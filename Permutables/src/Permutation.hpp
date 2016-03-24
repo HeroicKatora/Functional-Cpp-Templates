@@ -351,9 +351,9 @@ extendWithIdentity(const Permutation<perms...>& perm){
 }
 
 template<unsigned length>
-constexpr typename _perm_help_list<>::template Extension<length>::PermutationType
+constexpr typename _perm_help_list<>:: Extension<length>::PermutationType
 makeIdentity(){
-	return _perm_help_list<>::template Extension<length>::correspondingPerm;
+	return _perm_help_list<>:: Extension<length>::correspondingPerm;
 }
 
 /**
@@ -403,7 +403,7 @@ void applyPermutation(const Permutation<perms...>& permutation,
 /**
  * Applies a permutation in place. Behavior is undefined if the range of the iterator
  * is exceeded by the permutation. T has to be movable
- * If this is called for two permutation a,b it has the effect b=b°a
+ * If this is called for two permutation a,b it has the effect b=bï¿½a
  */
 template<typename T, unsigned... perms>
 void applyPermutationInPlace(const Permutation<perms...>& permutation,
