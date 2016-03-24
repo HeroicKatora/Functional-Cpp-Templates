@@ -6,7 +6,6 @@
  */
 
 #include "Permutation.hpp"
-#include "Tree.hpp"
 #include <cstdlib>
 #include <cstdio>
 
@@ -34,7 +33,5 @@ int main(int argc, char **argv) {
 	printf("%u", *(iterator++));
 	permCombined.unlock();
 
-	Tree<int> tree;
-	tree.clear();
 }
 
