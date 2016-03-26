@@ -17,7 +17,9 @@ int max (Foo& a, Foo& b){
 }
 
 int main(int argc, char **argv){
-	auto max5 = bind(max, Foo{6}, _auto);
-	Foo second{4};
-	std::cout << max5(second);
+	auto max6 = bind(max, Foo{6}, _auto);
+	Foo firstCmp{4};
+	std::cout << "Expecting 6:" << max6(firstCmp) << std::endl;
+	Foo secondCmp{19};
+	std::cout << "Expecting 19:" << max6(secondCmp) << std::endl;
 }
