@@ -227,6 +227,7 @@ struct _create_param<CAType, Fill<index>, _t_list<BuiltT...>>{
 	static constexpr unsigned fullIndex = sizeof...(BuiltT);
 	using type = _param<PLACEHOLDER, _placeholder_type<index-1, CAType>, fullIndex>;
 };
+
 template<typename list>
 struct _next_auto_fill{
 	static_assert(_false<list>::value, "list should be of type _t_list");
@@ -239,10 +240,10 @@ template<typename HeadT, typename... params>
 struct _next_auto_fill<_t_list<HeadT, params...>>{
 	static constexpr unsigned value = _next_auto_fill<_t_list<params...>>::value;
 };
-template<unsigned index, typename... params>
-struct _next_auto_fill<_t_list<Fill<index>, params...>>{
+template<unsigned placeholderIndex, typename CAType, unsigned index, typename... params>
+struct _next_auto_fill<_t_list<_param<PLACEHOLDER, _placeholder_type<placeholderIndex, CAType>, index>, params...>>{
 	static constexpr unsigned rec_value = _next_auto_fill<_t_list<params...>>::value;
-	static constexpr unsigned value = rec_value > index ? rec_value : index +1;
+	static constexpr unsigned value = rec_value > placeholderIndex ? rec_value : placeholderIndex +1;
 };
 //Create a filler param that is to be calculated automatically
 template<typename CAType, typename ...BuiltT>
@@ -258,12 +259,14 @@ struct _help_build_arg_types{
 	using ParamList = void; // A list to hold the final list of Parameters with which the bound expression should be called
 	using CParamList = void; // A list to hold the original argument types
 };
-
+template<typename L>
+using _count_placeholder = _next_auto_fill<L>;
 // Help build for a completed matching
 template<typename... fullParams>
 struct _help_build_arg_types<_t_list<>, _t_list<>, _t_list<fullParams...>>{
 	static constexpr size_t count = sizeof...(fullParams);
 	static constexpr size_t paramCount = sizeof...(fullParams);
+	static constexpr size_t placeholderCount = _count_placeholder<_t_list<fullParams...>>::value;
 	static constexpr size_t originalCount = 0;
 	using ParamList = _t_list<fullParams...>;
 	using CParamList = _t_list<>;
@@ -273,10 +276,13 @@ struct _help_build_arg_types<_t_list<>, _t_list<>, _t_list<fullParams...>>{
 template<typename CallArgT, typename ArgT, typename... callArgs, typename... args, typename... completedParams>
 struct _help_build_arg_types<_t_list<CallArgT, callArgs...>, _t_list<ArgT, args...>, _t_list<completedParams...>>{
 	static constexpr size_t count = sizeof...(completedParams);
-	using CreatedParam = typename _create_param<CallArgT, ArgT, _t_list<completedParams...>>::type;
-	using Recursion = _help_build_arg_types<_t_list<callArgs...>, _t_list<args...>, _t_list<completedParams..., CreatedParam>>;
+	using DeducedParamList =  _t_list<completedParams...>;
+	using CreatedParam = typename _create_param<CallArgT, ArgT, DeducedParamList>::type;
+	using CreatedParamList =  _t_list<completedParams..., CreatedParam>;
+	using Recursion = _help_build_arg_types<_t_list<callArgs...>, _t_list<args...>, CreatedParamList>;
 	using ParamList = typename Recursion::ParamList;
 	static constexpr size_t paramCount = Recursion::paramCount;
+	static constexpr size_t placeholderCount = _count_placeholder<CreatedParamList>::value;;
 	static constexpr size_t originalCount = sizeof...(callArgs)+1;
 	using CParamList = _t_list<CallArgT, callArgs...>;
 };
@@ -285,10 +291,13 @@ struct _help_build_arg_types<_t_list<CallArgT, callArgs...>, _t_list<ArgT, args.
 template<typename FCA, typename... callArgs, typename...completedParams>
 struct _help_build_arg_types<_t_list<FCA, callArgs...>, _t_list<>, _t_list<completedParams...>>{
 	static constexpr size_t count = sizeof...(completedParams);
-	using CreatedParam = typename _create_param<FCA, Fill<0>, _t_list<completedParams...>>::type;
-	using Recursion = _help_build_arg_types<_t_list<callArgs...>, _t_list<>, _t_list<completedParams..., CreatedParam>>;
+	using DeducedParamList =  _t_list<completedParams...>;
+	using CreatedParam = typename _create_param<FCA, Fill<0>, DeducedParamList>::type;
+	using CreatedParamList =  _t_list<completedParams..., CreatedParam>;
+	using Recursion = _help_build_arg_types<_t_list<callArgs...>, _t_list<>, CreatedParamList>;
 	using ParamList = typename Recursion::ParamList;
 	static constexpr size_t paramCount = Recursion::paramCount;
+	static constexpr size_t placeholderCount = _count_placeholder<CreatedParamList>::value;
 	static constexpr size_t originalCount = sizeof...(callArgs)+1;
 	using CParamList = _t_list<FCA, callArgs...>;
 };
@@ -383,7 +392,7 @@ struct _bind_expression{
 	typename BindTypes::Storage storage;
 
 	template<typename... ArgTypes>
-	_bind_expression(typename BindTypes::FnType function, ArgTypes... args):bindHelper(function), storage(args...){
+	_bind_expression(typename BindTypes::FnType function, ArgTypes&&... args):bindHelper(function), storage(args...){
 	}
 
 	template<typename... Parameters>
