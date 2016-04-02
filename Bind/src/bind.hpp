@@ -18,7 +18,8 @@ static constexpr Fill<index> fill = Fill<index>();
 
 static constexpr Fill<0> _auto = {};
 
-#include "celists.hpp"
+#include "hdrlist.hpp"
+using namespace hdrstd;
 
 template<typename list>
 struct _recursive_param_storage;
@@ -138,7 +139,7 @@ struct _extract_params<btype, _t_list<>, _t_list<listContent...>>{
 //Specialization for a list with items in it
 template<_bindType btype, typename firstParam, typename... listContent, typename... Params>
 struct _extract_params<btype, _t_list<firstParam, Params...>, _t_list<listContent...>>{
-	using _extendedList = typename _extend_list_if<_is_param_of_bound<btype, firstParam>::value, _t_list<listContent...>, firstParam>::type;
+	using _extendedList = typename hdrlist::extend_if<_is_param_of_bound<btype, firstParam>::value, _t_list<listContent...>, firstParam>::type;
 	using type = typename _extract_params<btype, _t_list<Params...>, _extendedList>::type;
 };
 
@@ -155,7 +156,7 @@ struct _extract_not_params<btype, _t_list<>, _t_list<listContent...>>{
 //Specialization for a list with items in it
 template<_bindType btype, typename firstParam, typename... listContent, typename... Params>
 struct _extract_not_params<btype, _t_list<firstParam, Params...>, _t_list<listContent...>>{
-	using _extendedList = typename _extend_list_if<!(_is_param_of_bound<btype, firstParam>::value), _t_list<listContent...>, firstParam>::type;
+	using _extendedList = typename hdrlist::extend_if<!(_is_param_of_bound<btype, firstParam>::value), _t_list<listContent...>, firstParam>::type;
 	using type = typename _extract_not_params<btype, _t_list<Params...>, _extendedList>::type;
 };
 
@@ -206,7 +207,8 @@ struct _make_signature_raw<Ret, _t_list<types...>>{
 template<typename Ret, typename ParamList>
 struct _gen_signature{
 	using ReturnType = Ret;
-	using ArgumentParamList = typename _extract_unbound<ParamList>::type;
+	using ArgumentParamList = typename _extract_params<PLACEHOLDER, ParamList>::type;
+	using NestedTargets = typename _extract_params<EVALUATION_TARGET, ParamList>::type;
 	using type = typename _make_signature_paramlist<Ret, ArgumentParamList>::type;
 };
 
@@ -277,6 +279,7 @@ template<typename CallArgT, typename ArgT, typename... callArgs, typename... arg
 struct _help_build_arg_types<_t_list<CallArgT, callArgs...>, _t_list<ArgT, args...>, _t_list<completedParams...>>{
 	static constexpr size_t count = sizeof...(completedParams);
 	using DeducedParamList =  _t_list<completedParams...>;
+	using CParamList = _t_list<CallArgT, callArgs...>;
 	using CreatedParam = typename _create_param<CallArgT, ArgT, DeducedParamList>::type;
 	using CreatedParamList =  _t_list<completedParams..., CreatedParam>;
 	using Recursion = _help_build_arg_types<_t_list<callArgs...>, _t_list<args...>, CreatedParamList>;
@@ -284,7 +287,6 @@ struct _help_build_arg_types<_t_list<CallArgT, callArgs...>, _t_list<ArgT, args.
 	static constexpr size_t paramCount = Recursion::paramCount;
 	static constexpr size_t placeholderCount = _count_placeholder<CreatedParamList>::value;;
 	static constexpr size_t originalCount = sizeof...(callArgs)+1;
-	using CParamList = _t_list<CallArgT, callArgs...>;
 };
 
 //Help for only call arguments remaining, fill with non-bound to do
@@ -292,6 +294,7 @@ template<typename FCA, typename... callArgs, typename...completedParams>
 struct _help_build_arg_types<_t_list<FCA, callArgs...>, _t_list<>, _t_list<completedParams...>>{
 	static constexpr size_t count = sizeof...(completedParams);
 	using DeducedParamList =  _t_list<completedParams...>;
+	using CParamList = _t_list<FCA, callArgs...>;
 	using CreatedParam = typename _create_param<FCA, Fill<0>, DeducedParamList>::type;
 	using CreatedParamList =  _t_list<completedParams..., CreatedParam>;
 	using Recursion = _help_build_arg_types<_t_list<callArgs...>, _t_list<>, CreatedParamList>;
@@ -299,7 +302,6 @@ struct _help_build_arg_types<_t_list<FCA, callArgs...>, _t_list<>, _t_list<compl
 	static constexpr size_t paramCount = Recursion::paramCount;
 	static constexpr size_t placeholderCount = _count_placeholder<CreatedParamList>::value;
 	static constexpr size_t originalCount = sizeof...(callArgs)+1;
-	using CParamList = _t_list<FCA, callArgs...>;
 };
 
 //Fail for only arguments remaining
@@ -366,7 +368,7 @@ struct _bind_helper<BindTypes, _t_list<ArgumentParams...>>{
 	template<size_t... constExpCounting>
 	Ret operator()(std::index_sequence<constExpCounting...>&& a,
 			StorageRef storage, typename _param_inspect<ArgumentParams>::type&& ... args){
-		return function(SelectionParamTreatment<typename list_get_index<constExpCounting, typename BuildHelper::ParamList>::type>::template select(storage, args...) ...);
+		return function(SelectionParamTreatment<typename hdrlist::get_index<constExpCounting, typename BuildHelper::ParamList>::type>::template select(storage, args...) ...);
 	}
 };
 
@@ -419,7 +421,7 @@ template<typename Storage, unsigned index>
 struct _get_recursive{
 	static_assert(index <= Storage::depth, "Requested element outside of storage");
 	auto get(Storage * st)
-	->typename list_get_index<index, typename Storage::StoredTypeList>::type&{
+	->typename hdrlist::get_index<index, typename Storage::StoredTypeList>::type&{
 		return st->recursive.template get<index-1>();
 	}
 };
@@ -443,7 +445,7 @@ struct _recursive_param_storage<_t_list<Head, Rest...>>{
 
 	template<unsigned index>
 	constexpr auto get()
-	->typename list_get_index<index, _t_list<Head, Rest...>>::type&{
+	->typename hdrlist::get_index<index, _t_list<Head, Rest...>>::type&{
 		return _get_recursive<ThisType, index>::get(this);
 	}
 

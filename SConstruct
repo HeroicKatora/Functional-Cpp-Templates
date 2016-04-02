@@ -1,7 +1,9 @@
 EnsureSConsVersion(1,0,0)
 
-env = Environment()
+env = Environment(CPPPATH=Dir('./headerlib').abspath)
 
-env.SConscript('Permutables/SConscript', exports={'env':env})
-env.SConscript('Bind/SConscript', exports={'env':env})
-env.SConscript('FizzBuzz/SConscript', exports={'env':env})
+envd = {'env':env}
+env.SConscript('Permutables/SConscript', exports=envd)
+env.SConscript('Bind/SConscript', exports=envd)
+env.SConscript('FizzBuzz/SConscript', exports=envd)
+env.SConscript('hdrshowcase/SConscript', exports=envd)
