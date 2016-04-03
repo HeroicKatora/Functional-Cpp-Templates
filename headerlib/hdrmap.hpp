@@ -30,6 +30,7 @@ namespace{
 
 	template<typename intType, intType key, typename val, typename left, typename right>
 	struct _t_map<intType, Node, _t_list<std::integral_constant<intType, key>, val, left, right>>{
+		using KeyType = intType;
 		using Key = std::integral_constant<intType, key>;
 		using Val = val;
 		using Left = left;
@@ -118,18 +119,51 @@ namespace{
 			using result = _map_search_return<true, type>;
 		};
 		using result = typename conditional<(val < key), expleft,
-				conditional<(val > key), expright, expequal>::template expr>::template expr<Void>::result;
+				conditional<(val > key), expright, expequal>::template result>::template result<Void>;
 	};
 }
-/**
- * A type that implements mapping of an integral to a typename
- */
 
-template<typename intType, intType val, typename map>
-using map_search = typename _map_search<intType, val, map>::result;
+namespace hdrmap{
+	/**
+	 * A type that implements mapping of an integral to a typename
+	 */
+	template<typename intType, intType val, typename map>
+	using map_search = _map_search<intType, val, map>;
 
-template<typename intType, intType key, typename val, typename map>
-using map_add = typename _map_add<intType, key, val, map>::result;
+	template<typename intType, intType key, typename val, typename map>
+	using map_add = _map_add<intType, key, val, map>;
 
-template<typename intType>
-using map_empty = _t_map_leaf<intType>;
+	template<typename intType>
+	using map_empty = _t_map_leaf<intType>;
+}
+
+namespace hdrstd{
+	template<typename intType>
+	struct Printer<_t_map_leaf<intType>>{
+		static void print(){
+			printf("()");
+		}
+	};
+
+	template<typename intType, intType key, typename val>
+	struct Printer<_t_map_node<intType, key, val, _t_map_leaf<intType>, _t_map_leaf<intType>>>{
+		static void print(){
+			printf("(%i -> ", key);
+			Printer<val>::print();
+			printf(")");
+		}
+	};
+
+	template<typename intType, intType key, typename val, typename left, typename right>
+	struct Printer<_t_map_node<intType, key, val, left, right>>{
+		static void print(){
+			printf("(%i -> ", key);
+			Printer<val>::print();
+			printf(", ");
+			Printer<left>::print();
+			printf(", ");
+			Printer<right>::print();
+			printf(")");
+		}
+	};
+}

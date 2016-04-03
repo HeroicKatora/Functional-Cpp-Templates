@@ -35,16 +35,23 @@ namespace hdrstd{
 		constexpr static _Tp result = v;
 	};
 
-	template<bool s, template<typename> class a, template<typename> class b>
+	template<template<typename...> class f, typename ...arg>
+	struct expression{
+		template<typename>
+		using expr = f<arg...>;
+	};
+
+	template<bool s, template<typename> class A, template<typename> class B>
 	struct conditional{
 		template<typename>
-		using expr = a<Void>;
+		using expr = A<Void>;
 	};
-	template<template<typename> class a, template<typename> class b>
-	struct conditional<false, a, b>{
+	template<template<typename> class A, template<typename> class B>
+	struct conditional<false, A, B>{
 		template<typename>
-		using expr = b<Void>;
+		using expr = B<Void>;
 	};
+
 	template<typename O>
 	struct Printer{
 		static_assert(_false<O>::value, "No printer for target class defined");
@@ -54,5 +61,33 @@ namespace hdrstd{
 	struct Printer<Void>{
 		static void print(){};
 	};
-	void sink_args(...){};
+	template<>
+	struct Printer<std::false_type>{
+		static void print(){
+			printf("false");
+		}
+	};
+	template<>
+	struct Printer<std::true_type>{
+		static void print(){
+			printf("true");
+		}
+	};
+	template<unsigned long v>
+	struct Printer<std::integral_constant<unsigned long, v>>{
+		static void print(){
+			printf("%lu", v);
+		}
+	};
+	template<typename _Tp, _Tp v>
+	struct Printer<std::integral_constant<_Tp, v>>{
+		static void print(){
+			printf("%i", v);
+		}
+	};
+
+	void sink_args(...){
+	};
+#define SINK_ARRAY(T, s, l) sink_args(new T[s] l)
+
 }

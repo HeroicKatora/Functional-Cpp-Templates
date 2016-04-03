@@ -20,6 +20,7 @@ static constexpr Fill<0> _auto = {};
 
 #include "hdrlist.hpp"
 using namespace hdrstd;
+using hdrlist::t_list;
 
 template<typename list>
 struct _recursive_param_storage;
@@ -122,60 +123,60 @@ struct _remove_head_bounds{
 	using type = List;
 };
 template<_bindType btype, typename fPType, unsigned fPIndex, typename... params>
-struct _remove_head_bounds<btype, _t_list<_param<btype, fPType, fPIndex>, params...>>{
-	using type = _remove_head_bounds<btype, _t_list<params...>>;
+struct _remove_head_bounds<btype, t_list<_param<btype, fPType, fPIndex>, params...>>{
+	using type = _remove_head_bounds<btype, t_list<params...>>;
 };
 
 //Extracts either bound or unbound parameters into the list
-template<_bindType btype, typename ParamList, typename ExtractedList = _t_list<>>
+template<_bindType btype, typename ParamList, typename ExtractedList = t_list<>>
 struct _extract_params{
 	static_assert(_false<ParamList>::value, "Not a list of _Params");
 };
 //Specialization for an empty param list
 template<_bindType btype, typename... listContent>
-struct _extract_params<btype, _t_list<>, _t_list<listContent...>>{
-	using type = _t_list<listContent...>;
+struct _extract_params<btype, t_list<>, t_list<listContent...>>{
+	using type = t_list<listContent...>;
 };
 //Specialization for a list with items in it
 template<_bindType btype, typename firstParam, typename... listContent, typename... Params>
-struct _extract_params<btype, _t_list<firstParam, Params...>, _t_list<listContent...>>{
-	using _extendedList = typename hdrlist::extend_if<_is_param_of_bound<btype, firstParam>::value, _t_list<listContent...>, firstParam>::type;
-	using type = typename _extract_params<btype, _t_list<Params...>, _extendedList>::type;
+struct _extract_params<btype, t_list<firstParam, Params...>, t_list<listContent...>>{
+	using _extendedList = typename hdrlist::extend_if<_is_param_of_bound<btype, firstParam>::value, t_list<listContent...>, firstParam>::type;
+	using type = typename _extract_params<btype, t_list<Params...>, _extendedList>::type;
 };
 
 //Extracts all params that are not of the specified _BindType
-template<_bindType btype, typename ParamList, typename ExtractedList = _t_list<>>
+template<_bindType btype, typename ParamList, typename ExtractedList = t_list<>>
 struct _extract_not_params{
 	static_assert(_false<ParamList>::value, "Not a list of _Params");
 };
 //Specialization for an empty param list
 template<_bindType btype, typename... listContent>
-struct _extract_not_params<btype, _t_list<>, _t_list<listContent...>>{
-	using type = _t_list<listContent...>;
+struct _extract_not_params<btype, t_list<>, t_list<listContent...>>{
+	using type = t_list<listContent...>;
 };
 //Specialization for a list with items in it
 template<_bindType btype, typename firstParam, typename... listContent, typename... Params>
-struct _extract_not_params<btype, _t_list<firstParam, Params...>, _t_list<listContent...>>{
-	using _extendedList = typename hdrlist::extend_if<!(_is_param_of_bound<btype, firstParam>::value), _t_list<listContent...>, firstParam>::type;
-	using type = typename _extract_not_params<btype, _t_list<Params...>, _extendedList>::type;
+struct _extract_not_params<btype, t_list<firstParam, Params...>, t_list<listContent...>>{
+	using _extendedList = typename hdrlist::extend_if<!(_is_param_of_bound<btype, firstParam>::value), t_list<listContent...>, firstParam>::type;
+	using type = typename _extract_not_params<btype, t_list<Params...>, _extendedList>::type;
 };
 
 template<typename ParamList>
 struct _extract_bound{
-	static_assert(_false<ParamList>::value, "Use _t_list, you shouldn't use this at all");
+	static_assert(_false<ParamList>::value, "Use t_list, you shouldn't use this at all");
 };
 template<typename... allParams>
-struct _extract_bound<_t_list<allParams...>>{
-	using type = typename _extract_params<BOUND, _t_list<allParams...>>::type;
+struct _extract_bound<t_list<allParams...>>{
+	using type = typename _extract_params<BOUND, t_list<allParams...>>::type;
 };
 
 template<typename ParamList>
 struct _extract_unbound{
-	static_assert(_false<ParamList>::value, "Use _t_list, you shouldn't use this at all");
+	static_assert(_false<ParamList>::value, "Use t_list, you shouldn't use this at all");
 };
 template<typename... allParams>
-struct _extract_unbound<_t_list<allParams...>>{
-	using type = typename _extract_not_params<BOUND, _t_list<allParams...>>::type;
+struct _extract_unbound<t_list<allParams...>>{
+	using type = typename _extract_not_params<BOUND, t_list<allParams...>>::type;
 };
 
 template<typename lhs, typename rhs>
@@ -186,20 +187,20 @@ struct _test_can_store{
 // construct a function signature from a list of _Parameters
 template<typename Ret, typename ParamList>
 struct _make_signature_paramlist{
-	static_assert(_false<Ret>::value, "Use _t_list as ParamList, you shouldn't use this at all");
+	static_assert(_false<Ret>::value, "Use t_list as ParamList, you shouldn't use this at all");
 };
 template<typename Ret, typename... signatures>
-struct _make_signature_paramlist<Ret, _t_list<signatures...>>{
+struct _make_signature_paramlist<Ret, t_list<signatures...>>{
 	using type = Ret(*)(typename _param_inspect<signatures>::type ...);
 };
 
 // construct a function signature from a list of typenames
 template<typename Ret, typename TypeList>
 struct _make_signature_raw{
-	static_assert(_false<Ret>::value, "Use _t_list as TypeList, you shouldn't use this at all");
+	static_assert(_false<Ret>::value, "Use t_list as TypeList, you shouldn't use this at all");
 };
 template<typename Ret, typename... types>
-struct _make_signature_raw<Ret, _t_list<types...>>{
+struct _make_signature_raw<Ret, t_list<types...>>{
 	using type = Ret(*)(types ...);
 };
 
@@ -218,46 +219,46 @@ struct _create_param{
 	static_assert(_false<CAType>::value, "This should not be constructed");
 };
 template<typename CallArgT, typename ArgT, typename ...BuiltT>
-struct _create_param<CallArgT, ArgT, _t_list<BuiltT...>>{
+struct _create_param<CallArgT, ArgT, t_list<BuiltT...>>{
 	static constexpr unsigned index = sizeof...(BuiltT);
 	typedef _test_can_store<CallArgT, ArgT> compatibiltyTest;
 	using type = _param<BOUND, ArgT, index>;
 };
 //Create a filler param
 template<typename CAType, unsigned index, typename ...BuiltT>
-struct _create_param<CAType, Fill<index>, _t_list<BuiltT...>>{
+struct _create_param<CAType, Fill<index>, t_list<BuiltT...>>{
 	static constexpr unsigned fullIndex = sizeof...(BuiltT);
 	using type = _param<PLACEHOLDER, _placeholder_type<index-1, CAType>, fullIndex>;
 };
 
 template<typename list>
 struct _next_auto_fill{
-	static_assert(_false<list>::value, "list should be of type _t_list");
+	static_assert(_false<list>::value, "list should be of type t_list");
 };
 template<>
-struct _next_auto_fill<_t_list<>>{
+struct _next_auto_fill<t_list<>>{
 	static constexpr unsigned value = 0;
 };
 template<typename HeadT, typename... params>
-struct _next_auto_fill<_t_list<HeadT, params...>>{
-	static constexpr unsigned value = _next_auto_fill<_t_list<params...>>::value;
+struct _next_auto_fill<t_list<HeadT, params...>>{
+	static constexpr unsigned value = _next_auto_fill<t_list<params...>>::value;
 };
 template<unsigned placeholderIndex, typename CAType, unsigned index, typename... params>
-struct _next_auto_fill<_t_list<_param<PLACEHOLDER, _placeholder_type<placeholderIndex, CAType>, index>, params...>>{
-	static constexpr unsigned rec_value = _next_auto_fill<_t_list<params...>>::value;
+struct _next_auto_fill<t_list<_param<PLACEHOLDER, _placeholder_type<placeholderIndex, CAType>, index>, params...>>{
+	static constexpr unsigned rec_value = _next_auto_fill<t_list<params...>>::value;
 	static constexpr unsigned value = rec_value > placeholderIndex ? rec_value : placeholderIndex +1;
 };
 //Create a filler param that is to be calculated automatically
 template<typename CAType, typename ...BuiltT>
-struct _create_param<CAType, Fill<0>, _t_list<BuiltT...>>{
+struct _create_param<CAType, Fill<0>, t_list<BuiltT...>>{
 	static constexpr unsigned fullIndex = sizeof...(BuiltT);
-	static constexpr unsigned placeholderIndex = _next_auto_fill<_t_list<BuiltT...>>::value;
+	static constexpr unsigned placeholderIndex = _next_auto_fill<t_list<BuiltT...>>::value;
 	using type = _param<PLACEHOLDER, _placeholder_type<placeholderIndex, CAType>, fullIndex>;
 };
 
-template<typename CAList, typename AList, typename DeducedParamList = _t_list<>>
+template<typename CAList, typename AList, typename DeducedParamList = t_list<>>
 struct _help_build_arg_types{
-	static_assert(_false<CAList>::value, "Use _t_list, you shouldn't use this at all");
+	static_assert(_false<CAList>::value, "Use t_list, you shouldn't use this at all");
 	using ParamList = void; // A list to hold the final list of Parameters with which the bound expression should be called
 	using CParamList = void; // A list to hold the original argument types
 };
@@ -265,24 +266,24 @@ template<typename L>
 using _count_placeholder = _next_auto_fill<L>;
 // Help build for a completed matching
 template<typename... fullParams>
-struct _help_build_arg_types<_t_list<>, _t_list<>, _t_list<fullParams...>>{
+struct _help_build_arg_types<t_list<>, t_list<>, t_list<fullParams...>>{
 	static constexpr size_t count = sizeof...(fullParams);
 	static constexpr size_t paramCount = sizeof...(fullParams);
-	static constexpr size_t placeholderCount = _count_placeholder<_t_list<fullParams...>>::value;
+	static constexpr size_t placeholderCount = _count_placeholder<t_list<fullParams...>>::value;
 	static constexpr size_t originalCount = 0;
-	using ParamList = _t_list<fullParams...>;
-	using CParamList = _t_list<>;
+	using ParamList = t_list<fullParams...>;
+	using CParamList = t_list<>;
 };
 
 //Help build for different types
 template<typename CallArgT, typename ArgT, typename... callArgs, typename... args, typename... completedParams>
-struct _help_build_arg_types<_t_list<CallArgT, callArgs...>, _t_list<ArgT, args...>, _t_list<completedParams...>>{
+struct _help_build_arg_types<t_list<CallArgT, callArgs...>, t_list<ArgT, args...>, t_list<completedParams...>>{
 	static constexpr size_t count = sizeof...(completedParams);
-	using DeducedParamList =  _t_list<completedParams...>;
-	using CParamList = _t_list<CallArgT, callArgs...>;
+	using DeducedParamList =  t_list<completedParams...>;
+	using CParamList = t_list<CallArgT, callArgs...>;
 	using CreatedParam = typename _create_param<CallArgT, ArgT, DeducedParamList>::type;
-	using CreatedParamList =  _t_list<completedParams..., CreatedParam>;
-	using Recursion = _help_build_arg_types<_t_list<callArgs...>, _t_list<args...>, CreatedParamList>;
+	using CreatedParamList =  t_list<completedParams..., CreatedParam>;
+	using Recursion = _help_build_arg_types<t_list<callArgs...>, t_list<args...>, CreatedParamList>;
 	using ParamList = typename Recursion::ParamList;
 	static constexpr size_t paramCount = Recursion::paramCount;
 	static constexpr size_t placeholderCount = _count_placeholder<CreatedParamList>::value;;
@@ -291,13 +292,13 @@ struct _help_build_arg_types<_t_list<CallArgT, callArgs...>, _t_list<ArgT, args.
 
 //Help for only call arguments remaining, fill with non-bound to do
 template<typename FCA, typename... callArgs, typename...completedParams>
-struct _help_build_arg_types<_t_list<FCA, callArgs...>, _t_list<>, _t_list<completedParams...>>{
+struct _help_build_arg_types<t_list<FCA, callArgs...>, t_list<>, t_list<completedParams...>>{
 	static constexpr size_t count = sizeof...(completedParams);
-	using DeducedParamList =  _t_list<completedParams...>;
-	using CParamList = _t_list<FCA, callArgs...>;
+	using DeducedParamList =  t_list<completedParams...>;
+	using CParamList = t_list<FCA, callArgs...>;
 	using CreatedParam = typename _create_param<FCA, Fill<0>, DeducedParamList>::type;
-	using CreatedParamList =  _t_list<completedParams..., CreatedParam>;
-	using Recursion = _help_build_arg_types<_t_list<callArgs...>, _t_list<>, CreatedParamList>;
+	using CreatedParamList =  t_list<completedParams..., CreatedParam>;
+	using Recursion = _help_build_arg_types<t_list<callArgs...>, t_list<>, CreatedParamList>;
 	using ParamList = typename Recursion::ParamList;
 	static constexpr size_t paramCount = Recursion::paramCount;
 	static constexpr size_t placeholderCount = _count_placeholder<CreatedParamList>::value;
@@ -306,9 +307,9 @@ struct _help_build_arg_types<_t_list<FCA, callArgs...>, _t_list<>, _t_list<compl
 
 //Fail for only arguments remaining
 template<typename... callArgs, typename...completedParams>
-struct _help_build_arg_types<_t_list<>, _t_list<callArgs...>, _t_list<completedParams...>>{
+struct _help_build_arg_types<t_list<>, t_list<callArgs...>, t_list<completedParams...>>{
 	static constexpr size_t count = sizeof...(completedParams);
-	static_assert(_false<_t_list<callArgs...>>::value, "More arguments given than the function you try to bind takes");
+	static_assert(_false<t_list<callArgs...>>::value, "More arguments given than the function you try to bind takes");
 };
 
 /**
@@ -323,7 +324,7 @@ struct _bind_helper{
 
 
 template<typename BindTypes, typename... ArgumentParams>
-struct _bind_helper<BindTypes, _t_list<ArgumentParams...>>{
+struct _bind_helper<BindTypes, t_list<ArgumentParams...>>{
 	using SignatureHelper = typename BindTypes::SignatureHelper;
 	using BuildHelper = typename BindTypes::BuildHelper;
 	using FnType = typename BindTypes::FnType;
@@ -406,8 +407,8 @@ struct _bind_expression{
 
 template<typename Ret, typename... CallArgsT, typename... ArgsT>
 static auto bind(Ret (*f)(CallArgsT...), ArgsT... args)
-->_bind_expression<Ret, _help_build_arg_types<_t_list<CallArgsT...>, _t_list<ArgsT...>>>{
-	using Builder = _help_build_arg_types<_t_list<CallArgsT...>, _t_list<ArgsT...>>;
+->_bind_expression<Ret, _help_build_arg_types<t_list<CallArgsT...>, t_list<ArgsT...>>>{
+	using Builder = _help_build_arg_types<t_list<CallArgsT...>, t_list<ArgsT...>>;
 	using BindExpression = _bind_expression<Ret, Builder>;
 	return BindExpression(f, args...);
 }
@@ -433,11 +434,11 @@ struct _get_recursive<Storage, 0>{
 };
 
 template<typename Head, typename... Rest>
-struct _recursive_param_storage<_t_list<Head, Rest...>>{
-	using StoredTypeList = _t_list<Head, Rest...>;
+struct _recursive_param_storage<t_list<Head, Rest...>>{
+	using StoredTypeList = t_list<Head, Rest...>;
 	using StoredType = Head;
 	using ThisType = _recursive_param_storage<StoredTypeList>;
-	using RecursionType = _recursive_param_storage<_t_list<Rest...>>;
+	using RecursionType = _recursive_param_storage<t_list<Rest...>>;
 	static constexpr size_t depth = sizeof...(Rest)+1;
 
 	Head value;
@@ -445,7 +446,7 @@ struct _recursive_param_storage<_t_list<Head, Rest...>>{
 
 	template<unsigned index>
 	constexpr auto get()
-	->typename hdrlist::get_index<index, _t_list<Head, Rest...>>::type&{
+	->typename hdrlist::get_index<index, t_list<Head, Rest...>>::type&{
 		return _get_recursive<ThisType, index>::get(this);
 	}
 
@@ -455,7 +456,7 @@ struct _recursive_param_storage<_t_list<Head, Rest...>>{
 	}
 };
 template<>
-struct _recursive_param_storage<_t_list<>>{
+struct _recursive_param_storage<t_list<>>{
 	template<unsigned index>
 	void get(){
 		static_assert(_false_integral<unsigned, index>::value, "Can't get from empty storage");
