@@ -10,6 +10,13 @@
 #include <type_traits>
 
 namespace hdrstd{
+	/**
+	 * A function should be a templated struct with a member named result.
+	 * An expression is a function that takes one template parameter but ignores it,
+	 * it will/should generally be called with Void as the generic parameter. See them
+	 * as lazy evaluated function calls, there is also a wrapper for exactly this.
+	 */
+
 	struct Void{} __attribute__((packed));
 	template<typename>
 	struct _false:std::false_type{
@@ -88,6 +95,42 @@ namespace hdrstd{
 
 	void sink_args(...){
 	};
-#define SINK_ARRAY(T, s, l) sink_args(new T[s] l)
+#define SINK_ARRAY(T, l) sink_args(new T[] l)
 
+	/**
+	 * Makes binary operators more intuitive
+	 */
+	template<typename aarg, template<typename, typename> class op, typename barg>
+	struct b{
+		using result = typename op<aarg, barg>::result;
+	};
+
+	/**
+	 * Partial function application
+	 */
+	template<template<typename...> class f, typename ...args>
+	struct p{
+		//static_assert(sizeof (par) > sizeof...(args), "Partial application implies left over parameters");
+		template<typename ...missing>
+		struct result_c{
+			using result = typename f<args..., missing...>::result;
+		};
+		template<typename ...missing>
+		using result = result_c<missing...>;
+	};
+}
+
+namespace{
+	template<bool existsB, typename typeT>
+	struct option{
+		constexpr static bool exists = existsB;
+		using type = typeT;
+	};
+}
+
+namespace hdrstd{
+
+	template<typename type>
+	using some = option<true, type>;
+	using none = option<false, void>;
 }

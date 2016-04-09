@@ -17,11 +17,6 @@ namespace{
 		Node,
 		Leaf
 	};
-	template<bool found, typename val>
-	struct _map_search_return{
-		constexpr static bool value = found;
-		using type = val;
-	};
 
 	////////////////////////////////////// Map type
 
@@ -101,7 +96,7 @@ namespace{
 	//End of search
 	template<typename intType, intType val>
 	struct _map_search<intType, val, _t_map_leaf<intType>, true>{
-		using result = _map_search_return<false, void>;
+		using result = hdrstd::none;
 	};
 	//No match
 	template<typename intType, intType val, intType key, typename type, typename left, typename right>
@@ -116,7 +111,7 @@ namespace{
 		};
 		template<typename>
 		struct expequal {
-			using result = _map_search_return<true, type>;
+			using result = hdrstd::some<type>;
 		};
 		using result = typename conditional<(val < key), expleft,
 				conditional<(val > key), expright, expequal>::template result>::template result<Void>;
@@ -128,13 +123,13 @@ namespace hdrmap{
 	 * A type that implements mapping of an integral to a typename
 	 */
 	template<typename intType, intType val, typename map>
-	using map_search = _map_search<intType, val, map>;
+	using search = _map_search<intType, val, map>;
 
 	template<typename intType, intType key, typename val, typename map>
-	using map_add = _map_add<intType, key, val, map>;
+	using add = _map_add<intType, key, val, map>;
 
 	template<typename intType>
-	using map_empty = _t_map_leaf<intType>;
+	using empty = _t_map_leaf<intType>;
 }
 
 namespace hdrstd{

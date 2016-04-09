@@ -102,7 +102,7 @@ namespace{
 	template<template<typename> class f, typename... listItems>
 	struct _map<f, _t_list<listItems...>>{
 		template <typename arg>
-		using _call = typename f<arg>::value;
+		using _call = typename f<arg>::result;
 		using result = _t_list<_call<listItems>...>;
 	};
 
