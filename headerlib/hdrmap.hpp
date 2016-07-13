@@ -76,8 +76,8 @@ namespace{
 		struct equal{
 			using result = _t_map_node<intType, key, val, left, right>;
 		};
-		using result = typename conditional<(key < mKey), smaller,
-						conditional<(key > mKey), larger, equal>::template expr>::template expr<Void>::result;
+		using result = typename conditional<(key < mKey), f_<smaller>,
+						conditional<(key > mKey), f_<larger>, f_<equal>>>::template expr<Void>::result;
 	};
 
 	////////////////////////////////////// Map search
@@ -113,8 +113,8 @@ namespace{
 		struct expequal {
 			using result = hdrstd::some<type>;
 		};
-		using result = typename conditional<(val < key), expleft,
-				conditional<(val > key), expright, expequal>::template result>::template result<Void>;
+		using result = typename conditional<(val < key), f_<expleft>,
+				conditional<(val > key), f_<expright>, f_<expequal>>>::template result<Void>;
 	};
 }
 

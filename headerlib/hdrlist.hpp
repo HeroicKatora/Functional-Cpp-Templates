@@ -38,10 +38,21 @@ namespace{
 	template<>
 	struct _head<_t_list<>>{
 	};
-	template<typename headI, typename... listItems>
-	struct _head<_t_list<headI, listItems...>>{
-		using type = headI;
-		using result = type;
+	template<typename head, typename... tail>
+	struct _head<_t_list<head, tail...>>{
+		using result = head;
+	};
+
+	template<typename List>
+	struct _tail{
+		static_assert(_false<List>::value, "Not a list");
+	};
+	template<>
+	struct _tail<_t_list<>>{
+	};
+	template<typename head, typename ...tail>
+	struct _tail<_t_list<head, tail...>>{
+		using result = _t_list<tail...>;
 	};
 
 	template<bool condition, typename List>
@@ -95,15 +106,12 @@ namespace{
 		static_assert(_false_integral<unsigned, index>::value, "Index out of range, List exhausted");
 	};
 
-	template<template<typename> class f, typename list>
-	struct _map{
-		static_assert(_false<list>::value, "Not a list");
+	template<typename Integral, typename list>
+	struct _nth{
 	};
-	template<template<typename> class f, typename... listItems>
-	struct _map<f, _t_list<listItems...>>{
-		template <typename arg>
-		using _call = typename f<arg>::result;
-		using result = _t_list<_call<listItems>...>;
+	template<size_t integral, typename list>
+	struct _nth<std::integral_constant<size_t, integral>, list>{
+		using result = typename _get_index<integral, list>::result;
 	};
 
 	template<typename>
@@ -122,24 +130,83 @@ namespace{
 		using result = _c_list<from_int_constant<t>::result...>;
 	};
 
-	template<template<typename, typename> class f, typename, typename list>
+	/*Iteration functions*/
+
+	template<typename f, typename list>
+	struct _map{
+		static_assert(_false<list>::value, "Not a list");
+	};
+	template<typename f, typename... listItems>
+	struct _map<f, _t_list<listItems...>>{
+		template <typename arg>
+		using _call = typename f::template expr<arg>::result;
+		using result = _t_list<_call<listItems>...>;
+	};
+
+	template<typename f, typename list>
+	struct _mapi{
+		static_assert(_false<list>::value, "Not a list");
+	};
+	template<typename f, typename... listItems>
+	struct _mapi<f, _t_list<listItems...>>{
+		using list = _t_list<listItems...>;
+		using indices = std::index_sequence_for<listItems...>;
+		using index_list = typename _c_to_t<indices>::result;
+		template <typename index>
+		struct _call{
+		   using result = typename f::template expr<index, _nth<index, list>>::result;
+		};
+		using result = typename _map<function<_call>, index_list>::result;
+	};
+
+	template<typename f, typename, typename list>
 	struct _fold_left{
 		static_assert(_false<list>::value, "Last parameter needs to be a list");
 	};
-	template<template<typename, typename> class f, typename base>
+	template<typename f, typename base>
 	struct _fold_left<f, base, _t_list<>>{
 		using result = base;
 	};
-	template<template<typename, typename> class f, typename base, typename head, typename ...tail>
+	template<typename f, typename base, typename head, typename ...tail>
 	struct _fold_left<f, base, _t_list<head, tail...>>{
-		using fold_once = typename f<base, head>::result;
+		using fold_once = typename f::template expr<base, head>::result;
 		using result = typename _fold_left<f, fold_once, _t_list<tail...>>::result;
 	};
 
-	template<template<typename, typename> class f, typename list>
+	/*Scanning functions*/
+
+
+	/*Searching functions*/
+	template<typename f, typename list>
 	struct _filter{
 		static_assert(_false<list>::value, "Last parameter needs to be a list");
 	};
+	template<typename f>
+	struct _filter<f, _t_list<>>{
+		using result = _t_list<>;
+	};
+	template<typename f, typename hd, typename ...tail>
+	struct _filter<f, _t_list<hd, tail...>>{
+		struct y {
+			template<typename>
+			struct expr{
+				using result = typename _join<_t_list<hd>, typename _filter<f, _t_list<tail...>>::result>::result;
+			};
+		};
+		using n = expression<::_filter, f, _t_list<tail...>>;
+		constexpr static bool fresult = f::template expr<hd>::result;
+		using result = typename conditional<fresult, y, n>::template expr<Void>::result;
+	};
+
+	template<typename f, typename list>
+	struct _find{
+		using hd = typename _head<list>::result;
+		using tl = typename _tail<list>::result;
+		using rec = expression<_find, tl>;
+		constexpr static bool condition = f::template expr<hd>::result;
+		using result = typename conditional<condition, expression_val<hd>, rec>::template expr<Void>::result;
+	};
+
 	template<typename Sep, typename...>
 	struct _list_printer;
 	template<typename Sep>
@@ -190,11 +257,17 @@ namespace hdrlist{
 	template<typename ListA, typename ListB>
 	using join = _join<ListA, ListB>;
 
+	template<typename ListA, typename ListB>
+	using concat = join<ListA, ListB>;
+
 	template<unsigned index, typename list>
 	using get_index = _get_index<index, list>;
 
-	template<template<typename> class f, typename list>
+	template<typename f, typename list>
 	using map = _map<f, list>;
+
+	template<typename f, typename list>
+	using filter = _filter<f, list>;
 
 	template<typename l>
 	using c_to_t = _c_to_t<l>;
@@ -202,7 +275,7 @@ namespace hdrlist{
 	template<typename l>
 	using t_to_c = _t_to_c<l>;
 
-	template<template<typename, typename> class f, typename b, typename list>
+	template<typename f, typename b, typename list>
 	using fold_left = _fold_left<f, b, list>;
 
 	template<typename ...Arg>

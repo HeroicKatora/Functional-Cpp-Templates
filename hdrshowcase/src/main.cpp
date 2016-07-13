@@ -8,6 +8,14 @@
 #include "hdrlist.hpp"
 #include "hdrmap.hpp"
 
+template<typename val>
+struct filter_function{};
+
+template<typename _Tp, _Tp a>
+struct filter_function<std::integral_constant<_Tp, a>>{
+	constexpr static bool result = a % 2 == 0;
+};
+
 template<typename arg>
 struct inc{
 	static_assert(_false<arg>::value, "Can only operate on integral constants");
@@ -35,19 +43,27 @@ struct buildMap {
 using emptyMap = typename hdrmap::empty<unsigned>;
 
 template<typename val>
-using createSingularMap = typename p<buildMap, emptyMap>::result<val>;;
+using createSingularMap = typename p_<buildMap, emptyMap>::result<val>;;
 
 int main(int argc, char **argv) {
+	printf("Mapping 6,3,4,5,7,10 with x+1\n");
 	using clist = _c_list<6,3,4,5,7,10>;
 	using tlist = typename hdrlist::c_to_t<clist>::result;
-	using mod = typename hdrlist::map<inc, tlist>::result;
+	using mod = typename hdrlist::map<hdrstd::function<inc>, tlist>::result;
 	using reslist = typename hdrlist::t_to_c<mod>::result;
 	using print_list = hdrstd::Printer<reslist>;
 	print_list::print();
 	printf("\n");
 
+	printf("Filtering for even numbers\n");
+	using filtered = typename hdrlist::filter<hdrstd::function<filter_function>, tlist>::result;
+	using print_filtered = hdrstd::Printer<filtered>;
+	print_filtered::print();
+	printf("\n");
+
+	printf("Building a map from it\n");
 	using emptyMap = typename hdrmap::empty<unsigned>;
-	using fullMap = typename hdrlist::fold_left<buildMap, emptyMap, mod>::result;
+	using fullMap = typename hdrlist::fold_left<hdrstd::function<buildMap>, emptyMap, mod>::result;
 	using print_map = hdrstd::Printer<fullMap>;
 	print_map::print();
 	printf("\n");
