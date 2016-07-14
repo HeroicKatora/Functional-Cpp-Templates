@@ -112,58 +112,6 @@ namespace hdrstd{
 			template<typename ...missing>
 			using result = result_c<missing...>;
 		};
-
-		template<bool existsB, typename typeT>
-		struct option{
-			constexpr static bool exists = existsB;
-			using type = typeT;
-		};
-
-		template<typename type>
-		using some = option<true, type>;
-		using none = option<false, void>;
-		
-		struct _option{
-			template<typename T>
-			using ret = some<T>;
-
-			template<typename option, typename function>
-			struct bind{
-			};
-			template<typename function>
-			struct bind<none, function>{
-				using result = none;
-			};
-			template<typename type, typename function>
-			struct bind<some<type>, function>{
-				using result = typename function::template expr<type>::result;
-			};
-		};
-
-		template<typename C>
-		struct MonadApply{
-			template<typename T>
-			using ret = typename C::template ret<T>;
-
-			template<typename op, typename f>
-			using bind = typename C::template bind<op, f>;
-
-			template<typename Fa, typename Fb>
-			struct kleisli{
-				template<typename a>
-				struct expr{
-					using step = typename Fa::template expr<a>::result;
-					using result = MonadApply::bind<step, Fb>;
-				};
-				using result = f_<expr>;
-			};
-
-			template<typename f, typename op>
-			struct functor{
-				using _ret_function = f_<MonadApply::ret>;
-				using result = typename MonadApply::template bind<op, c_<_ret_function, f>>::result;
-			};
-		};
 	}
 
 	template<typename t>
@@ -194,9 +142,6 @@ namespace hdrstd{
 
 	template<typename FunctionA, typename FunctionB>
 	using c_ = _impl::c_<FunctionA, FunctionB>;
-
-	template<typename MonadStub>
-	using MonadApply = _impl::MonadApply<MonadStub>;
 
 	using _impl::conditional;
 
@@ -243,9 +188,4 @@ namespace hdrstd{
 	template<template<typename...> class Function, typename ...args>
 	using p_ = _impl::p_<Function, args...>;
 
-	template<typename type>
-	using some = _impl::some<type>;
-	using none = _impl::none;
-
-	using option = MonadApply<_impl::_option>;
 }

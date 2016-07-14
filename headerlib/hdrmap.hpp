@@ -9,6 +9,7 @@
 #include <type_traits>
 
 #include "hdrlist.hpp"
+#include "types/option.hpp"
 
 using namespace hdrstd;
 
@@ -82,23 +83,23 @@ namespace{
 
 	////////////////////////////////////// Map search
 
-	template<typename intType, intType val, typename map, bool when =  true>
+	template<typename intType, intType val, typename map>
 	struct _map_search{
 		static_assert(_false<map>::value, "Only use this with maps from this header");
 		//The result of the search, value has a bool, type is the result
 		using result = void;
 	};
-	template<typename siType, typename miType, siType val, _map_type ty, typename _t_init_list, bool when>
-	struct _map_search<siType, val, _t_map<miType, ty, _t_init_list>, when>{
+	template<typename siType, typename miType, siType val, _map_type ty, typename _t_init_list>
+	struct _map_search<siType, val, _t_map<miType, ty, _t_init_list>>{
 		static_assert(_false<siType>::value, "Key type and search type do not match");
 	};
 
 	//End of search
 	template<typename intType, intType val>
-	struct _map_search<intType, val, _t_map_leaf<intType>, true>{
-		using result = hdrstd::none;
+	struct _map_search<intType, val, _t_map_leaf<intType>>{
+		using result = hdrtypes::option::none;
 	};
-	//No match
+	//Search has not ended
 	template<typename intType, intType val, intType key, typename type, typename left, typename right>
 	struct _map_search<intType, val, _t_map_node<intType, key, type, left, right>>{
 		template<typename>
@@ -111,10 +112,10 @@ namespace{
 		};
 		template<typename>
 		struct expequal {
-			using result = hdrstd::some<type>;
+			using result = hdrtypes::option::some<type>;
 		};
 		using result = typename conditional<(val < key), f_<expleft>,
-				conditional<(val > key), f_<expright>, f_<expequal>>>::template result<Void>;
+				conditional<(val > key), f_<expright>, f_<expequal>>>::template expr<Void>::result;
 	};
 }
 

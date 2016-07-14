@@ -7,6 +7,7 @@
 
 #include "hdrlist.hpp"
 #include "hdrmap.hpp"
+#include "types/option.hpp"
 
 template<typename val>
 struct filter_function{};
@@ -63,11 +64,22 @@ int main(int argc, char **argv) {
 
 	printf("Building a map from it\n");
 	using emptyMap = typename hdrmap::empty<unsigned>;
-	using fullMap = typename hdrlist::fold_left<hdrstd::function<buildMap>, emptyMap, mod>::result;
+	using fullMap = typename hdrlist::fold_left<f_<buildMap>, emptyMap, mod>::result;
 	using print_map = hdrstd::Printer<fullMap>;
 	print_map::print();
 	printf("\n");
 
+	printf("Trying map search for 6 and then for 9\n");
+	using search_6 = typename hdrmap::search<unsigned, 6, fullMap>::result;
+	hdrstd::Printer<search_6>::print(); printf("%s", "\n");
+	using search_9 = typename hdrmap::search<unsigned, 9, fullMap>::result;
+	hdrstd::Printer<search_9>::print(); printf("%s", "\n");
+
+	printf("Trying to apply the option monad by calling fmap inc some<13>\n");
+	using applied_6 = typename hdrtypes::monad::functor<f_<inc>, search_6>::result;
+	hdrstd::Printer<applied_6>::print(); printf("%s", "\n");
+
+	printf("Trying sth else\n");
 	using map_3 = typename createSingularMap<typename to_int_unsigned<3>::result>::result;
 	using print_map_3 = hdrstd::Printer<map_3>;
 	print_map_3::print();
