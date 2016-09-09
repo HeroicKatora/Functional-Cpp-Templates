@@ -75,9 +75,12 @@ int main(int argc, char **argv) {
 	using search_9 = typename hdrmap::search<unsigned, 9, fullMap>::result;
 	hdrstd::Printer<search_9>::print(); printf("%s", "\n");
 
-	printf("Trying to apply the option monad by calling fmap inc some<13>\n");
+	printf("Trying to apply the option monad by calling fmap inc some<13>, fmap inc none\n");
 	using applied_6 = typename hdrtypes::monad::functor<f_<inc>, search_6>::result;
 	hdrstd::Printer<applied_6>::print(); printf("%s", "\n");
+	using none = hdrtypes::option::none;
+	using applied_none = typename hdrtypes::monad::functor<f_<inc>, none>::result;
+	hdrstd::Printer<applied_none>::print(); printf("%s", "\n");
 
 	printf("Trying sth else\n");
 	using map_3 = typename createSingularMap<typename to_int_unsigned<3>::result>::result;

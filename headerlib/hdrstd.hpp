@@ -145,6 +145,19 @@ namespace hdrstd{
 
 	using _impl::conditional;
 
+	template<typename Instance>
+	struct Type{
+		static_assert(_false<Instance>::value, "No type information available");
+		template<typename TypeKey>
+		struct Impl;
+	};
+
+	template<>
+	struct Type<Void>{
+		template<typename TypeKey>
+		struct Impl;
+	};
+
 	template<typename O>
 	struct Printer{
 		static_assert(_false<O>::value, "No printer for target class defined");

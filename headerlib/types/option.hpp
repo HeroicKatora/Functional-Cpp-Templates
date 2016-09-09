@@ -21,11 +21,11 @@ namespace option{
 		template<typename type>
 		using some = option<true, type>;
 		using none = option<false, void>;
-		
+
 		struct _option_monad_impl{
 			template<typename T>
 			struct ret {
-			   	using result = some<T>;
+				 	using result = some<T>;
 			};
 
 			template<typename option, typename function>
@@ -42,15 +42,16 @@ namespace option{
 		};
 
 		using _option_monad = MonadBind<_option_monad_impl>;
-		struct _option_type{
-			using monad = _option_monad;
-		};
+
+		template<typename TypeKey>
+		struct _option_type : hdrstd::Void {	};
+		template<>
+		struct _option_type<hdrtypes::monad::MonadType> : _option_monad {};
 
 		template<bool existsB, typename typeT>
 		struct option{
 			constexpr static bool exists = existsB;
-			using Type = typeT;
-			using type = _option_type;
+			using type = typeT;
 		};
 	}
 
@@ -58,10 +59,18 @@ namespace option{
 	using some = _impl::some<type>;
 	using none = _impl::none;
 
-	using option_type = _impl::_option_type;
-}
-}
+	template<typename TypeKey>
+	using option_type = _impl::_option_type<TypeKey>;
+} // namespace option
+} //namespace hdrtypes
+
 namespace hdrstd{
+	template<bool exists, typename T>
+	struct Type<hdrtypes::option::_impl::option<exists, T>> : Type<Void>{
+		template<typename TypeKey>
+		using Impl = hdrtypes::option::option_type<TypeKey>;
+	};
+
 	template<typename T>
 	struct Printer<hdrtypes::option::some<T>>{
 		static void print(){
