@@ -1,7 +1,8 @@
 Import('env')
 
 env = env.Clone()
-env.Append(CPPFLAGS=['-Wall', '-fmessage-length=0', '-std=c++1y', '-O3'])
+env.Append(CPPFLAGS=['-Wall', '-fmessage-length=0', '-std=c++1y', '-O3', '-ftemplate-depth=100000'])
 env.VariantDir('build', 'src', duplicate=0)
 
 env.Program(target='build/main.out', source = 'build/main.cpp')
+env.Program(target='build/perf.out', source = 'build/perftest.cpp')

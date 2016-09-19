@@ -63,12 +63,12 @@ namespace{
 	};
 	template<typename intType, intType key, typename val, intType mKey, typename mVal, typename left, typename right>
 	struct _map_add<intType, key, val, _t_map_node<intType, mKey, mVal, left, right>>{
-		template<typename>
+		template<typename T>
 		struct smaller{
 			using newLeft = typename _map_add<intType, key, val, left>::result;
 			using result = _t_map_node<intType, mKey, mVal, newLeft, right>;
 		};
-		template<typename>
+		template<typename T>
 		struct larger{
 			using newRight = typename _map_add<intType, key, val, right>::result;
 			using result = _t_map_node<intType, mKey, mVal, left, newRight>;
@@ -102,11 +102,11 @@ namespace{
 	//Search has not ended
 	template<typename intType, intType val, intType key, typename type, typename left, typename right>
 	struct _map_search<intType, val, _t_map_node<intType, key, type, left, right>>{
-		template<typename>
+		template<typename T>
 		struct expleft {
 			using result = typename _map_search<intType, val, left>::result;
 		};
-		template<typename>
+		template<typename T>
 		struct expright {
 			using result = typename _map_search<intType, val, right>::result;
 		};
@@ -144,7 +144,9 @@ namespace hdrstd{
 	template<typename intType, intType key, typename val>
 	struct Printer<_t_map_node<intType, key, val, _t_map_leaf<intType>, _t_map_leaf<intType>>>{
 		static void print(){
-			printf("(%i -> ", key);
+			printf("(");
+			Printer<std::integral_constant<intType, key>>::print();
+			printf(" -> ");
 			Printer<val>::print();
 			printf(")");
 		}
@@ -153,7 +155,9 @@ namespace hdrstd{
 	template<typename intType, intType key, typename val, typename left, typename right>
 	struct Printer<_t_map_node<intType, key, val, left, right>>{
 		static void print(){
-			printf("(%i -> ", key);
+			printf("(");
+			Printer<std::integral_constant<intType, key>>::print();
+			printf(" -> ");
 			Printer<val>::print();
 			printf(", ");
 			Printer<left>::print();

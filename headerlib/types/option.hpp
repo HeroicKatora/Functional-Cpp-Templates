@@ -44,9 +44,9 @@ namespace option{
 		using _option_monad = MonadBind<_option_monad_impl>;
 
 		template<typename TypeKey>
-		struct _option_type : hdrstd::Void {	};
+		struct _option_type { using type = hdrstd::Void; };
 		template<>
-		struct _option_type<hdrtypes::monad::MonadType> : _option_monad {};
+		struct _option_type<hdrtypes::monad::MonadType> { using type = _option_monad; };
 
 		template<bool existsB, typename typeT>
 		struct option{
@@ -68,7 +68,7 @@ namespace hdrstd{
 	template<bool exists, typename T>
 	struct Type<hdrtypes::option::_impl::option<exists, T>> : Type<Void>{
 		template<typename TypeKey>
-		using Impl = hdrtypes::option::option_type<TypeKey>;
+		using Impl = typename hdrtypes::option::option_type<TypeKey>::type;
 	};
 
 	template<typename T>

@@ -1,6 +1,7 @@
 EnsureSConsVersion(1,0,0)
 
 env = Environment(CPPPATH=Dir('./headerlib').abspath)
+#env.Replace(CXX='clang++')
 
 envd = {'env':env}
 env.SConscript('Permutables/SConscript', exports=envd)

@@ -6,6 +6,7 @@
  */
 
 #pragma once
+#include <cstdio>
 #include <utility>
 #include <type_traits>
 
@@ -43,7 +44,7 @@ namespace hdrstd{
 			constexpr static _Tp result = v;
 		};
 
-		template<template<typename...> class f, typename ...arg>
+		template<template<typename...> class f, typename... arg>
 		struct expression{
 			template<typename>
 			using expr = f<arg...>;
@@ -57,7 +58,7 @@ namespace hdrstd{
 		};
 		template<template<typename...> class f>
 		struct function{
-			template<typename ...arg>
+			template<typename... arg>
 			using expr = f<arg...>;
 		};
 		template<template<typename...> class F>
@@ -77,13 +78,13 @@ namespace hdrstd{
 
 		template<bool s, typename A, typename B>
 		struct conditional{
-			template<typename>
-			using expr = typename A::template expr<Void>;
+			template<typename T>
+			using expr = typename A::template expr<T>;
 		};
 		template<typename A, typename B>
 		struct conditional<false, A, B>{
-			template<typename>
-			using expr = typename B::template expr<Void>;
+			template<typename T>
+			using expr = typename B::template expr<T>;
 		};
 
 		struct Sink{
@@ -201,4 +202,6 @@ namespace hdrstd{
 	template<template<typename...> class Function, typename ...args>
 	using p_ = _impl::p_<Function, args...>;
 
+	template<typename>
+	struct Debug;
 }

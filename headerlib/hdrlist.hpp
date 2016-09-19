@@ -1,8 +1,8 @@
 /*
  * celists.hpp
  *
- *  Created on: 12.11.2015
- *      Author: Andreas Molzer
+ *	Created on: 12.11.2015
+ *			Author: Andreas Molzer
  */
 #pragma once
 #include <stdlib.h>
@@ -55,14 +55,33 @@ namespace{
 		using result = _t_list<tail...>;
 	};
 
+	template<typename ListA, typename ListB>
+	struct _join{
+		static_assert(_false<ListA>::value, "Not two lists");
+	};
+	template<typename... listAItems, typename... listBItems>
+	struct _join<_t_list<listAItems...>, _t_list<listBItems...>>{
+		using type = _t_list<listAItems..., listBItems...>;
+		using result = type;
+	};
+
 	template<bool condition, typename List>
 	struct _remove_tail_if{
 		using type = List;
 		using result = type;
 	};
-	template<typename tail, typename... listItems>
-	struct _remove_tail_if<false, _t_list<listItems..., tail>>{
-		using type = _t_list<listItems...>;
+	template<typename... listItems>
+	struct _remove_tail_if<true, _t_list<listItems...>>{
+		using list = _t_list<listItems...>;
+		using headtype = typename _head<list>::result;
+		using taillist = typename _tail<list>::result;
+		using tailrec = typename _remove_tail_if<true, taillist>::result;
+		using type = _join<_t_list<headtype>, tailrec>;
+		using result = type;
+	};
+	template<typename tail>
+	struct _remove_tail_if<true, _t_list<tail>>{
+		using type = _t_list<>;
 		using result = type;
 	};
 
@@ -74,16 +93,6 @@ namespace{
 	template<typename head, typename... listItems>
 	struct _remove_head_if<false, _t_list<head, listItems...>>{
 		using type = _t_list<listItems...>;
-		using result = type;
-	};
-
-	template<typename ListA, typename ListB>
-	struct _join{
-		static_assert(_false<ListA>::value, "Not two lists");
-	};
-	template<typename... listAItems, typename... listBItems>
-	struct _join<_t_list<listAItems...>, _t_list<listBItems...>>{
-		using type = _t_list<listAItems..., listBItems...>;
 		using result = type;
 	};
 
@@ -154,7 +163,7 @@ namespace{
 		using index_list = typename _c_to_t<indices>::result;
 		template <typename index>
 		struct _call{
-		   using result = typename f::template expr<index, _nth<index, list>>::result;
+			 using result = typename f::template expr<index, _nth<index, list>>::result;
 		};
 		using result = typename _map<function<_call>, index_list>::result;
 	};
@@ -188,9 +197,10 @@ namespace{
 	template<typename f, typename hd, typename ...tail>
 	struct _filter<f, _t_list<hd, tail...>>{
 		struct y {
-			template<typename>
+			template<typename T>
 			struct expr{
-				using result = typename _join<_t_list<hd>, typename _filter<f, _t_list<tail...>>::result>::result;
+				using taillist = typename hdrstd::template expression<::_filter, f, _t_list<tail...>>::template expr<T>::result;
+				using result = typename _join<_t_list<hd>, taillist>::result;
 			};
 		};
 		using n = expression<::_filter, f, _t_list<tail...>>;
@@ -202,7 +212,7 @@ namespace{
 	struct _find{
 		using hd = typename _head<list>::result;
 		using tl = typename _tail<list>::result;
-		using rec = expression<_find, tl>;
+		using rec = expression<::_find, tl>;
 		constexpr static bool condition = f::template expr<hd>::result;
 		using result = typename conditional<condition, expression_val<hd>, rec>::template expr<Void>::result;
 	};
@@ -302,4 +312,3 @@ namespace hdrstd{
 		}
 	};
 }
-
