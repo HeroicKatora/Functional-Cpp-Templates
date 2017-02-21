@@ -1,10 +1,12 @@
 EnsureSConsVersion(1,0,0)
+import os
 
-env = Environment(CPPPATH=Dir('./headerlib').abspath)
-#env.Replace(CXX='clang++')
+env = Environment(CPPPATH=Dir('./headerlib').abspath, ENV=os.environ)
+env.Replace(CXX='g++-7')
 
 envd = {'env':env}
-env.SConscript('Permutables/SConscript', exports=envd)
-env.SConscript('Bind/SConscript', exports=envd)
-env.SConscript('FizzBuzz/SConscript', exports=envd)
-env.SConscript('hdrshowcase/SConscript', exports=envd)
+#env.SConscript('Permutables/SConscript', exports=envd)
+#env.SConscript('Bind/SConscript', exports=envd)
+#env.SConscript('FizzBuzz/SConscript', exports=envd)
+#env.SConscript('hdrshowcase/SConscript', exports=envd)
+env.SConscript('test/SConscript', exports=envd)

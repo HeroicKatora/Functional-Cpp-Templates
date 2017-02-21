@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <typeinfo>
-#include "hdrstd.hpp"
+#include "hdr/std.hpp"
 
 using namespace hdrstd;
 
@@ -20,38 +20,71 @@ namespace{
 	template<size_t... t>
 	using _c_list = std::integer_sequence<size_t, t...>;
 
-	template<bool toggle, typename List, typename Extension>
-	struct _extend_if{
-		using type = List;
-		using result = type;
+	template<typename toggle, typename List, typename Extension>
+	struct _impl_extend_if{
+		using result = List;
 	};
 	template<typename... listItems, typename Extension>
-	struct _extend_if<true, _t_list<listItems...>, Extension>{
+	struct _impl_extend_if<True, _t_list<listItems...>, Extension>{
 		using type = _t_list<listItems..., Extension>;
 		using result = type;
 	};
+	struct _extend_if{
+		struct _impl{
+			template<
+				typename Toggle,
+				typename List,
+				typename Extension,
+				typename T>
+			using expr = Const<
+				typename _impl_extend_if<
+					typename Toggle::template expr<T>,
+					typename List::template expr<T>,
+					typename Extension::template expr<T>
+				>::result
+			>;
+		};
+		template<typename Arg>
+		using expr = typename F4<_extend_if::_impl>::template expr<Arg>;
+	};
 
 	template<typename List>
-	struct _head{
+	struct _impl_head{
 		static_assert(_false<List>::value, "Not a list");
 	};
 	template<>
-	struct _head<_t_list<>>{
+	struct _impl_head<_t_list<>>{
+		static constexpr const char *result = "The list does not have a head";
 	};
 	template<typename head, typename... tail>
-	struct _head<_t_list<head, tail...>>{
+	struct _impl_head<_t_list<head, tail...>>{
 		using result = head;
 	};
 
+	struct _head{
+		struct _impl{
+			template<
+				typename List,
+				typename T>
+			using expr = Const<
+				typename _impl_head<
+					typename List::template expr<T>
+				>::result
+			>;
+		};
+		template<typename List>
+		using expr = typename F2<_head::_impl>::template expr<List>;
+	};
+
 	template<typename List>
-	struct _tail{
+	struct _impl_tail{
 		static_assert(_false<List>::value, "Not a list");
 	};
 	template<>
-	struct _tail<_t_list<>>{
+	struct _impl_tail<_t_list<>>{
 	};
 	template<typename head, typename ...tail>
-	struct _tail<_t_list<head, tail...>>{
+	struct _impl_tail<_t_list<head, tail...>>{
 		using result = _t_list<tail...>;
 	};
 

@@ -8,8 +8,8 @@
 #pragma once
 #include <type_traits>
 
-#include "hdrlist.hpp"
-#include "types/option.hpp"
+#include "hdr/list.hpp"
+#include "hdr/types/option.hpp"
 
 using namespace hdrstd;
 

@@ -1,0 +1,8 @@
+Import('env')
+
+env = env.Clone()
+env.Append(CPPFLAGS=['-Wall', '-fmessage-length=0', '-std=c++1z', '-O3', '-ftemplate-depth=100000'])
+env.VariantDir('build', 'src', duplicate=0)
+
+env.Program(target='build/std.out', source = 'build/std.cpp')
+env.Program(target='build/lazy.out', source = 'build/lazy.cpp')
