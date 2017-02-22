@@ -52,7 +52,7 @@
  *	Read this as an operator as well.
  */
 #define HDR_MAP_TO
-namespace hdrstd{
+namespace hdr::std {
 	/**
 	 * A function should be a templated struct with a member named result.
 	 * An expression is a function that takes one template parameter but ignores it,
@@ -68,10 +68,10 @@ namespace hdrstd{
 	 *	to create an error message in invalid partial specializations.
 	 */
 	template<typename>
-	struct _false:std::false_type {
+	struct _false: ::std::false_type {
 	};
 	template<typename T, T value>
-	struct _false_integral:std::false_type {
+	struct _false_integral: ::std::false_type {
 	};
 
 	/**	Lifts a base function to a pure one. For more than one argument, you should
@@ -82,28 +82,6 @@ namespace hdrstd{
 	struct Function {
 		template<typename arg>
 		using expr = f<arg>;
-	};
-
-	/** Wraps struct types which declare a member named type to display their result
-	 *	This is mostly for c++ standard classes but might be used to implement functions
-	 *	via template specializations.
-	 */
-	template<template<typename> class f>
-	struct TypeFunction {
-		template<typename arg>
-		using expr = typename f<arg>::type;
-	};
-
-	template<template<typename,typename> class f>
-	struct TypeFunction2 {
-		template<typename A1, typename A2>
-		using expr = typename f<A1, A2>::type;
-	};
-
-	template<template<typename,typename,typename> class f>
-	struct TypeFunction3 {
-		template<typename A1, typename A2, typename A3>
-		using expr = typename f<A1, A2, A3>::type;
 	};
 
 	/**	Hides a type from immediate substitution in template using declarations.
@@ -169,14 +147,42 @@ namespace hdrstd{
 		using expr = F3<_rec<Arg>>;
 	};
 
+	/** Wraps struct types which declare a member named type to display their result
+	 *	This is mostly for c++ standard classes but might be used to implement functions
+	 *	via template specializations.
+	 */
+	template<template<typename> typename f>
+	struct _TypeFunction {
+		template<typename arg>
+		using expr = typename f<arg>::type;
+	};
+	template<template<typename> typename f>
+	using TypeFunction = F1<_TypeFunction<f>>;
+
+	template<template<typename,typename> typename f>
+	struct _TypeFunction2 {
+		template<typename A1, typename A2>
+		using expr = typename f<A1, A2>::type;
+	};
+	template<template<typename,typename> typename f>
+	using TypeFunction2 = F2<_TypeFunction2<f>>;
+
+	template<template<typename,typename,typename> typename f>
+	struct _TypeFunction3 {
+		template<typename A1, typename A2, typename A3>
+		using expr = typename f<A1, A2, A3>::type;
+	};
+	template<template<typename,typename,typename> typename f>
+	using TypeFunction3 = F3<_TypeFunction3<f>>;
+
 	/**	Type Definition of true, should be used as a parameter instead of bools.
 	 */
 	HDR_TYPE
-	using True = std::true_type;
+	using True = ::std::true_type;
 	/**	Type Definition of false, should be used as a parameter instead of bools.
 	 */
 	HDR_TYPE
-	using False = std::false_type;
+	using False = ::std::false_type;
 
 	/**
 	 * Partial function application
@@ -262,11 +268,11 @@ namespace hdrstd{
 	using Conditional = typename _Conditional<c, A, B>::result;
 
 
-	struct When_Else{//Function Object of Conditional
+	struct When_Else {//Function Object of Conditional
 		template<typename C, typename T>
 		using CVal = typename C::template expr<T>;
 		template<typename C, typename T>
-		constexpr static const bool c = std::is_same<CVal<C, T>, True>::value;
+		constexpr static const bool c = ::std::is_same_v<CVal<C, T>, True>;
 		template<typename C, typename A, typename B, typename T>
 		using expr = typename Conditional<c<C, T>, A, B>::template expr<T>;
 	};
@@ -276,39 +282,6 @@ namespace hdrstd{
 		template<typename ...T>
 		Sink(T&&... v){};
 	};
-
-	// template<typename t>
-	// using _false = _convert::_false<t>;
-	// template<typename T, T value>
-	// using _false_integral = _convert::_false_integral<T, value>;
-	//
-	// template<typename T, T value>
-	// using to_int_constant = _convert::to_int_constant<T, value>;
-	// template<unsigned value>
-	// using to_int_unsigned = _convert::to_int_constant<unsigned, value>;
-	//
-	// template<typename value>
-	// using Const = _convert::Const<value>;
-	//
-	// template<template<typename> class RawFunction>
-	// using Function = _convert::template Function<RawFunction>;
-	//
-	// template<typename PseudoFunction>
-	// using F1 = _convert::F1<PseudoFunction>;
-	// template<typename PseudoFunction>
-	// using F2 = _convert::F2<PseudoFunction>;
-	// template<typename PseudoFunction>
-	// using F3 = _convert::F3<PseudoFunction>;
-	// template<typename PseudoFunction>
-	// using F4 = _convert::F4<PseudoFunction>;
-	//
-	// template<typename T, typename... args>
-	// using Apply = _impl::template Apply<T, args...>;
-	//
-	// using freturn = _impl::freturn;
-	// using _impl::apply;
-	// using _impl::compose;
-	// using _impl::when_else;
 
 	template<typename Instance>
 	struct Type{
@@ -333,27 +306,15 @@ namespace hdrstd{
 		static void print(){};
 	};
 	template<>
-	struct Printer<std::false_type>{
+	struct Printer<False>{
 		static void print(){
 			printf("false");
 		}
 	};
 	template<>
-	struct Printer<std::true_type>{
+	struct Printer<True>{
 		static void print(){
 			printf("true");
-		}
-	};
-	template<unsigned long v>
-	struct Printer<std::integral_constant<unsigned long, v>>{
-		static void print(){
-			printf("%lu", v);
-		}
-	};
-	template<typename _Tp, _Tp v>
-	struct Printer<std::integral_constant<_Tp, v>>{
-		static void print(){
-			printf("%i", v);
 		}
 	};
 

@@ -7,14 +7,14 @@
 
 #pragma once
 #include "hdr/std.hpp"
-namespace hdrstd::math {
+namespace hdr::math {
 
 /**	Utility to convert integers to types
  */
 HDR_BASE
 HDR_CONVERT_TO HDR_TYPE
 template<typename _Tp, _Tp v>
-using IntegralConstant = std::integral_constant<_Tp, v>;
+using IntegralConstant = ::std::integral_constant<_Tp, v>;
 template<unsigned u>
 using Unsigned = IntegralConstant<unsigned, u>;
 template<signed s>
@@ -22,9 +22,9 @@ using Signed = IntegralConstant<signed, s>;
 
 template<typename a, typename b>
 struct Plus {
-	static_assert(_false<a>::value, "No specialization provided for type");
+	static_assert(::hdr::std::_false<a>::value, "No specialization provided for type");
 };
-using plus = hdrstd::F2<hdrstd::TypeFunction2<Plus>>;
+using plus = ::hdr::std::TypeFunction2<Plus>;
 
 template<typename _Tp, _Tp a, _Tp b>
 struct Plus<IntegralConstant<_Tp, a>, IntegralConstant<_Tp, b>> {
@@ -37,3 +37,21 @@ struct Plus<IntegralConstant<bool, a>, IntegralConstant<bool, b>> {
 };
 
 } // hdrstd::math
+
+namespace hdr::std {
+
+template<unsigned long v>
+struct Printer<hdr::math::IntegralConstant<unsigned long, v>>{
+	static void print(){
+		printf("%lu", v);
+	}
+};
+
+template<typename _Tp, _Tp v>
+struct Printer<hdr::math::IntegralConstant<_Tp, v>>{
+	static void print(){
+		printf("%i", v);
+	}
+};
+
+}

@@ -8,12 +8,15 @@
 #pragma once
 #include "hdr/std.hpp"
 
-namespace hdrstd::lazy {
+namespace hdr::lazy {
 
-using ::hdrstd::Apply;
-using ::hdrstd::compose;
-using ::hdrstd::fconst;
-using ::hdrstd::Void;
+using ::hdr::std::Apply;
+using ::hdr::std::compose;
+using ::hdr::std::fconst;
+using ::hdr::std::Void;
+using ::hdr::std::F2;
+using ::hdr::std::F3;
+using ::hdr::std::flip;
 
 /**	Lift from Pure to Monad
  */
@@ -21,11 +24,12 @@ HDR_FUNCTION
 HDR_PURE HDR_MAP_TO HDR_MONAD
 using freturn = fconst;
 
-/**	Collapse from lazy monad to pure
+/**	Collapse from lazy monad to pure and constructor
  */
 HDR_FUNCTION
 HDR_MONAD HDR_MAP_TO HDR_PURE
-template<typename T> using Eval = Apply<T, Void>;
+template<typename T> using Lazy = Apply<freturn, T>;
+template<typename T, typename V=Void> using Eval = Apply<T, V>;
 
 /** Lift from Function to Monad Space, with 1 argument
  *		(a -> b) -> (() -> a) -> (() -> b)
@@ -38,7 +42,7 @@ struct Lift1{
 };
 HDR_FUNCTION
 HDR_FUNCTION HDR_MAP_TO HDR_MONAD
-using lift = hdrstd::F2<Lift1>;
+using lift = F2<Lift1>;
 using lift1 = lift;
 using fmap = lift;
 
@@ -49,7 +53,7 @@ struct FJoin {
   template<typename A, typename V>
   using expr = Apply<A, V, V>;
 };
-using fjoin = hdrstd::F2<FJoin>;
+using fjoin = F2<FJoin>;
 
 /** Utility for lazy functions taking 2 arguments, guarantees to not eval any partial
  *  of the function until the result is evaluated.
@@ -62,6 +66,6 @@ struct Lift2{
   template<typename F, typename Wa, typename Wb>
   using expr = Apply<fjoin, Apply<compose, Apply<flip, L1<F, Wa>>, Wb>>;
 };
-using lift2 = hdrstd::F3<Lift2>;
+using lift2 = F3<Lift2>;
 
 }

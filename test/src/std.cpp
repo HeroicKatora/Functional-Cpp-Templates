@@ -1,7 +1,7 @@
 #include "hdr/std.hpp"
 #include <type_traits>
 
-using namespace hdrstd;
+using namespace hdr::std;
 using std::is_same_v;
 struct Test {
   template<typename T> struct PlusOne;

@@ -4,9 +4,9 @@
 #include <functional>
 #include <type_traits>
 
-using namespace hdrstd;
-using namespace hdrstd::lazy;
-using namespace hdrstd::math;
+using namespace hdr::std;
+using namespace hdr::lazy;
+using namespace hdr::math;
 using std::is_same_v;
 struct Test {
   struct TestBoxing {
@@ -29,9 +29,9 @@ struct Test {
 
     using LazyRecursion = Apply<lift, FunctionalRecursion>;
 
-    using LazyCharArg = Apply<freturn, CharArg>;
+    using LazyCharArg = Lazy<CharArg>;
     static_assert(is_same_v<CharArg, Eval<LazyCharArg>>);
-    using LazyLongArg = Apply<freturn, LongArg>;
+    using LazyLongArg = Lazy<LongArg>;
     static_assert(is_same_v<LongArg, Eval<LazyLongArg>>);
 
     using LazyResultChar = Apply<LazyRecursion, LazyCharArg>;
@@ -45,7 +45,7 @@ struct Test {
     using NumberFour = Signed<4>;
     using NumberEight = Signed<8>;
     using LazyPlus = Apply<lift2, plus>;
-    using LazyResult = Apply<LazyPlus, Apply<freturn, NumberFour>, Apply<freturn, NumberFour>>;
+    using LazyResult = Apply<LazyPlus, Lazy<NumberFour>, Lazy<NumberFour>>;
 
     static_assert(is_same_v<NumberEight, Eval<LazyResult>>);
   };
