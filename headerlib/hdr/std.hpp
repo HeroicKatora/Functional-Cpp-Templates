@@ -84,10 +84,26 @@ namespace hdrstd{
 		using expr = f<arg>;
 	};
 
+	/** Wraps struct types which declare a member named type to display their result
+	 *	This is mostly for c++ standard classes but might be used to implement functions
+	 *	via template specializations.
+	 */
 	template<template<typename> class f>
 	struct TypeFunction {
 		template<typename arg>
 		using expr = typename f<arg>::type;
+	};
+
+	template<template<typename,typename> class f>
+	struct TypeFunction2 {
+		template<typename A1, typename A2>
+		using expr = typename f<A1, A2>::type;
+	};
+
+	template<template<typename,typename,typename> class f>
+	struct TypeFunction3 {
+		template<typename A1, typename A2, typename A3>
+		using expr = typename f<A1, A2, A3>::type;
 	};
 
 	/**	Hides a type from immediate substitution in template using declarations.

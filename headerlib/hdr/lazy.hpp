@@ -39,6 +39,7 @@ struct Lift1{
 HDR_FUNCTION
 HDR_FUNCTION HDR_MAP_TO HDR_MONAD
 using lift = hdrstd::F2<Lift1>;
+using lift1 = lift;
 using fmap = lift;
 
 /** Join operator of the lazy monad
@@ -50,18 +51,17 @@ struct FJoin {
 };
 using fjoin = hdrstd::F2<FJoin>;
 
-/** Utility for lazy functions taking 2 arguments
+/** Utility for lazy functions taking 2 arguments, guarantees to not eval any partial
+ *  of the function until the result is evaluated.
  *    (a -> b -> c) -> (() -> a) -> (() -> b) -> (() -> c)
  */
 HDR_BASE
 HDR_FUNCTION HDR_MAP_TO HDR_MONAD
-template<typename F>
 struct Lift2{
-  // (() -> a) -> () -> b -> c
-  using L1 = Apply<lift, F>;
-  // () -> b -> c
-  template<typename Wa> using Applied = Apply<L1, Wa>;
-  //
+  template<typename F, typename Wa> using L1 = Apply<lift1, F, Wa>;
+  template<typename F, typename Wa, typename Wb>
+  using expr = Apply<fjoin, Apply<compose, Apply<flip, L1<F, Wa>>, Wb>>;
 };
+using lift2 = hdrstd::F3<Lift2>;
 
 }

@@ -14,18 +14,26 @@ namespace hdrstd::math {
 HDR_BASE
 HDR_CONVERT_TO HDR_TYPE
 template<typename _Tp, _Tp v>
-using to_int_constant = Const<std::integral_constant<_Tp, v>>;
+using IntegralConstant = std::integral_constant<_Tp, v>;
 template<unsigned u>
-struct to_int_unsigned : to_int_constant<unsigned, u>{};
+using Unsigned = IntegralConstant<unsigned, u>;
+template<signed s>
+using Signed = IntegralConstant<signed, s>;
 
 template<typename a, typename b>
-struct plus{
-	static_assert(_false<a>::value, "Can only operate on integral constants");
-	using result = void;
+struct Plus {
+	static_assert(_false<a>::value, "No specialization provided for type");
 };
+using plus = hdrstd::F2<hdrstd::TypeFunction2<Plus>>;
+
 template<typename _Tp, _Tp a, _Tp b>
-struct plus<std::integral_constant<_Tp, a>, std::integral_constant<_Tp, b>>{
-	using result = std::integral_constant<_Tp, a+b>;
+struct Plus<IntegralConstant<_Tp, a>, IntegralConstant<_Tp, b>> {
+	using type = IntegralConstant<_Tp, a+b>;
+};
+
+template<bool a, bool b>
+struct Plus<IntegralConstant<bool, a>, IntegralConstant<bool, b>> {
+	using type = IntegralConstant<bool, a || b>;
 };
 
 } // hdrstd::math
