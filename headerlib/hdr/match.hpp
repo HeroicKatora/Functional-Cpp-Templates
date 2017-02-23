@@ -34,6 +34,7 @@ struct Matched {
 
 template<typename Key>
 struct Placeholder { using type = Key; };
+struct PlaceholderAny;
 
 /**
  *    A -> B -> Optional TemplateVars

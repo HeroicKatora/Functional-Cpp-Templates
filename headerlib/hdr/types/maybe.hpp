@@ -11,8 +11,16 @@
 namespace hdr::maybe {
 
 using ::hdr::std::Apply;
+using ::hdr::std::True;
+using ::hdr::std::False;
+using ::hdr::std::Const;
 using ::hdr::std::Function;
+using ::hdr::std::TypeFunction;
 using ::hdr::std::TypeFunction2;
+using ::hdr::std::TypeFunction3;
+
+using ::hdr::std::id;
+using ::hdr::std::flip;
 template<bool,typename>
 struct Maybe;
 
@@ -42,11 +50,40 @@ struct Maybe {
 	using type = typeT;
 };
 
+/** Unpacks a maybe into a default value or the function application
+ *		b -> (a -> b) -> Maybe a -> b
+ */
+template<typename Default, typename F, typename Maybe>
+struct MaybeFunc;
+
+template<typename Default, typename F>
+struct MaybeFunc<Default, F, Nothing> {
+	using type = Default;
+};
+template<typename Default, typename F, typename V>
+struct MaybeFunc<Default, F, Just<V>> {
+	using type = Apply<F, V>;
+};
+using maybe = TypeFunction3<MaybeFunc>;
+
+using isJust 		= Apply<maybe, False, Const<True>>;
+using isNothing = Apply<maybe, True,  Const<False>>;
+
+template<typename Maybe>
+struct FromJust;
+template<typename V>
+struct FromJust<Just<V>> {
+	using type = V;
+};
+using fromJust = TypeFunction<FromJust>;
+
+using fromMaybe = Apply<Apply<flip, maybe>, id>;
+
 } // namespace hdrtypes::option
 
 namespace hdr::std {
 	template<typename T>
-	struct Printer<hdr::maybe::Just<T>>{
+	struct Printer<::hdr::maybe::Just<T>>{
 		static void print(){
 			printf("%s", "Some<");
 			Printer<T>::print();
@@ -54,7 +91,7 @@ namespace hdr::std {
 		}
 	};
 	template<>
-	struct Printer<hdr::maybe::Nothing>{
+	struct Printer<::hdr::maybe::Nothing>{
 		static void print(){
 			printf("%s", "None");
 		}
