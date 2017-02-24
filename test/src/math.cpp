@@ -36,7 +36,7 @@ struct Test {
 
   // Example from README.md
   struct Factorial {
-    using ffactorial = FromValueTemplate<factorial>;
+    using ffactorial = ValueTemplateFunction<factorial>;
     constexpr static auto res = Apply<ffactorial, Value<5>>::value;
   };
 };

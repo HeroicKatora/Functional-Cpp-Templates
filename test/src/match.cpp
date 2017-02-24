@@ -12,13 +12,13 @@ struct TypeIndexFunction {
   using RetType = decltype(boost::typeindex::ctti_type_index::type_id<V>());
   constexpr static const RetType value = boost::typeindex::ctti_type_index::type_id<V>();
 };
-using typeindex = hdr::std::Function<TypeIndexFunction>;
+using typeindex = hdr::std::TemplateFunction<TypeIndexFunction>;
 
 struct CompareTypeIndex {
   template<typename IA, typename IB>
   using expr = hdr::math::IntegralConstant<bool, (IA::value < IB::value)>;
 };
-using compare = hdr::std::F2<CompareTypeIndex>;
+using compare = hdr::std::Function<CompareTypeIndex>;
 
 using IndexFoo = hdr::std::Apply<typeindex, Foo>;
 using IndexBar = hdr::std::Apply<typeindex, Bar>;

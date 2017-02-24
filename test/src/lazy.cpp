@@ -19,7 +19,7 @@ struct Test {
 
   struct TestLaziness {
     template<typename T> struct DeepRecursion;
-    template<typename T> struct DeepRecursion<IntegralConstant<T, T(-1)>> { using type = Void; };
+    template<typename T> struct DeepRecursion<IntegralConstant<T, T(std::numeric_limits<T>::max())>> { using type = Void; };
     template<typename T, T t> struct DeepRecursion<IntegralConstant<T, t>> { using type = typename DeepRecursion<IntegralConstant<T, t+1>>::type; };
     using FunctionalRecursion = TypeFunction<DeepRecursion>;
 

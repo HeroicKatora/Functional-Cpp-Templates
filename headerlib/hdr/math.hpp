@@ -25,7 +25,8 @@ template<typename a, typename b>
 struct Plus {
 	static_assert(::hdr::std::_false<a>::value, "No specialization provided for type");
 };
-using plus = ::hdr::std::TypeFunction2<Plus>;
+using plus = ::hdr::std::TypeFunction<Plus>;
+//using plus = GenericTypeFunction<Plus>;
 
 template<typename _Tp, _Tp a, _Tp b>
 struct Plus<Value<a>, Value<b>> {
@@ -41,7 +42,7 @@ template<typename a, typename b>
 struct Mult {
 	static_assert(::hdr::std::_false<a>::value, "No specialization provided for type");
 };
-using mult = ::hdr::std::TypeFunction2<Mult>;
+using mult = ::hdr::std::TypeFunction<Mult>;
 
 template<typename _Tp, _Tp a, _Tp b>
 struct Mult<Value<a>, Value<b>> {
@@ -54,7 +55,7 @@ struct Mult<Bool<a>, Bool<b>> {
 };
 
 template<template<auto> typename F>
-struct FromValueTemplate {
+struct ValueTemplateFunction {
 	template<typename Arg>
 	using expr = Value<F<Arg::value>::value>;
 };

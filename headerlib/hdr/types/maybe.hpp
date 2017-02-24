@@ -14,10 +14,8 @@ using ::hdr::std::Apply;
 using ::hdr::std::True;
 using ::hdr::std::False;
 using ::hdr::std::Const;
-using ::hdr::std::Function;
+using ::hdr::std::TemplateFunction;
 using ::hdr::std::TypeFunction;
-using ::hdr::std::TypeFunction2;
-using ::hdr::std::TypeFunction3;
 
 using ::hdr::std::id;
 using ::hdr::std::flip;
@@ -28,12 +26,12 @@ template<typename type>
 using Just 		= Maybe<true, type>;
 using Nothing = Maybe<false, void>;
 
-using freturn = Function<Just>;
+using freturn = TemplateFunction<Just>;
 
 template<typename option, typename function>
 struct Bind {
 };
-using bind = TypeFunction2<Bind>;
+using bind = TypeFunction<Bind>;
 
 template<typename F>
 struct Bind<Nothing, F> {
@@ -64,7 +62,7 @@ template<typename Default, typename F, typename V>
 struct MaybeFunc<Default, F, Just<V>> {
 	using type = Apply<F, V>;
 };
-using maybe = TypeFunction3<MaybeFunc>;
+using maybe = TypeFunction<MaybeFunc>;
 
 using isJust 		= Apply<maybe, False, Const<True>>;
 using isNothing = Apply<maybe, True,  Const<False>>;

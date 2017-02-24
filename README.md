@@ -4,7 +4,7 @@ A small library of my C++ stuff built upon my header library.
 The header library is meant to work similarly to the type meta programming part of Boost.Hana while alleviating some issues I had with it.
 The approach is a functional one, relying on template programming instead of constexpr object representation.
 
-The code quality is not up to Boost.Hana but afterall I explore a completely new style of functional templating, sorry for the inconvenience. A very interesting aspect of the Boost library is the usefullness of its error messages which I can currently not even come close to. Debugging statements are rare (only tested for correctness by a couple of test cases) and "type type safety" is not enforced in any way. 
+The code quality is not up to Boost.Hana but afterall I explore a completely new style of functional templating, sorry for the inconvenience. A very interesting aspect of the Boost library is the usefullness of its error messages which I can currently not even come close to. Debugging statements are rare (only tested for correctness by a couple of test cases) and "type type safety" is not enforced in any way.
 
 Paradigm
 -------
@@ -30,7 +30,7 @@ template<int n> struct factorial {
 template<> struct factorial<0> {
   constexpr static const int value = 0;
 };
-using ffactorial = FromValueTemplate<factorial>;
+using ffactorial = ValueTemplateFunction<factorial>;
 constexpr res = Apply<ffactorial, Signed<5>>::value;
 ```
 To see this in action, see [this file](test/src/math.cpp)

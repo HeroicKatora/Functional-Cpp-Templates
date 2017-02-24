@@ -74,14 +74,79 @@ namespace hdr::std {
 	struct _false_integral: ::std::false_type {
 	};
 
+	/** Wraps struct types which declare a member named type to display their result
+	 *	This is mostly for c++ standard classes but might be used to implement functions
+	 *	via template specializations.
+	 */
+	template<template<typename ...> typename F>
+	struct _TypeFunction;
+	template<template<typename ...> typename F>
+	using TypeFunction = typename _TypeFunction<F>::type;
+
+	template<template<typename> typename F>
+	struct _TypeFunction<F> {
+		struct _final {
+			template<typename Arg>
+			using expr = typename F<Arg>::type;
+		};
+		using type = _final;
+	};
+	template<template<typename, typename> typename F>
+	struct _TypeFunction <F> {
+		template<typename IA> struct _inner {
+			template<typename I1>	using _Inner = F<IA, I1>;
+			using type = ::hdr::std::TypeFunction<_Inner>;
+		};
+		using type = ::hdr::std::TypeFunction<_inner>;
+	};
+	template<template<typename, typename, typename> typename F>
+	struct _TypeFunction <F> {
+		template<typename IA> struct _inner {
+			template<typename I1, typename I2> using _Inner = F<IA, I1, I2>;
+			using type = ::hdr::std::TypeFunction<_Inner>;
+		};
+		using type = ::hdr::std::TypeFunction<_inner>;
+	};
+	template<template<typename, typename, typename, typename> typename F>
+	struct _TypeFunction <F> {
+		template<typename IA, typename IB> struct _inner {
+			template<typename I1, typename I2> using _Inner = F<IB, IA, I1, I2>;
+			using type = ::hdr::std::TypeFunction<_Inner>;
+		};
+		using type = ::hdr::std::TypeFunction<_inner>;
+	};
+
 	/**	Lifts a base function to a pure one. For more than one argument, you should
 	 *	generally wrap it into a class and then use F1,...
 	 */
 	HDR_BASE HDR_CONVERT_TO HDR_FUNCTION
-	template<template<typename> class f>
-	struct Function {
-		template<typename arg>
-		using expr = f<arg>;
+	template<template<typename...> class _>
+	struct _TFunction;
+	template<template<typename...> class F>
+	using TemplateFunction = TypeFunction<_TFunction<F>::template expr>;
+	template<template<typename> typename F>
+	struct _TFunction<F> {
+		template<typename arg> struct expr {
+			using type = F<arg>;
+		};
+	};
+	template<template<typename,typename> typename F>
+	struct _TFunction<F> {
+		template<typename I1, typename I2> struct expr {
+			using type = F<I1, I2>;
+		};
+	};
+	template<template<typename,typename,typename> typename F>
+	struct _TFunction<F> {
+		template<typename I1, typename I2, typename I3> struct expr {
+			using type = F<I1, I2, I3>;
+		};
+	};
+	template<template<typename,typename,typename,typename> typename F>
+	struct _TFunction<F> {
+		template<typename I1, typename I2, typename I3, typename I4> struct expr {
+			using type = F<I1, I2, I3, I4>;
+		};
 	};
 
 	/**	Hides a type from immediate substitution in template using declarations.
@@ -100,80 +165,7 @@ namespace hdr::std {
 	HDR_BASE
 	HDR_OBJECT HDR_CONVERT_TO HDR_FUNCTION
 	template<typename F>
-	using F1 = F;
-
-	/**	Part of a set of functions to convert a function object to a pure function
-	 *	This transforms a function which takes 2 argument.
-	 */
-	HDR_BASE
-	HDR_OBJECT HDR_CONVERT_TO HDR_FUNCTION
-	template<typename F>
-	struct F2 {
-		template<typename A1> struct _rec {
-			template<typename A2>
-			using expr = typename F::template expr<A1, A2>;
-		};
-		template<typename Arg>
-		using expr = _rec<Arg>;
-	};
-
-	/**	Part of a set of functions to convert a function object to a pure function
-	 *	This transforms a function which takes 3 argument.
-	 */
-	HDR_BASE
-	HDR_OBJECT HDR_CONVERT_TO HDR_FUNCTION
-	template<typename F>
-	struct F3 {
-		template<typename A1>	struct _rec {
-			template<typename A2, typename A3>
-			using expr = typename F::template expr<A1, A2, A3>;
-		};
-		template<typename Arg>
-		using expr = F2<_rec<Arg>>;
-	};
-
-	/**	Part of a set of functions to convert a function object to a pure function
-	 *	This transforms a function which takes 4 argument.
-	 */
-	HDR_BASE
-	HDR_OBJECT HDR_CONVERT_TO HDR_FUNCTION
-	template<typename F>
-	struct F4 {
-		template<typename A1>	struct _rec {
-			template<typename A2, typename A3, typename A4>
-			using expr = typename F::template expr<A1, A2, A3, A4>;
-		};
-		template<typename Arg>
-		using expr = F3<_rec<Arg>>;
-	};
-
-	/** Wraps struct types which declare a member named type to display their result
-	 *	This is mostly for c++ standard classes but might be used to implement functions
-	 *	via template specializations.
-	 */
-	template<template<typename> typename f>
-	struct _TypeFunction {
-		template<typename arg>
-		using expr = typename f<arg>::type;
-	};
-	template<template<typename> typename f>
-	using TypeFunction = F1<_TypeFunction<f>>;
-
-	template<template<typename,typename> typename f>
-	struct _TypeFunction2 {
-		template<typename A1, typename A2>
-		using expr = typename f<A1, A2>::type;
-	};
-	template<template<typename,typename> typename f>
-	using TypeFunction2 = F2<_TypeFunction2<f>>;
-
-	template<template<typename,typename,typename> typename f>
-	struct _TypeFunction3 {
-		template<typename A1, typename A2, typename A3>
-		using expr = typename f<A1, A2, A3>::type;
-	};
-	template<template<typename,typename,typename> typename f>
-	using TypeFunction3 = F3<_TypeFunction3<f>>;
+	using Function = TemplateFunction<F::template expr>;
 
 	/**	Type Definition of true, should be used as a parameter instead of bools.
 	 */
@@ -236,7 +228,7 @@ namespace hdr::std {
 	 *		(a -> b) -> (b -> c) -> (a -> c)
 	 */
 	HDR_FUNCTION
-	using compose = F3<Compose>;
+	using compose = Function<Compose>;
 	HDR_FUNCTION
 	using c = compose;
 
@@ -247,14 +239,14 @@ namespace hdr::std {
 		template<typename F, typename A, typename B>
 		using expr = Apply<F, B, A>;
 	};
-	using flip = F3<Flip>;
+	using flip = Function<Flip>;
 
 	/**	Ignores the second argument
 	 *	(a -> b -> a)
 	 */
 	HDR_FUNCTION
 	HDR_PURE HDR_MAP_TO HDR_PURE HDR_MAP_TO HDR_PURE
-	using fconst = Function<Const>;
+	using fconst = TemplateFunction<Const>;
 
 	template<bool c, typename A, typename B>
 	struct _Conditional{
@@ -276,7 +268,7 @@ namespace hdr::std {
 		template<typename C, typename A, typename B, typename T>
 		using expr = typename Conditional<c<C, T>, A, B>::template expr<T>;
 	};
-	using when_else = F4<When_Else>;
+	using when_else = Function<When_Else>;
 
 	struct Sink{
 		template<typename ...T>

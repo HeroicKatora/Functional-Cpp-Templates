@@ -11,6 +11,8 @@ using ::hdr::maybe::Nothing;
 using ::hdr::maybe::isJust;
 using ::hdr::maybe::fromJust;
 using ::hdr::maybe::fromMaybe;
+using ::hdr::maybe::bind;
+using ::hdr::maybe::freturn;
 using ::std::is_same_v;
 
 struct Test {
@@ -19,7 +21,7 @@ struct Test {
 
   struct NothingTest {
     using Function = Const<Mapped>;
-    using Result = Apply<::hdr::maybe::bind, Nothing, Function>;
+    using Result = Apply<bind, Nothing, Function>;
     using Replaced = Apply<fromMaybe, FooBar, Result>;
     static_assert(is_same_v<Result, Nothing>);
     static_assert(is_same_v<FooBar, Replaced>);
@@ -28,8 +30,8 @@ struct Test {
 
   struct Bind {
     using Function = Const<Just<Mapped>>;
-    using JustFooBar = Apply<::hdr::maybe::freturn, FooBar>;
-    using Result = Apply<::hdr::maybe::bind, JustFooBar, Function>;
+    using JustFooBar = Apply<freturn, FooBar>;
+    using Result = Apply<bind, JustFooBar, Function>;
     using Unpacked = Apply<fromJust, Result>;
     using FromMaybe = Apply<fromMaybe, Void, Result>;
     static_assert(is_same_v<Just<Mapped>, Result>);

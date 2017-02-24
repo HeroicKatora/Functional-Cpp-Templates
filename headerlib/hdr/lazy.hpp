@@ -11,11 +11,10 @@
 namespace hdr::lazy {
 
 using ::hdr::std::Apply;
+using ::hdr::std::Void;
+using ::hdr::std::Function;
 using ::hdr::std::compose;
 using ::hdr::std::fconst;
-using ::hdr::std::Void;
-using ::hdr::std::F2;
-using ::hdr::std::F3;
 using ::hdr::std::flip;
 
 /**	Lift from Pure to Monad
@@ -42,7 +41,7 @@ struct Lift1{
 };
 HDR_FUNCTION
 HDR_FUNCTION HDR_MAP_TO HDR_MONAD
-using lift = F2<Lift1>;
+using lift = Function<Lift1>;
 using lift1 = lift;
 using fmap = lift;
 
@@ -53,7 +52,7 @@ struct FJoin {
   template<typename A, typename V>
   using expr = Apply<A, V, V>;
 };
-using fjoin = F2<FJoin>;
+using fjoin = Function<FJoin>;
 
 /** Utility for lazy functions taking 2 arguments, guarantees to not eval any partial
  *  of the function until the result is evaluated.
@@ -66,6 +65,6 @@ struct Lift2{
   template<typename F, typename Wa, typename Wb>
   using expr = Apply<fjoin, Apply<compose, Apply<flip, L1<F, Wa>>, Wb>>;
 };
-using lift2 = F3<Lift2>;
+using lift2 = Function<Lift2>;
 
 }
