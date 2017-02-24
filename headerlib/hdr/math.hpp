@@ -13,12 +13,13 @@ namespace hdr::math {
  */
 HDR_BASE
 HDR_CONVERT_TO HDR_TYPE
-template<typename _Tp, _Tp v>
-using IntegralConstant = ::std::integral_constant<_Tp, v>;
-template<unsigned u>
-using Unsigned = IntegralConstant<unsigned, u>;
-template<signed s>
-using Signed = IntegralConstant<signed, s>;
+template<typename T, T v>
+using IntegralConstant = ::std::integral_constant<T, v>;
+template<auto v>
+using Value = IntegralConstant<decltype(v), v>;
+template<unsigned u> using Unsigned = Value<u>;
+template<signed s> 	 using Signed 	= Value<s>;
+template<bool b> 		 using Bool 		= Value<b>;
 
 template<typename a, typename b>
 struct Plus {
@@ -27,13 +28,35 @@ struct Plus {
 using plus = ::hdr::std::TypeFunction2<Plus>;
 
 template<typename _Tp, _Tp a, _Tp b>
-struct Plus<IntegralConstant<_Tp, a>, IntegralConstant<_Tp, b>> {
-	using type = IntegralConstant<_Tp, a+b>;
+struct Plus<Value<a>, Value<b>> {
+	using type = Value<a+b>;
 };
 
 template<bool a, bool b>
-struct Plus<IntegralConstant<bool, a>, IntegralConstant<bool, b>> {
-	using type = IntegralConstant<bool, a || b>;
+struct Plus<Bool<a>, Bool<b>> {
+	using type = Bool<a || b>;
+};
+
+template<typename a, typename b>
+struct Mult {
+	static_assert(::hdr::std::_false<a>::value, "No specialization provided for type");
+};
+using mult = ::hdr::std::TypeFunction2<Mult>;
+
+template<typename _Tp, _Tp a, _Tp b>
+struct Mult<Value<a>, Value<b>> {
+	using type = Value<a*b>;
+};
+
+template<bool a, bool b>
+struct Mult<Bool<a>, Bool<b>> {
+	using type = Bool<a && b>;
+};
+
+template<template<auto> typename F>
+struct FromValueTemplate {
+	template<typename Arg>
+	using expr = Value<F<Arg::value>::value>;
 };
 
 } // hdrstd::math
@@ -41,14 +64,14 @@ struct Plus<IntegralConstant<bool, a>, IntegralConstant<bool, b>> {
 namespace hdr::std {
 
 template<unsigned long v>
-struct Printer<hdr::math::IntegralConstant<unsigned long, v>>{
+struct Printer<hdr::math::Value<v>>{
 	static void print(){
 		printf("%lu", v);
 	}
 };
 
 template<typename _Tp, _Tp v>
-struct Printer<hdr::math::IntegralConstant<_Tp, v>>{
+struct Printer<hdr::math::Value<v>>{
 	static void print(){
 		printf("%i", v);
 	}

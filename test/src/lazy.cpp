@@ -3,6 +3,7 @@
 #include "hdr/math.hpp"
 #include <functional>
 #include <type_traits>
+#include <limits>
 
 using namespace hdr::std;
 using namespace hdr::lazy;

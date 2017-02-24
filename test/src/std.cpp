@@ -4,6 +4,7 @@
 using namespace hdr::std;
 using std::is_same_v;
 struct Test {
+  // Define some test functions, these could be done better with hdr/math but we don't include it here
   template<typename T> struct PlusOne;
   template<typename T, T t> struct PlusOne<std::integral_constant<T, t>> { using type = std::integral_constant<T, t+1>; };
   template<typename T> struct TimesTwo;
