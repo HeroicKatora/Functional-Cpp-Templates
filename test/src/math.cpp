@@ -11,7 +11,7 @@ template<signed n> struct factorial {
 };
 
 template<> struct factorial<0> {
-  constexpr static const int value = 0;
+  constexpr static const int value = 1;
 };
 
 struct Test {
@@ -38,6 +38,7 @@ struct Test {
   struct Factorial {
     using ffactorial = ValueTemplateFunction<factorial>;
     constexpr static auto res = Apply<ffactorial, Value<5>>::value;
+    static_assert(res == 120);
   };
 };
 

@@ -220,26 +220,26 @@ namespace hdr::std {
 	 */
 	HDR_OBJECT
 	HDR_FUNCTION HDR_FUNCTION HDR_MAP_TO HDR_FUNCTION
+	template<typename F, typename G, typename Arg>
 	struct Compose{
-		template<typename F, typename G, typename Arg>
-		using expr = Apply<F, Apply<G, Arg>>;
+		using type = Apply<F, Apply<G, Arg>>;
 	};
 	/**	Binary operator for function composition
 	 *		(a -> b) -> (b -> c) -> (a -> c)
 	 */
 	HDR_FUNCTION
-	using compose = Function<Compose>;
+	using compose = TypeFunction<Compose>;
 	HDR_FUNCTION
 	using c = compose;
 
 	/** Flips the order of two arguments
 	 * 		(a -> b -> c) -> (b -> a -> c)
 	 */
+	template<typename F, typename A, typename B>
 	struct Flip {
-		template<typename F, typename A, typename B>
-		using expr = Apply<F, B, A>;
+		using type = Apply<F, B, A>;
 	};
-	using flip = Function<Flip>;
+	using flip = TypeFunction<Flip>;
 
 	/**	Ignores the second argument
 	 *	(a -> b -> a)
