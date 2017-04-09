@@ -9,14 +9,13 @@ using std::is_same_v;
 template<signed n> struct factorial {
   constexpr static const int value = n*factorial<n-1>::value;
 };
-
 template<> struct factorial<0> {
   constexpr static const int value = 1;
 };
 
-struct Test {
+namespace Test {
   // Improved version for test/src/std.cpp
-  struct StdTest {
+  namespace StdTest {
     using FunctionalOne = Apply<plus, Value<1>>;
     using FunctionalTwo = Apply<mult, Value<2>>;
 
@@ -35,9 +34,8 @@ struct Test {
   };
 
   // Example from README.md
-  struct Factorial {
-    using ffactorial = ValueTemplateFunction<factorial>;
-    constexpr static auto res = Apply<ffactorial, Value<5>>::value;
+  namespace Factorial {
+    constexpr auto res = Apply<ValueTemplateFunction<factorial>, Value<5>>::value;
     static_assert(res == 120);
   };
 };

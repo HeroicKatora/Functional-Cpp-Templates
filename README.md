@@ -8,18 +8,20 @@ The code quality is not up to Boost.Hana but afterall I explore a completely new
 
 Paradigm
 -------
-The only first class citizen in headerlib are structs. Without free template parameters of any sort. Functions in the type system can't have side effects which is strong reasoning behind the functional approach of programming I chose for this library.
+The only first class citizen in headerlib are structs. Without free template parameters of any sort. It's is very complicated for functions in the template system to have side effects which is strong reasoning behind the functional approach of programming I chose for this library.
 
 Advantages
 ----------
-Let's look at an example as a comparison from Boost.Hana about eval_if coding the factorial function [from here](http://www.boost.org/doc/libs/1_62_0/libs/hana/doc/html/group__group-Logical.html#gab64636f84de983575aac0208f5fa840c)
+Let's look at an example as a comparison from Boost.Hana about eval_if coding the factorial function [adapted for c++17 from here](http://www.boost.org/doc/libs/1_62_0/libs/hana/doc/html/group__group-Logical.html#gab64636f84de983575aac0208f5fa840c)
 ```template <typename N>
-auto fact(N n) {
-    return hana::eval_if(n == hana::int_c<0>,
-        [] { return hana::int_c<1>; },
-        [=](auto _) { return n * fact(_(n) - hana::int_c<1>); }
+template<typename N>
+constexpr auto ffactorial(const N n) {
+    return hana::eval_if(hana::equal(n, hana::int_c<0>),
+        [] () constexpr { return hana::int_c<1>; },
+        [=](auto _) constexpr { return hana::mult(n, fact(hana::minus(_(n), hana::int_c<1>))); }
     );
 }
+constexpr auto res = ffactorial(hana::int_c<5>);
 ```
 There are several negative points made in the documentation and it's just as bad when using it to dynamically determining a typename.
 But you know how to code the same function with template specialization already. That's where this library comes in.
@@ -28,10 +30,9 @@ template<int n> struct factorial {
   constexpr static const int value = n*factorial<n-1>::value;
 };
 template<> struct factorial<0> {
-  constexpr static const int value = 0;
+  constexpr static const int value = 1;
 };
-using ffactorial = ValueTemplateFunction<factorial>;
-constexpr res = Apply<ffactorial, Signed<5>>::value;
+constexpr auto res = hdr::Apply<hdr::ValueTemplateFunction<factorial>, hdr::Signed<5>>::value;
 ```
 To see this in action, see [this file](test/src/math.cpp)
 
