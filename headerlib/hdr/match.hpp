@@ -23,12 +23,14 @@ using ::hdr::std::False;
 using ::hdr::std::TemplateFunction;
 using ::hdr::std::TypeFunction;
 using ::hdr::std::compose;
+using ::hdr::std::flip;
 using ::hdr::std::when_else;
 using ::hdr::maybe::Just;
 using ::hdr::maybe::Nothing;
 using ::hdr::maybe::bind;
-using ::hdr::maybe::maybe;
+using ::hdr::maybe::fmap;
 using ::hdr::maybe::freturn;
+using ::hdr::maybe::maybe;
 
 template<typename Var>
 struct Unmatched {
@@ -97,12 +99,22 @@ struct Decompose<A<TArgs...>, A<Args...>> {
 };
 
 /** Constructs a WithClause
- *    Template -> (TemplateVars -> Bool) -> (TemplateVars -> B) -> A -> Match
+ *    Template -> (TemplateVars -> Bool) -> (TemplateVars -> B) -> A -> Maybe B
  */
 template<typename Template, typename Selector, typename Function>
 struct With {
-  template<typename A>
-  using expr = typename Decompose<Template, A>::type;
+  using maybe_decomp = Apply<decompose, Template>;                     // (A -> Maybe TemplateVars)
+  using boolifier    = Apply<fmap, Selector>;                          // (Maybe TemplateVars -> Maybe Bool)
+  using get_result   = Apply<fmap, Function>;                          // (Maybe TemplateVars -> Maybe B)
+  using if_selected  = Apply<Apply<flip, when_else>, Const<Nothing>> ; // (Bool -> (Maybe TemplateVars -> Maybe B) -> (Maybe TemplateVars -> Maybe B))
+  using fmappable    = Apply<Apply<flip, if_selected>, get_result>;    // (Bool -> (Maybe TemplateVars -> Maybe B))
+  using select_after = Apply<flip, fmappable>;                         // (Maybe TemplateVars -> Bool -> Maybe B)
+  template<typename MTV>
+  using _result_func = Apply<bind, Apply<boolifier, MTV>, Apply<select_after, MTV>>; // <>(Maybe TemplateVars -> Maybe B)
+  using result_func  = TemplateFunction<_result_func>;                 // (Maybe TemplateVars -> Maybe B)
+  using maybe_result = Apply<compose, result_func, maybe_decomp>;      // (A -> Maybe B)
+  using type = maybe_result;
 };
+using with = TypeFunction<With>;
 
 }

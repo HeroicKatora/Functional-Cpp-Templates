@@ -18,6 +18,7 @@ using ::hdr::std::TemplateFunction;
 using ::hdr::std::TypeFunction;
 
 using ::hdr::std::id;
+using ::hdr::std::compose;
 using ::hdr::std::flip;
 template<bool,typename>
 struct Maybe;
@@ -32,6 +33,7 @@ template<typename option, typename function>
 struct Bind {
 };
 using bind = TypeFunction<Bind>;
+using fmap = Apply<compose, Apply<flip, bind>, Apply<compose, freturn>>;
 
 template<typename F>
 struct Bind<Nothing, F> {
