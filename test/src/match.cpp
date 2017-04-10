@@ -35,6 +35,7 @@ namespace Main {
   using FooP = Placeholder<Foo>;
   using BarP = Placeholder<Bar>;
   template<typename A, typename B> struct Pair {};
+  template<typename A, typename B> struct Diff {};
 
   using DecFir = Apply<decompose, Pair<FooP, BarP>, Pair<bool, int>>;
   using DecSec = Apply<decompose, Pair<bool, BarP>, Pair<bool, int>>;
@@ -45,8 +46,14 @@ namespace Main {
   static_assert(Apply<hdr::maybe::isJust, DecThi>::value);
   static_assert(Apply<hdr::maybe::isJust, DecFou>::value);
 
-  using Fail   = Apply<decompose, Pair<bool, int>,  Pair<int, bool>>;
-  static_assert(Apply<hdr::maybe::isNothing, Fail>::value);
+  using FailFi = Apply<decompose, unsigned int,     unsigned short>;
+  using FailSe = Apply<decompose, Pair<bool, int>,  Pair<int, bool>>;
+  using FailTh = Apply<decompose, Pair<bool, int>,  unsigned short>;
+  using FailFo = Apply<decompose, Pair<bool, int>,  Diff<bool, int>>;
+  static_assert(Apply<hdr::maybe::isNothing, FailFi>::value);
+  static_assert(Apply<hdr::maybe::isNothing, FailSe>::value);
+  static_assert(Apply<hdr::maybe::isNothing, FailTh>::value);
+  static_assert(Apply<hdr::maybe::isNothing, FailFo>::value);
 };
 
 int main() {};
