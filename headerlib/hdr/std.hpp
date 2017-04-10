@@ -261,12 +261,10 @@ namespace hdr::std {
 
 
 	struct When_Else {//Function Object of Conditional
-		template<typename C, typename T>
-		using CVal = typename C::template expr<T>;
-		template<typename C, typename T>
-		constexpr static const bool c = ::std::is_same_v<CVal<C, T>, True>;
-		template<typename C, typename A, typename B, typename T>
-		using expr = typename Conditional<c<C, T>, A, B>::template expr<T>;
+		template<typename C>
+		constexpr static const bool c = ::std::is_same_v<C, True>;
+		template<typename C, typename A, typename B>
+		using expr = Conditional<c<C>, A, B>;
 	};
 	using when_else = Function<When_Else>;
 

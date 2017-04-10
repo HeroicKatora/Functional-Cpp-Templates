@@ -7,24 +7,26 @@
 struct Foo;
 struct Bar;
 
-struct PreConditiona {
+namespace PreConditiona {
+  using namespace hdr::std;
+  using namespace hdr::math;
   template<typename V>
   struct TypeIndexFunction {
     using RetType = decltype(boost::typeindex::ctti_type_index::type_id<V>());
     constexpr static const RetType value = boost::typeindex::ctti_type_index::type_id<V>();
   };
-  using typeindex = hdr::std::TemplateFunction<TypeIndexFunction>;
+  using typeindex = TemplateFunction<TypeIndexFunction>;
 
   struct CompareTypeIndex {
     template<typename IA, typename IB>
-    using expr = hdr::math::IntegralConstant<bool, (IA::value < IB::value)>;
+    using expr = Bool<(IA::value < IB::value)>;
   };
-  using compare = hdr::std::Function<CompareTypeIndex>;
+  using compare = Function<CompareTypeIndex>;
 
-  using IndexFoo = hdr::std::Apply<typeindex, Foo>;
-  using IndexBar = hdr::std::Apply<typeindex, Bar>;
-  using IsFooSmaller = hdr::std::Apply<compare, IndexFoo, IndexBar>;
-  using IsBarSmaller = hdr::std::Apply<compare, IndexBar, IndexFoo>;
+  using IndexFoo     = Apply<typeindex, Foo>;
+  using IndexBar     = Apply<typeindex, Bar>;
+  using IsFooSmaller = Apply<compare, IndexFoo, IndexBar>;
+  using IsBarSmaller = Apply<compare, IndexBar, IndexFoo>;
   static_assert(IsFooSmaller::value ^ IsBarSmaller::value);
 };
 
@@ -34,12 +36,17 @@ namespace Main {
   using BarP = Placeholder<Bar>;
   template<typename A, typename B> struct Pair {};
 
-  using DecFir = typename Decompose<Pair<FooP, BarP>, Pair<bool, int>>::type;
-  using DecSec = typename Decompose<Pair<bool, BarP>, Pair<bool, int>>::type;
-  using DecThi = typename Decompose<Pair<bool, int>,  Pair<bool, int>>::type;
+  using DecFir = Apply<decompose, Pair<FooP, BarP>, Pair<bool, int>>;
+  using DecSec = Apply<decompose, Pair<bool, BarP>, Pair<bool, int>>;
+  using DecThi = Apply<decompose, Pair<bool, int>,  Pair<bool, int>>;
+  using DecFou = Apply<decompose, PlaceholderAny,   Pair<bool, int>>;
   static_assert(Apply<hdr::maybe::isJust, DecFir>::value);
   static_assert(Apply<hdr::maybe::isJust, DecSec>::value);
   static_assert(Apply<hdr::maybe::isJust, DecThi>::value);
+  static_assert(Apply<hdr::maybe::isJust, DecFou>::value);
+
+  using Fail   = Apply<decompose, Pair<bool, int>,  Pair<int, bool>>;
+  static_assert(Apply<hdr::maybe::isNothing, Fail>::value);
 };
 
 int main() {};

@@ -18,9 +18,12 @@ namespace hdr::match {
 
 using ::hdr::std::Apply;
 using ::hdr::std::Const;
+using ::hdr::std::True;
+using ::hdr::std::False;
 using ::hdr::std::TemplateFunction;
 using ::hdr::std::TypeFunction;
 using ::hdr::std::compose;
+using ::hdr::std::when_else;
 using ::hdr::maybe::Just;
 using ::hdr::maybe::Nothing;
 using ::hdr::maybe::bind;
@@ -75,8 +78,11 @@ template<typename K, typename ... R> struct _Flatten<K, R...> {
  */
 template<typename Template, typename Actual>
 struct Decompose {
-  using type = Just<KVList<>>;
+  template<typename T, typename S> struct IsSame { using type = False; };
+  template<typename T> struct IsSame<T, T>       { using type = True;  };
+  using type = Apply<when_else, typename IsSame<Template, Actual>::type, Just<KVList<>>, Nothing>;
 };
+using decompose = TypeFunction<Decompose>;
 template<typename PKey, typename A>
 struct Decompose<Placeholder<PKey>, A> {
   using type = Just<KVList<KVPair<PKey, A>>>;
@@ -87,7 +93,7 @@ struct Decompose<PlaceholderAny, A> {
 };
 template<template<typename...> typename A, typename ... TArgs, typename ... Args>
 struct Decompose<A<TArgs...>, A<Args...>> {
-  using type = typename _Flatten<typename Decompose<TArgs, Args>::type ...>::type;
+  using type = typename _Flatten<Apply<decompose, TArgs, Args>...>::type;
 };
 
 /** Constructs a WithClause
@@ -95,7 +101,8 @@ struct Decompose<A<TArgs...>, A<Args...>> {
  */
 template<typename Template, typename Selector, typename Function>
 struct With {
-
+  template<typename A>
+  using expr = typename Decompose<Template, A>::type;
 };
 
 }
