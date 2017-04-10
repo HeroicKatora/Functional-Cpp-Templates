@@ -54,6 +54,27 @@ namespace Main {
   static_assert(Apply<hdr::maybe::isNothing, FailSe>::value);
   static_assert(Apply<hdr::maybe::isNothing, FailTh>::value);
   static_assert(Apply<hdr::maybe::isNothing, FailFo>::value);
+
+  namespace WithUsage {
+    using namespace hdr::match;
+    using namespace hdr::std;
+    using freematch  = Apply<with, PlaceholderAny, Const<True>, Const<Foo>>;
+    using JustResult = Apply<freematch, Pair<bool, bool>>;
+    static_assert(Apply<hdr::maybe::isJust, JustResult>::value);
+
+    struct UniqueNoMatch;
+    using nonematch  = Apply<with, UniqueNoMatch,  Const<True>, Const<Foo>>;
+    using NoResult   = Apply<nonematch, Foo>;
+    static_assert(Apply<hdr::maybe::isNothing, NoResult>::value);
+
+    using truematch  = Apply<with, Foo, Const<True>, Const<Bar>>;
+    using BarResult  = Apply<hdr::maybe::fromJust, Apply<truematch, Foo>>;
+    static_assert(std::is_same_v<Bar, BarResult>);
+    
+    using falsematch = Apply<with, Foo, Const<False>, Const<Bar>>;
+    using NotResult  = Apply<falsematch, Foo>;
+    static_assert(Apply<hdr::maybe::isNothing, NotResult>::value);
+  }
 };
 
 int main() {};

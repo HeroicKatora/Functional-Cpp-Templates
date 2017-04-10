@@ -106,8 +106,8 @@ struct With {
   using maybe_decomp = Apply<decompose, Template>;                     // (A -> Maybe TemplateVars)
   using boolifier    = Apply<fmap, Selector>;                          // (Maybe TemplateVars -> Maybe Bool)
   using get_result   = Apply<fmap, Function>;                          // (Maybe TemplateVars -> Maybe B)
-  using if_selected  = Apply<Apply<flip, when_else>, Const<Nothing>> ; // (Bool -> (Maybe TemplateVars -> Maybe B) -> (Maybe TemplateVars -> Maybe B))
-  using fmappable    = Apply<Apply<flip, if_selected>, get_result>;    // (Bool -> (Maybe TemplateVars -> Maybe B))
+  using if_selected  = Apply<Apply<flip, when_else>, get_result> ;     // (Bool -> (Maybe TemplateVars -> Maybe B) -> (Maybe TemplateVars -> Maybe B))
+  using fmappable    = Apply<Apply<flip, if_selected>, Const<Nothing>>;// (Bool -> (Maybe TemplateVars -> Maybe B))
   using select_after = Apply<flip, fmappable>;                         // (Maybe TemplateVars -> Bool -> Maybe B)
   template<typename MTV>
   using _result_func = Apply<bind, Apply<boolifier, MTV>, Apply<select_after, MTV>>; // <>(Maybe TemplateVars -> Maybe B)
