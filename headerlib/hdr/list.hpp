@@ -1,3 +1,5 @@
+#ifndef HEADERLIB_HDR_LIST_HPP
+#define HEADERLIB_HDR_LIST_HPP
 /*
  * celists.hpp
  *
@@ -51,3 +53,4 @@ namespace hdrstd{
 		}
 	};
 }
+#endif //HEADERLIB_HDR_LIST_HPP

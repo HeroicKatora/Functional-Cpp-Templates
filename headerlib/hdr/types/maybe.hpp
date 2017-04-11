@@ -1,3 +1,5 @@
+#ifndef HEADERLIB_HDR_TYPES_MAYBE_HPP
+#define HEADERLIB_HDR_TYPES_MAYBE_HPP
 /*
  * option.hpp
  *
@@ -97,3 +99,4 @@ namespace hdr::std {
 		}
 	};
 }
+#endif //HEADERLIB_HDR_TYPES_MAYBE_HPP

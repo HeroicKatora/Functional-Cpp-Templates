@@ -1,3 +1,5 @@
+#ifndef HEADERLIB_HDR_MATH_HPP
+#define HEADERLIB_HDR_MATH_HPP
 /*
  * hdrmath.hpp
  *
@@ -79,3 +81,4 @@ struct Printer<hdr::math::Value<v>>{
 };
 
 }
+#endif //HEADERLIB_HDR_MATH_HPP

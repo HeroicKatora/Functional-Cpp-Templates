@@ -1,3 +1,5 @@
+#ifndef HEADERLIB_HDR_MAP_HPP
+#define HEADERLIB_HDR_MAP_HPP
 /*
  * hdrmap.hpp
  *
@@ -168,3 +170,4 @@ namespace hdrstd{
 		}
 	};
 }
+#endif //HEADERLIB_HDR_MAP_HPP

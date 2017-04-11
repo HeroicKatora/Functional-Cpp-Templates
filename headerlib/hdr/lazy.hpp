@@ -1,3 +1,5 @@
+#ifndef HEADERLIB_HDR_LAZY_HPP
+#define HEADERLIB_HDR_LAZY_HPP
 /*
  * lazy.hpp
  *
@@ -68,3 +70,4 @@ struct Lift2{
 using lift2 = Function<Lift2>;
 
 }
+#endif //HEADERLIB_HDR_LAZY_HPP

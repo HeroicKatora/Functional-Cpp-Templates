@@ -1,3 +1,5 @@
+#ifndef HEADERLIB_HDR_MATCH_HPP
+#define HEADERLIB_HDR_MATCH_HPP
 /*
  * match.hpp
  *
@@ -119,3 +121,4 @@ struct With {
 using with = TypeFunction<With>;
 
 }
+#endif //HEADERLIB_HDR_MATCH_HPP

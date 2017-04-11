@@ -1,3 +1,5 @@
+#ifndef HEADERLIB_HDR_TYPES_MONAD_HPP
+#define HEADERLIB_HDR_TYPES_MONAD_HPP
 /*
  * hdrmonad.hpp
  *
@@ -62,3 +64,4 @@ namespace hdrtypes{ namespace monad{
 	};
 } // namespace monad
 } // namespace hdrtypes
+#endif //HEADERLIB_HDR_TYPES_MONAD_HPP

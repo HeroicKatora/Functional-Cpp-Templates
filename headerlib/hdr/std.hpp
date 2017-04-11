@@ -1,3 +1,5 @@
+#ifndef HEADERLIB_HDR_STD_HPP
+#define HEADERLIB_HDR_STD_HPP
 /*
  * hdrstd.hpp
  *
@@ -316,3 +318,4 @@ namespace hdr::std {
 	template<typename>
 	struct Debug;
 }
+#endif //HEADERLIB_HDR_STD_HPP
