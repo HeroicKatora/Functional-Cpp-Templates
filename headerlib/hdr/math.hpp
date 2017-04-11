@@ -13,8 +13,6 @@ namespace hdr::math {
 
 /**	Utility to convert integers to types
  */
-HDR_BASE
-HDR_CONVERT_TO HDR_TYPE
 template<typename T, T v>
 using IntegralConstant = ::std::integral_constant<T, v>;
 template<auto v>

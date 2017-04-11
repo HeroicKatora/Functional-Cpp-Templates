@@ -9,12 +9,18 @@
 #include "hdr/std.hpp"
 #include "hdr/types/maybe.hpp"
 
-/** Intended usage:
- *    match var [(with template selector function)]...
- *  Essentially works as a monad M where
- *  (match var) constructs (M V) and
- *  (with template selector function) constructs a (V -> M V) and
- *  the monad overloads application to be bind
+/** Limited core matching, as a monad.
+ *    match var [>>= (with template selector function)]*
+ *  Essentially works as a monad M with M::return == match which constructs
+ *  an 'Unmatched' type. with constructs a bindable function returning this type.
+ *  Binding F to a Matched T will skip the application of F while binding to
+ *  an unmatched will do it. This works like Maybe but instead Nothing/Matched
+ *  carries an additional result type and Maybe/Unmatched is very much the same.
+ *  [WIP]
+ *  Templates are declared like the type they are supposed to match but using
+ *  Placholders instead of the true type parameters. Should the type definition
+ *  depends on its parameters, a special form is provided (can't be constructed).
+ *  This feature is not currently implemented.
  */
 namespace hdr::match {
 
@@ -34,23 +40,24 @@ using ::hdr::maybe::fmap;
 using ::hdr::maybe::freturn;
 using ::hdr::maybe::maybe;
 
+/// Type definition of Unmatched
 template<typename Var>
-struct Unmatched {
-  template<typename With>
-  using expr = Apply<With, Var>;
-};
-
+struct Unmatched;
+/// Type definition of Matched
 template<typename Var>
-struct Matched {
-  template<typename With>
-  using expr = Matched<Var>;
-};
+struct Matched;
 
+/// A placeholder with a given type as its identifier
 template<typename Key>
 struct Placeholder { using type = Key; };
+/// A placeholder matching anything
 struct PlaceholderAny;
 using _ = PlaceholderAny;
 
+/** We don't have set/map/list since are in core :(
+ *  Anyways, this implements flat map, so don't go too wild with placeholder
+ *  count and we don't check anything.
+ */
 template<typename _Key, typename _Val> struct KVPair{
   using Key = _Key; using Val = _Val;
 };
@@ -77,8 +84,8 @@ template<typename K, typename ... R> struct _Flatten<K, R...> {
   using type    = Apply<TypeFunction<MaybeJoin>, K, T>;
 };
 
-/**
- *    A -> B -> Optional TemplateVars
+/** Tries to deconstruct a type into the placeholders given into the template.
+ *    Template -> Argument -> Maybe TemplateVars
  */
 template<typename Template, typename Actual>
 struct Decompose {
@@ -118,6 +125,7 @@ struct With {
   using maybe_result = Apply<compose, result_func, maybe_decomp>;      // (A -> Maybe B)
   using type = maybe_result;
 };
+/// Constructor function for With
 using with = TypeFunction<With>;
 
 }

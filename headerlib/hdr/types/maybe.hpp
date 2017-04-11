@@ -2,12 +2,12 @@
 #define HEADERLIB_HDR_TYPES_MAYBE_HPP
 /*
  * option.hpp
+ * Declares an option monad type, called Maybe in Haskell. I renamed it to maybe
+ * but haven't moved the file. This shall be a features forever.
  *
- * 	Created on: 14.07.2016
+ *  Created on: 14.07.2016
  * 		Author: andreas
  */
-
-#pragma once
 #include "hdr/std.hpp"
 
 namespace hdr::maybe {
@@ -22,19 +22,21 @@ using ::hdr::std::TypeFunction;
 using ::hdr::std::id;
 using ::hdr::std::compose;
 using ::hdr::std::flip;
-template<bool,typename>
-struct Maybe;
 
+/** Use these type aliases to construct, compare and handle Maybes
+ */
+struct Nothing;
 template<typename type>
-using Just 		= Maybe<true, type>;
-using Nothing = Maybe<false, void>;
+struct Just;
 
+/// Monad constructor
 using freturn = TemplateFunction<Just>;
 
 template<typename option, typename function>
-struct Bind {
-};
+struct Bind;
+/// Monad bind function
 using bind = TypeFunction<Bind>;
+/// Monad fmap function, expressed with bind and return
 using fmap = Apply<compose, Apply<flip, bind>, Apply<compose, freturn>>;
 
 template<typename F>
@@ -46,17 +48,13 @@ struct Bind<Just<T>, F> {
 	using type = Apply<F, T>;
 };
 
-template<bool existsB, typename typeT>
-struct Maybe {
-	constexpr static bool exists = existsB;
-	using type = typeT;
-};
 
+template<typename Default, typename F, typename Maybe>
+struct MaybeFunc;
 /** Unpacks a maybe into a default value or the function application
  *		b -> (a -> b) -> Maybe a -> b
  */
-template<typename Default, typename F, typename Maybe>
-struct MaybeFunc;
+using maybe = TypeFunction<MaybeFunc>;
 
 template<typename Default, typename F>
 struct MaybeFunc<Default, F, Nothing> {
@@ -66,9 +64,10 @@ template<typename Default, typename F, typename V>
 struct MaybeFunc<Default, F, Just<V>> {
 	using type = Apply<F, V>;
 };
-using maybe = TypeFunction<MaybeFunc>;
 
+/// True if argument is an instance of Just else False
 using isJust 		= Apply<maybe, False, Const<True>>;
+/// True if argument is not an instance of Just else True
 using isNothing = Apply<maybe, True,  Const<False>>;
 
 template<typename Maybe>
@@ -77,8 +76,11 @@ template<typename V>
 struct FromJust<Just<V>> {
 	using type = V;
 };
+/// Exception when argument is not Just<V>
 using fromJust = TypeFunction<FromJust>;
-
+/** Returns the default value or an unpacked Just
+ *  	(a -> Maybe a -> a)
+ */
 using fromMaybe = Apply<Apply<flip, maybe>, id>;
 
 } // namespace hdrtypes::option
