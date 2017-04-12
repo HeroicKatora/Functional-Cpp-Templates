@@ -8,60 +8,34 @@
  */
 
 #pragma once
-#include "hdrstd.hpp"
+#include "hdr/std.hpp"
 
 
-namespace hdrtypes{ namespace monad{
+namespace hdr::monad {
+	using hdr::std::Apply;
+	using hdr::std::TemplateFunction;
+	using hdr::std::flip;
+	using hdr::std::compose;
+	using hdr::std::id;
 
+	template<typename ret_, typename bind_>
+	struct MonadFromBind {
+		using return_ = ret_;
+		using bind 		= bind_;
 
-	template<typename Instance>
-	using Type = hdrstd::Type<Instance>;
-	struct MonadType {};
+		template<typename F> // Pointfree does not look very pretty
+		using _kleisli = Apply<flip, Apply<compose, bind, F>>;
+		using kleisli = TemplateFunction<_kleisli>;
 
-	template<typename Monad, typename T>
-	struct ret{
-		using result = typename Type<Monad>::template Impl<MonadType>::template ret<T>::result;
+		// This pointfree form is much simpler to understand
+		using fmap 		= Apply<compose, Apply<flip, bind>, Apply<compose, return_>>;
+		using join    = Apply<Apply<flip, bind>, id>;
 	};
+	using monadFromBind = TemplateFunction<MonadFromBind>;
 
-	template<typename Monad, typename F>
-	struct bind{
-		using result = typename Type<Monad>::template Impl<MonadType>::template bind<Monad, F>::result;
+	template<typename>
+	struct MonadFromKleisli {
+
 	};
-
-	template<typename Monad, typename Fa, typename Fb>
-	struct kleisli{
-		using result = typename Type<Monad>::template Impl<MonadType>::template kleisli<Fa, Fb>::result;
-	};
-
-	template<typename F, typename Monad>
-	struct functor{
-		using result = typename Type<Monad>::template Impl<MonadType>::template functor<F, Monad>::result;
-	};
-
-	template<typename C>
-	struct MonadBind{
-		template<typename T>
-		using ret = typename C::template ret<T>;
-
-		template<typename op, typename f>
-		using bind = typename C::template bind<op, f>;
-
-		template<typename Fa, typename Fb>
-		struct kleisli{
-			template<typename a>
-			struct expr{
-				using step = typename Fa::template expr<a>::result;
-				using result = MonadBind::bind<step, Fb>;
-			};
-			using result = f_<expr>;
-		};
-
-		template<typename f, typename op>
-		struct functor{
-			using _ret_function = f_<MonadBind::ret>;
-			using result = typename MonadBind::template bind<op, c_<_ret_function, f>>::result;
-		};
-	};
-} // namespace monad
-} // namespace hdrtypes
+} // namespace hdr::monad
 #endif //HEADERLIB_HDR_TYPES_MONAD_HPP

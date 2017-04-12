@@ -9,6 +9,7 @@
  * 		Author: andreas
  */
 #include "hdr/std.hpp"
+#include "hdr/types/monad.hpp"
 
 namespace hdr::maybe {
 
@@ -23,31 +24,13 @@ using ::hdr::std::id;
 using ::hdr::std::compose;
 using ::hdr::std::flip;
 
+using ::hdr::monad::MonadFromBind;
+
 /** Use these type aliases to construct, compare and handle Maybes
  */
 struct Nothing;
 template<typename type>
 struct Just;
-
-/// Monad constructor
-using freturn = TemplateFunction<Just>;
-
-template<typename option, typename function>
-struct Bind;
-/// Monad bind function
-using bind = TypeFunction<Bind>;
-/// Monad fmap function, expressed with bind and return
-using fmap = Apply<compose, Apply<flip, bind>, Apply<compose, freturn>>;
-
-template<typename F>
-struct Bind<Nothing, F> {
-	using type = Nothing;
-};
-template<typename T, typename F>
-struct Bind<Just<T>, F> {
-	using type = Apply<F, T>;
-};
-
 
 template<typename Default, typename F, typename Maybe>
 struct MaybeFunc;
@@ -55,7 +38,6 @@ struct MaybeFunc;
  *		b -> (a -> b) -> Maybe a -> b
  */
 using maybe = TypeFunction<MaybeFunc>;
-
 template<typename Default, typename F>
 struct MaybeFunc<Default, F, Nothing> {
 	using type = Default;
@@ -64,6 +46,15 @@ template<typename Default, typename F, typename V>
 struct MaybeFunc<Default, F, Just<V>> {
 	using type = Apply<F, V>;
 };
+
+/// Monad constructor
+using freturn 	= TemplateFunction<Just>;
+using bind 			= Apply<flip, Apply<maybe, Nothing>>;
+using MaybeType = MonadFromBind<freturn, bind>;
+/// Monad fmap function, expressed with bind and return
+using fmap 			= MaybeType::fmap;
+using kleisli 	= MaybeType::kleisli;
+using join    	= MaybeType::join;
 
 /// True if argument is an instance of Just else False
 using isJust 		= Apply<maybe, False, Const<True>>;

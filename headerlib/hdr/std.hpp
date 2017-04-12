@@ -279,6 +279,7 @@ namespace hdr::std {
 		using expr = Conditional<c<C>, A, B>;
 	};
 	using when_else = Function<When_Else>;
+	using unless    = Apply<compose, flip, when_else>;
 
 	/** Type constexpr constructible from any arguments, could be useful.
 	 */
