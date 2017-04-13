@@ -24,7 +24,7 @@ namespace hdr::monad {
 		using bind 		= bind_;
 		using kleisli = Apply<compose, flip, Apply<compose, bind>>;
 		using fmap 		= Apply<compose, Apply<flip, bind>, Apply<compose, return_>>;
-		using join    = Apply<Apply<flip, bind>, id>;
+		using join    = Apply<flip, bind, id>;
 	};
 	using monadFromBind = TemplateFunction<MonadFromBind>;
 

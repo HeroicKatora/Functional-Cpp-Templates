@@ -13,6 +13,7 @@ using ::hdr::maybe::fromJust;
 using ::hdr::maybe::fromMaybe;
 using ::hdr::maybe::bind;
 using ::hdr::maybe::fmap;
+using ::hdr::maybe::join;
 using ::hdr::maybe::kleisli;
 using ::hdr::maybe::return_;
 using ::std::is_same_v;
@@ -59,6 +60,12 @@ namespace Test {
     using resle  = Apply<bind, Value, left>;
     static_assert(is_same_v<resfn, resri> &&
                   is_same_v<resfn, resle>);
+  };
+
+  namespace Join {
+    using Value  = Just<FooBar>;
+    using result = Apply<join, Apply<fmap, return_, Value>>;
+    static_assert(is_same_v<Value, result>);
   };
 };
 
