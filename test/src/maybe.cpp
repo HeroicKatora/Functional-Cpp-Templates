@@ -13,6 +13,7 @@ using ::hdr::maybe::fromJust;
 using ::hdr::maybe::fromMaybe;
 using ::hdr::maybe::bind;
 using ::hdr::maybe::fmap;
+using ::hdr::maybe::kleisli;
 using ::hdr::maybe::return_;
 using ::std::is_same_v;
 
@@ -45,6 +46,19 @@ namespace Test {
     using Value  = Just<FooBar>;
     using Result = Apply<fmap, Const<Mapped>, Value>;
     static_assert(is_same_v<Just<Mapped>, Result>);
+  };
+
+  namespace Kleisli {
+    using Value  = Just<FooBar>;
+    using fn     = Const<Just<Mapped>>;
+    using right  = Apply<kleisli, return_, fn>;
+    using left   = Apply<kleisli, fn, return_>;
+
+    using resfn  = Apply<bind, Value, fn>;
+    using resri  = Apply<bind, Value, right>;
+    using resle  = Apply<bind, Value, left>;
+    static_assert(is_same_v<resfn, resri> &&
+                  is_same_v<resfn, resle>);
   };
 };
 
