@@ -13,7 +13,7 @@ using ::hdr::maybe::fromJust;
 using ::hdr::maybe::fromMaybe;
 using ::hdr::maybe::bind;
 using ::hdr::maybe::fmap;
-using ::hdr::maybe::freturn;
+using ::hdr::maybe::return_;
 using ::std::is_same_v;
 
 namespace Test {
@@ -31,7 +31,7 @@ namespace Test {
 
   namespace Bind {
     using Function   = Const<Just<Mapped>>;
-    using JustFooBar = Apply<freturn, FooBar>;
+    using JustFooBar = Apply<return_, FooBar>;
     using Result     = Apply<bind, JustFooBar, Function>;
     using Unpacked   = Apply<fromJust, Result>;
     using FromMaybe  = Apply<fromMaybe, Void, Result>;

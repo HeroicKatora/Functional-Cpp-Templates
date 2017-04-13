@@ -59,21 +59,30 @@ namespace Main {
     using namespace hdr::match;
     using namespace hdr::std;
     using freematch  = Apply<with, PlaceholderAny, Const<True>, Const<Foo>>;
-    using JustResult = Apply<freematch, Pair<bool, bool>>;
-    static_assert(Apply<hdr::maybe::isJust, JustResult>::value);
+    using JustResult = Apply<freematch, Foo>;
+    static_assert(Apply<isMatched, JustResult>::value);
 
     struct UniqueNoMatch;
     using nonematch  = Apply<with, UniqueNoMatch,  Const<True>, Const<Foo>>;
     using NoResult   = Apply<nonematch, Foo>;
-    static_assert(Apply<hdr::maybe::isNothing, NoResult>::value);
+    static_assert(Apply<isUnmatched, NoResult>::value);
 
     using truematch  = Apply<with, Foo, Const<True>, Const<Bar>>;
-    using BarResult  = Apply<hdr::maybe::fromJust, Apply<truematch, Foo>>;
+    using BarResult  = Apply<fromMatched,   Apply<truematch,  Foo>>;
     static_assert(std::is_same_v<Bar, BarResult>);
-    
+
     using falsematch = Apply<with, Foo, Const<False>, Const<Bar>>;
-    using NotResult  = Apply<falsematch, Foo>;
-    static_assert(Apply<hdr::maybe::isNothing, NotResult>::value);
+    using NotResult  = Apply<fromUnmatched, Apply<falsematch, Foo>>;
+    static_assert(std::is_same_v<Foo, NotResult>);
+
+    using finallymatch  = Apply<kleisli, nonematch, freematch>;
+    using firstmatch    = Apply<kleisli, freematch, nonematch>;
+    using againmatch    = Apply<kleisli, freematch, truematch>;
+
+    // All of the above should match any type to Foo and not to None or Bar
+    static_assert(std::is_same_v<Matched<Foo>, Apply<firstmatch, Foo>> &&
+                  std::is_same_v<Matched<Foo>, Apply<againmatch, Foo>> &&
+                  std::is_same_v<Matched<Foo>, Apply<finallymatch, Foo>>);
   }
 };
 

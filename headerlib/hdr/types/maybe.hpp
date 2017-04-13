@@ -19,6 +19,7 @@ using ::hdr::std::False;
 using ::hdr::std::Const;
 using ::hdr::std::TemplateFunction;
 using ::hdr::std::TypeFunction;
+using ::hdr::std::Void;
 
 using ::hdr::std::id;
 using ::hdr::std::compose;
@@ -48,9 +49,9 @@ struct MaybeFunc<Default, F, Just<V>> {
 };
 
 /// Monad constructor
-using freturn 	= TemplateFunction<Just>;
+using return_ 	= TemplateFunction<Just>;
 using bind 			= Apply<flip, Apply<maybe, Nothing>>;
-using MaybeType = MonadFromBind<freturn, bind>;
+using MaybeType = MonadFromBind<return_, bind>;
 /// Monad fmap function, expressed with bind and return
 using fmap 			= MaybeType::fmap;
 using kleisli 	= MaybeType::kleisli;
@@ -61,14 +62,8 @@ using isJust 		= Apply<maybe, False, Const<True>>;
 /// True if argument is not an instance of Just else True
 using isNothing = Apply<maybe, True,  Const<False>>;
 
-template<typename Maybe>
-struct FromJust;
-template<typename V>
-struct FromJust<Just<V>> {
-	using type = V;
-};
 /// Exception when argument is not Just<V>
-using fromJust = TypeFunction<FromJust>;
+using fromJust  = Apply<maybe, Void, id>;
 /** Returns the default value or an unpacked Just
  *  	(a -> Maybe a -> a)
  */

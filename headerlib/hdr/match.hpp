@@ -30,22 +30,70 @@ using ::hdr::std::True;
 using ::hdr::std::False;
 using ::hdr::std::TemplateFunction;
 using ::hdr::std::TypeFunction;
+using ::hdr::std::Void;
+using ::hdr::std::apply;
 using ::hdr::std::compose;
+using ::hdr::std::id;
+using ::hdr::std::fconst;
 using ::hdr::std::flip;
 using ::hdr::std::when_else;
 using ::hdr::maybe::Just;
 using ::hdr::maybe::Nothing;
-using ::hdr::maybe::bind;
-using ::hdr::maybe::fmap;
-using ::hdr::maybe::freturn;
 using ::hdr::maybe::maybe;
 
 /// Type definition of Unmatched
 template<typename Var>
 struct Unmatched;
+using unmatched = TemplateFunction<Unmatched>;
 /// Type definition of Matched
 template<typename Var>
 struct Matched;
+using matched   = TemplateFunction<Matched>;
+
+template<typename U, typename M, typename V> struct _matching;
+/// (a -> c) -> (b -> c) -> (Matching a b) -> c
+using matching  = TypeFunction<_matching>;
+template<typename U, typename M, typename V>
+struct _matching<U, M, Unmatched<V>> {
+  using type = Apply<U, V>;
+};
+template<typename U, typename M, typename V>
+struct _matching<U, M, Matched<V>> {
+  using type = Apply<M, V>;
+};
+
+using isUnmatched = Apply<matching, Const<True>,  Const<False>>;
+using isMatched   = Apply<matching, Const<False>, Const<True>>;
+ ///  (V -> M V -> M V)
+using _unmatchedAdd = Apply<compose, Apply<flip, matching, matched>, fconst>;
+
+/** Left side matched will always propagate
+ *    (Matching a b) -> (Matching a b) -> (Matching a b)
+ *  This is a non-abelian function, beware
+ */
+using matchAdd    = Apply<matching, _unmatchedAdd, fconst>;
+
+using fromUnmatched = Apply<matching, id, Void>;
+using fromMatched   = Apply<matching, Void, id>;
+
+template<typename M>
+struct _bind;
+using return_      = unmatched;
+using bind         = TypeFunction<_bind>;
+using MatchingType = hdr::monad::MonadFromBind<return_, bind>;
+using fmap         = MatchingType::fmap;
+using kleisli      = MatchingType::kleisli;
+using join         = MatchingType::join;
+
+template<typename V>
+struct _bind<Matched<V>> {
+  using type = Const<Matched<V>>;
+};
+template<typename V>
+struct _bind<Unmatched<V>> {
+  using resultf = Apply<flip, apply, V>;
+  using type    = Apply<compose, Apply<matchAdd, Unmatched<V>>, resultf>;
+};
 
 /// A placeholder with a given type as its identifier
 template<typename Key>
@@ -78,7 +126,7 @@ template<typename K, typename ... R> struct _Flatten<K, R...> {
     template<typename L, typename M> using Mjoin = Just<Apply<_join, L, M>>;
     using mjoin = TemplateFunction<Mjoin>;
     using first = Apply<maybe, Const<Nothing>, mjoin, Ma>;
-    using type  = Apply<bind, Mb, first>;
+    using type  = Apply<::hdr::maybe::bind, Mb, first>;
   };
   using T       = typename _Flatten<R...>::type;
   using type    = Apply<TypeFunction<MaybeJoin>, K, T>;
@@ -113,20 +161,23 @@ struct Decompose<A<TArgs...>, A<Args...>> {
 template<typename Template, typename Selector, typename Function>
 struct With {
   using maybe_decomp = Apply<decompose, Template>;                     // (A -> Maybe TemplateVars)
-  using boolifier    = Apply<fmap, Selector>;                          // (Maybe TemplateVars -> Maybe Bool)
-  using get_result   = Apply<fmap, Function>;                          // (Maybe TemplateVars -> Maybe B)
+  using boolifier    = Apply<::hdr::maybe::fmap, Selector>;            // (Maybe TemplateVars -> Maybe Bool)
+  using get_result   = Apply<::hdr::maybe::fmap, Function>;            // (Maybe TemplateVars -> Maybe B)
   template<typename B>
   using _selector    = Apply<when_else, B, get_result, Const<Nothing>>;
   using selector     = TemplateFunction<_selector>;                    // (Bool -> (Maybe TemplateVars -> Maybe B))
   using select_after = Apply<flip, selector>;                          // (Maybe TemplateVars -> Bool -> Maybe B)
   template<typename MTV>
-  using _result_func = Apply<bind, Apply<boolifier, MTV>, Apply<select_after, MTV>>;
+  using _result_func = Apply<::hdr::maybe::bind, Apply<boolifier, MTV>, Apply<select_after, MTV>>;
   using result_func  = TemplateFunction<_result_func>;                 // (Maybe TemplateVars -> Maybe B)
   using maybe_result = Apply<compose, result_func, maybe_decomp>;      // (A -> Maybe B)
-  using type = maybe_result;
+  template<typename A>
+  using match_result = Apply<maybe, Unmatched<A>, matched, Apply<maybe_result, A>>;
+  using type         = TemplateFunction<match_result>;                 // (A -> Match V)
 };
 /// Constructor function for With
 using with = TypeFunction<With>;
+
 
 }
 #endif //HEADERLIB_HDR_MATCH_HPP
