@@ -22,12 +22,7 @@ namespace hdr::monad {
 	struct MonadFromBind {
 		using return_ = ret_;
 		using bind 		= bind_;
-
-		template<typename F> // Pointfree does not look very pretty
-		using _kleisli = Apply<flip, Apply<compose, bind, F>>;
-		using kleisli = TemplateFunction<_kleisli>;
-
-		// This pointfree form is much simpler to understand
+		using kleisli = Apply<compose, flip, Apply<compose, bind>>;
 		using fmap 		= Apply<compose, Apply<flip, bind>, Apply<compose, return_>>;
 		using join    = Apply<Apply<flip, bind>, id>;
 	};
