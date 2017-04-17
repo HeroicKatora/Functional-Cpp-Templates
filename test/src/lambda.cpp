@@ -27,7 +27,15 @@ namespace Test {
   static_assert(::std::is_same_v<Foo, result>);
 
   using remix  = Apply<twoa, lidentity, id>;
-  static_assert(::std::is_same_v<id, remix>);
+  using selfremix  = Apply<twoa, lidentity, lidentity>;
+  static_assert(::std::is_same_v<id,        remix>);
+  static_assert(::std::is_same_v<lidentity, selfremix>);
+
+  using inner    = Lambda<IApply<fconst, _0>, IApply<fconst, _0>>;
+  using innerid  = Apply<inner, id>;
+  using innerfoo = Apply<inner, Foo>;
+  static_assert(::std::is_same_v<id,        innerid>);
+  static_assert(::std::is_same_v<Foo,       innerfoo>);
 }
 
 int main() {};

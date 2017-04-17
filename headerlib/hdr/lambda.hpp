@@ -26,7 +26,8 @@ template<typename ... T> struct ConcreteLambda; // Internal lambda representatio
 template<typename ... T> using  Lambda = typename ConcreteLambda<T...>::remove_boiler;
 
 namespace {
- // Outside the standard type system, you shouldn't modify or pass them... I might regret this
+ // Outside the standard type system, you shouldn't modify or pass them... I might regret this.
+ // Luckily, this only needs to be shifted out of the anonymous namespace
 template<unsigned t>     struct Variable;
 
 template<typename T>     struct Terminal;
