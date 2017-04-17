@@ -1,12 +1,12 @@
-#ifndef HEADERLIB_HDR_MATCH_HPP
-#define HEADERLIB_HDR_MATCH_HPP
+#ifndef HEADERLIB_HDR_CORE_MATCH_HPP
+#define HEADERLIB_HDR_CORE_MATCH_HPP
 /*
  * match.hpp
  *
  *  Created on: 22.02.2017
  *      Author: Andreas Molzer
  */
-#include "hdr/std.hpp"
+#include "hdr/core/std.hpp"
 #include "hdr/types/maybe.hpp"
 
 /** Limited core matching, as a monad.

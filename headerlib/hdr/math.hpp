@@ -8,7 +8,7 @@
  */
 
 #pragma once
-#include "hdr/std.hpp"
+#include "hdr/core/std.hpp"
 namespace hdr::math {
 
 /**	Utility to convert integers to types

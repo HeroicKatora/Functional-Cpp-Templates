@@ -1,5 +1,5 @@
-#ifndef HEADERLIB_HDR_LAMBDA_HPP
-#define HEADERLIB_HDR_LAMBDA_HPP
+#ifndef HEADERLIB_HDR_CORE_LAMBDA_HPP
+#define HEADERLIB_HDR_CORE_LAMBDA_HPP
 /*
  * @file: lambda.hpp
  * Defines a helper type (not part of the real type system, i.e. not a function nor a non-template type)
@@ -18,7 +18,7 @@
  *      Author: Andreas Molzer
  */
 
-#include "hdr/std.hpp"
+#include "hdr/core/std.hpp"
 
 namespace hdr::lambda {
 template<typename ... T> struct IApply;

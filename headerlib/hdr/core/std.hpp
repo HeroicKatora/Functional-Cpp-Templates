@@ -1,5 +1,5 @@
-#ifndef HEADERLIB_HDR_STD_HPP
-#define HEADERLIB_HDR_STD_HPP
+#ifndef HEADERLIB_HDR_CORE_STD_HPP
+#define HEADERLIB_HDR_CORE_STD_HPP
 /*
  * hdrstd.hpp
  * A set of functions to denote function application, unify declarations and some

@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <typeinfo>
-#include "hdr/std.hpp"
+#include "hdr/core/std.hpp"
 
 using namespace hdrstd;
 
