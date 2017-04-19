@@ -40,6 +40,7 @@ using ::hdr::std::when_else;
 using ::hdr::maybe::Just;
 using ::hdr::maybe::Nothing;
 using ::hdr::maybe::maybe;
+using ::hdr::monad::MonadFromBind;
 
 /// Type definition of Unmatched
 template<typename Var>
@@ -50,18 +51,19 @@ template<typename Var>
 struct Matched;
 using matched   = TemplateFunction<Matched>;
 
-template<typename U, typename M, typename V> struct _matching;
+namespace {
+  template<typename U, typename M, typename V> struct _matching;
+  template<typename U, typename M, typename V>
+  struct _matching<U, M, Unmatched<V>> {
+    using type = Apply<U, V>;
+  };
+  template<typename U, typename M, typename V>
+  struct _matching<U, M, Matched<V>> {
+    using type = Apply<M, V>;
+  };
+}
 /// (a -> c) -> (b -> c) -> (Matching a b) -> c
-using matching  = TypeFunction<_matching>;
-template<typename U, typename M, typename V>
-struct _matching<U, M, Unmatched<V>> {
-  using type = Apply<U, V>;
-};
-template<typename U, typename M, typename V>
-struct _matching<U, M, Matched<V>> {
-  using type = Apply<M, V>;
-};
-
+using matching    = TypeFunction<_matching>;
 using isUnmatched = Apply<matching, Const<True>,  Const<False>>;
 using isMatched   = Apply<matching, Const<False>, Const<True>>;
  ///  (V -> M V -> M V)
@@ -71,29 +73,31 @@ using _unmatchedAdd = Apply<compose, Apply<flip, matching, matched>, fconst>;
  *    (Matching a b) -> (Matching a b) -> (Matching a b)
  *  This is a non-abelian function, beware
  */
-using matchAdd    = Apply<matching, _unmatchedAdd, fconst>;
+using matchAdd    = Apply<matching, _unmatchedAdd, matched>;
 
 using fromUnmatched = Apply<matching, id, Void>;
 using fromMatched   = Apply<matching, Void, id>;
 
-template<typename M>
-struct _bind;
+namespace {
+  template<typename M>
+  struct _bind;
+  template<typename V>
+  struct _bind<Matched<V>> {
+    using type = Const<Matched<V>>;
+  };
+  template<typename V>
+  struct _bind<Unmatched<V>> {
+    using resultf = Apply<flip, apply, V>;
+    using type    = Apply<compose, Apply<matchAdd, Unmatched<V>>, resultf>;
+  };
+}
+
 using return_      = unmatched;
 using bind         = TypeFunction<_bind>;
-using MatchingType = hdr::monad::MonadFromBind<return_, bind>;
+using MatchingType = MonadFromBind<return_, bind>;
 using fmap         = MatchingType::fmap;
 using kleisli      = MatchingType::kleisli;
 using join         = MatchingType::join;
-
-template<typename V>
-struct _bind<Matched<V>> {
-  using type = Const<Matched<V>>;
-};
-template<typename V>
-struct _bind<Unmatched<V>> {
-  using resultf = Apply<flip, apply, V>;
-  using type    = Apply<compose, Apply<matchAdd, Unmatched<V>>, resultf>;
-};
 
 /// A placeholder with a given type as its identifier
 template<typename Key>
@@ -102,81 +106,86 @@ struct Placeholder { using type = Key; };
 struct PlaceholderAny;
 using _ = PlaceholderAny;
 
-/** We don't have set/map/list since are in core :(
- *  Anyways, this implements flat map, so don't go too wild with placeholder
- *  count and we don't check anything.
- */
-template<typename _Key, typename _Val> struct KVPair{
-  using Key = _Key; using Val = _Val;
-};
-template<typename ... KVs> struct KVList;
-template<typename K, typename L> struct _Join;
-using _join = TypeFunction<_Join>;
-template<typename ... KVs, typename ... KLs>
-struct _Join<KVList<KVs...>, KVList<KLs...>> {
-  using type = KVList<KVs..., KLs...>;
-};
-
-template<typename... Args> struct _Flatten;
-template<>           struct _Flatten<>  { using type = KVList<>; };
-template<typename K> struct _Flatten<K> { using type = K; };
-template<typename K, typename ... R> struct _Flatten<K, R...> {
-  template<typename Ma, typename Mb>
-  struct MaybeJoin {
-    template<typename L, typename M> using Mjoin = Just<Apply<_join, L, M>>;
-    using mjoin = TemplateFunction<Mjoin>;
-    using first = Apply<maybe, Const<Nothing>, mjoin, Ma>;
-    using type  = Apply<::hdr::maybe::bind, Mb, first>;
+namespace {
+  /** We don't have set/map/list since are in core :(
+   *  Anyways, this implements flat map, so don't go too wild with placeholder
+   *  count and we don't check anything.
+   */
+  template<typename _Key, typename _Val> struct KVPair{
+    using Key = _Key; using Val = _Val;
   };
-  using T       = typename _Flatten<R...>::type;
-  using type    = Apply<TypeFunction<MaybeJoin>, K, T>;
-};
+  template<typename ... KVs> struct KVList;
+  template<typename K, typename L> struct Join;
+  using _join = TypeFunction<Join>;
+  template<typename ... KVs, typename ... KLs>
+  struct Join<KVList<KVs...>, KVList<KLs...>> {
+    using type = KVList<KVs..., KLs...>;
+  };
 
-/** Tries to deconstruct a type into the placeholders given into the template.
- *    Template -> Argument -> Maybe TemplateVars
- */
-template<typename Template, typename Actual>
-struct Decompose {
-  template<typename T, typename S> struct IsSame { using type = False; };
-  template<typename T> struct IsSame<T, T>       { using type = True;  };
-  using type = Apply<when_else, typename IsSame<Template, Actual>::type, Just<KVList<>>, Nothing>;
-};
-using decompose = TypeFunction<Decompose>;
-template<typename PKey, typename A>
-struct Decompose<Placeholder<PKey>, A> {
-  using type = Just<KVList<KVPair<PKey, A>>>;
-};
-template<typename A>
-struct Decompose<PlaceholderAny, A> {
-  using type = Just<KVList<>>;
-};
-template<template<typename...> typename A, typename ... TArgs, typename ... Args>
-struct Decompose<A<TArgs...>, A<Args...>> {
-  using type = typename _Flatten<Apply<decompose, TArgs, Args>...>::type;
-};
+  template<typename... Args> struct Flatten;
+  template<>           struct Flatten<>  { using type = KVList<>; };
+  template<typename K> struct Flatten<K> { using type = K; };
+  template<typename K, typename ... R> struct Flatten<K, R...> {
+    template<typename Ma, typename Mb>
+    struct MaybeJoin {
+      using mjoin = Apply<compose, Apply<compose, ::hdr::maybe::return_>, _join>;
+      using first = Apply<maybe, Const<Nothing>, mjoin, Ma>;
+      using type  = Apply<::hdr::maybe::bind, Mb, first>;
+    };
+    using T       = typename Flatten<R...>::type;
+    using type    = Apply<TypeFunction<MaybeJoin>, K, T>;
+  };
 
-/** Constructs a WithClause
+  /** Tries to deconstruct a type into the placeholders given into the template.
+   *    Template -> Argument -> Maybe TemplateVars
+   */
+  template<typename Template, typename Actual>
+  struct Decompose {
+    template<typename T, typename S> struct IsSame { using type = False; };
+    template<typename T> struct IsSame<T, T>       { using type = True;  };
+    using type = Apply<when_else, typename IsSame<Template, Actual>::type, Just<KVList<>>, Nothing>;
+  };
+  using _decompose = TypeFunction<Decompose>;
+  template<typename PKey, typename A>
+  struct Decompose<Placeholder<PKey>, A> {
+    using type = Just<KVList<KVPair<PKey, A>>>;
+  };
+  template<typename A>
+  struct Decompose<PlaceholderAny, A> {
+    using type = Just<KVList<>>;
+  };
+  template<template<typename...> typename A, typename ... TArgs, typename ... Args>
+  struct Decompose<A<TArgs...>, A<Args...>> {
+    using type = typename Flatten<Apply<_decompose, TArgs, Args>...>::type;
+  };
+
+  /** Constructs a WithClause
+   *    Template -> (TemplateVars -> Bool) -> (TemplateVars -> B) -> A -> Maybe B
+   */
+  template<typename Template, typename Selector, typename Function>
+  struct With {
+    using maybe_decomp = Apply<_decompose, Template>;                     // (A -> Maybe TemplateVars)
+    using boolifier    = Apply<::hdr::maybe::fmap, Selector>;            // (Maybe TemplateVars -> Maybe Bool)
+    using get_result   = Apply<::hdr::maybe::fmap, Function>;            // (Maybe TemplateVars -> Maybe B)
+    template<typename B>
+    using _selector    = Apply<when_else, B, get_result, Const<Nothing>>;
+    using selector     = TemplateFunction<_selector>;                    // (Bool -> (Maybe TemplateVars -> Maybe B))
+    using select_after = Apply<flip, selector>;                          // (Maybe TemplateVars -> Bool -> Maybe B)
+    template<typename MTV>
+    using _result_func = Apply<::hdr::maybe::bind, Apply<boolifier, MTV>, Apply<select_after, MTV>>;
+    using result_func  = TemplateFunction<_result_func>;                 // (Maybe TemplateVars -> Maybe B)
+    using maybe_result = Apply<compose, result_func, maybe_decomp>;      // (A -> Maybe B)
+    template<typename A>
+    using match_result = Apply<maybe, Unmatched<A>, matched, Apply<maybe_result, A>>;
+    using type         = TemplateFunction<match_result>;                 // (A -> Match V)
+  };
+}
+/** Constructor function for With
  *    Template -> (TemplateVars -> Bool) -> (TemplateVars -> B) -> A -> Maybe B
  */
-template<typename Template, typename Selector, typename Function>
-struct With {
-  using maybe_decomp = Apply<decompose, Template>;                     // (A -> Maybe TemplateVars)
-  using boolifier    = Apply<::hdr::maybe::fmap, Selector>;            // (Maybe TemplateVars -> Maybe Bool)
-  using get_result   = Apply<::hdr::maybe::fmap, Function>;            // (Maybe TemplateVars -> Maybe B)
-  template<typename B>
-  using _selector    = Apply<when_else, B, get_result, Const<Nothing>>;
-  using selector     = TemplateFunction<_selector>;                    // (Bool -> (Maybe TemplateVars -> Maybe B))
-  using select_after = Apply<flip, selector>;                          // (Maybe TemplateVars -> Bool -> Maybe B)
-  template<typename MTV>
-  using _result_func = Apply<::hdr::maybe::bind, Apply<boolifier, MTV>, Apply<select_after, MTV>>;
-  using result_func  = TemplateFunction<_result_func>;                 // (Maybe TemplateVars -> Maybe B)
-  using maybe_result = Apply<compose, result_func, maybe_decomp>;      // (A -> Maybe B)
-  template<typename A>
-  using match_result = Apply<maybe, Unmatched<A>, matched, Apply<maybe_result, A>>;
-  using type         = TemplateFunction<match_result>;                 // (A -> Match V)
-};
-/// Constructor function for With
-using with = TypeFunction<With>;
+using with      = TypeFunction<With>;
+/// Template -> V -> Maybe TemplateVars
+using decompose = _decompose;
 
 
 }
