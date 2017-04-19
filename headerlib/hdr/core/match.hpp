@@ -9,13 +9,18 @@
 #include "hdr/core/std.hpp"
 #include "hdr/types/maybe.hpp"
 
-/** Limited core matching, as a monad.
+/** Limited (!!!) core matching, as a monad.
  *    match var [>>= (with template selector function)]*
  *  Essentially works as a monad M with M::return == match which constructs
  *  an 'Unmatched' type. with constructs a bindable function returning this type.
  *  Binding F to a Matched T will skip the application of F while binding to
  *  an unmatched will do it. This works like Maybe but instead Nothing/Matched
  *  carries an additional result type and Maybe/Unmatched is very much the same.
+ *
+ *  Limitations of core matching:
+ *  Each placeholder can only be used once in a template, this is not (!) checked
+ *  for. If you need this functionality, use advanced matching based on sets
+ *  instead (uniqueness check needs set mechanics for performance).
  *  [WIP]
  *  Templates are declared like the type they are supposed to match but using
  *  Placholders instead of the true type parameters. Should the type definition
@@ -39,6 +44,7 @@ using ::hdr::std::flip;
 using ::hdr::std::when_else;
 using ::hdr::maybe::Just;
 using ::hdr::maybe::Nothing;
+using ::hdr::maybe::fromJust;
 using ::hdr::maybe::maybe;
 using ::hdr::monad::MonadFromBind;
 
@@ -111,15 +117,34 @@ namespace {
    *  Anyways, this implements flat map, so don't go too wild with placeholder
    *  count and we don't check anything.
    */
-  template<typename _Key, typename _Val> struct KVPair{
-    using Key = _Key; using Val = _Val;
-  };
+  template<typename _Key, typename _Val> struct KVPair;
   template<typename ... KVs> struct KVList;
+
   template<typename K, typename L> struct Join;
   using _join = TypeFunction<Join>;
   template<typename ... KVs, typename ... KLs>
   struct Join<KVList<KVs...>, KVList<KLs...>> {
     using type = KVList<KVs..., KLs...>;
+  };
+
+  template<typename List, typename Name> struct Get;
+  using _get_maybe  = TypeFunction<Get>;
+  template<typename Name>
+  struct Get<KVList<>, Name> {
+    using type = Nothing;
+  };
+  template<typename Name, typename Value, typename ... Rest>
+  struct Get<KVList<KVPair<Name, Value>, Rest...>, Name> {
+    using type = Just<Value>;
+  };
+  template<typename Name, typename First, typename ... Rest>
+  struct Get<KVList<First, Rest...>, Name> {
+    using type = typename Get<KVList<Rest...>, Name>::type;
+  };
+  using _get       = Apply<compose, Apply<compose, fromJust>, _get_maybe>;
+
+  template<typename ... KVs> struct KVList {
+    using get = Apply<_get, KVList<KVs...>>;
   };
 
   template<typename... Args> struct Flatten;
@@ -184,8 +209,23 @@ namespace {
  *    Template -> (TemplateVars -> Bool) -> (TemplateVars -> B) -> A -> Maybe B
  */
 using with      = TypeFunction<With>;
+using with_do   = Apply<flip, with, Const<True>>;
 /// Template -> V -> Maybe TemplateVars
 using decompose = _decompose;
+/** Supply the name used in the placeholder then the template vars. Error when
+ *  there is no such keyword in the TemplatVars. The argument order makes it
+ *  easier to use it for maybe::bind or in lambdas (as the name should be defined
+ *  ad-hoc and known to the programmer).
+ *    Name -> TemplateVars -> V
+ *  If you already know the TemplateVars, you can also use `TemplateVars::get`, type
+ *    Name -> V
+ */
+using get       = Apply<flip, _get>;
+
+namespace {
+  template<typename V, typename ... W> struct _match;
+  template<typename V> struct sth;
+}
 
 
 }

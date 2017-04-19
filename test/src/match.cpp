@@ -32,28 +32,44 @@ namespace PreConditiona {
 
 namespace Main {
   using namespace hdr::match;
+  using ::hdr::maybe::isJust;
+  using ::hdr::maybe::isNothing;
+
   using FooP = Placeholder<Foo>;
   using BarP = Placeholder<Bar>;
-  template<typename A, typename B> struct Pair {};
-  template<typename A, typename B> struct Diff {};
+  template<typename A, typename B> struct Pair;
+  template<typename A, typename B> struct Diff;
 
-  using DecFir = Apply<decompose, Pair<FooP, BarP>, Pair<bool, int>>;
-  using DecSec = Apply<decompose, Pair<bool, BarP>, Pair<bool, int>>;
-  using DecThi = Apply<decompose, Pair<bool, int>,  Pair<bool, int>>;
-  using DecFou = Apply<decompose, PlaceholderAny,   Pair<bool, int>>;
-  static_assert(Apply<hdr::maybe::isJust, DecFir>::value);
-  static_assert(Apply<hdr::maybe::isJust, DecSec>::value);
-  static_assert(Apply<hdr::maybe::isJust, DecThi>::value);
-  static_assert(Apply<hdr::maybe::isJust, DecFou>::value);
+  namespace DecomposeUsage {
+    using DecFir = Apply<decompose, Pair<FooP, BarP>, Pair<bool, int>>;
+    using DecSec = Apply<decompose, Pair<bool, BarP>, Pair<bool, int>>;
+    using DecThi = Apply<decompose, Pair<bool, int>,  Pair<bool, int>>;
+    using DecFou = Apply<decompose, PlaceholderAny,   Pair<bool, int>>;
+    static_assert(Apply<isJust, DecFir>::value);
+    static_assert(Apply<isJust, DecSec>::value);
+    static_assert(Apply<isJust, DecThi>::value);
+    static_assert(Apply<isJust, DecFou>::value);
 
-  using FailFi = Apply<decompose, unsigned int,     unsigned short>;
-  using FailSe = Apply<decompose, Pair<bool, int>,  Pair<int, bool>>;
-  using FailTh = Apply<decompose, Pair<bool, int>,  unsigned short>;
-  using FailFo = Apply<decompose, Pair<bool, int>,  Diff<bool, int>>;
-  static_assert(Apply<hdr::maybe::isNothing, FailFi>::value);
-  static_assert(Apply<hdr::maybe::isNothing, FailSe>::value);
-  static_assert(Apply<hdr::maybe::isNothing, FailTh>::value);
-  static_assert(Apply<hdr::maybe::isNothing, FailFo>::value);
+    using FailFi = Apply<decompose, unsigned int,     unsigned short>;
+    using FailSe = Apply<decompose, Pair<bool, int>,  Pair<int, bool>>;
+    using FailTh = Apply<decompose, Pair<bool, int>,  unsigned short>;
+    using FailFo = Apply<decompose, Pair<bool, int>,  Diff<bool, int>>;
+    static_assert(Apply<isNothing, FailFi>::value);
+    static_assert(Apply<isNothing, FailSe>::value);
+    static_assert(Apply<isNothing, FailTh>::value);
+    static_assert(Apply<isNothing, FailFo>::value);
+
+    using MDecomposed = Apply<decompose, Pair<FooP, BarP>, Pair<bool, int>>;
+    using Decomposed  = Apply<hdr::maybe::fromJust, MDecomposed>;
+    using MatchFoo    = Apply<Decomposed::get, Foo>;
+    using MatchBar    = Apply<Decomposed::get, Bar>;
+    using GetMatchFoo = Apply<get, Foo, Decomposed>;
+    using GetMatchBar = Apply<get, Bar, Decomposed>;
+    static_assert(std::is_same_v<bool, MatchFoo>);
+    static_assert(std::is_same_v<int,  MatchBar>);
+    static_assert(std::is_same_v<bool, GetMatchFoo>);
+    static_assert(std::is_same_v<int,  GetMatchBar>);
+  }
 
   namespace WithUsage {
     using namespace hdr::match;
