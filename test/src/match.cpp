@@ -35,14 +35,14 @@ namespace Main {
   using ::hdr::maybe::isJust;
   using ::hdr::maybe::isNothing;
 
-  using FooP = Placeholder<Foo>;
-  using BarP = Placeholder<Bar>;
+  using FooPlaceholder = Placeholder<Foo>;
+  using BarPlaceholder = Placeholder<Bar>;
   template<typename A, typename B> struct Pair;
   template<typename A, typename B> struct Diff;
 
   namespace DecomposeUsage {
-    using DecFir = Apply<decompose, Pair<FooP, BarP>, Pair<bool, int>>;
-    using DecSec = Apply<decompose, Pair<bool, BarP>, Pair<bool, int>>;
+    using DecFir = Apply<decompose, Pair<FooPlaceholder, BarPlaceholder>, Pair<bool, int>>;
+    using DecSec = Apply<decompose, Pair<bool, BarPlaceholder>,           Pair<bool, int>>;
     using DecThi = Apply<decompose, Pair<bool, int>,  Pair<bool, int>>;
     using DecFou = Apply<decompose, PlaceholderAny,   Pair<bool, int>>;
     static_assert(Apply<isJust, DecFir>::value);
@@ -59,7 +59,8 @@ namespace Main {
     static_assert(Apply<isNothing, FailTh>::value);
     static_assert(Apply<isNothing, FailFo>::value);
 
-    using MDecomposed = Apply<decompose, Pair<FooP, BarP>, Pair<bool, int>>;
+    using MDecomposed = Apply<decompose, Pair<FooPlaceholder, BarPlaceholder>,
+                                         Pair<bool,           int>>;
     using Decomposed  = Apply<hdr::maybe::fromJust, MDecomposed>;
     using MatchFoo    = Apply<Decomposed::get, Foo>;
     using MatchBar    = Apply<Decomposed::get, Bar>;
@@ -74,20 +75,20 @@ namespace Main {
   namespace WithUsage {
     using namespace hdr::match;
     using namespace hdr::std;
-    using freematch  = Apply<with, PlaceholderAny, Const<True>, Const<Foo>>;
+    using freematch  = Apply<with, PlaceholderAny, Const<Foo>>;
     using JustResult = Apply<freematch, Foo>;
     static_assert(Apply<isMatched, JustResult>::value);
 
     struct UniqueNoMatch;
-    using nonematch  = Apply<with, UniqueNoMatch,  Const<True>, Const<Foo>>;
+    using nonematch  = Apply<with, UniqueNoMatch,  Const<Foo>>;
     using NoResult   = Apply<nonematch, Foo>;
     static_assert(Apply<isUnmatched, NoResult>::value);
 
-    using truematch  = Apply<with, Foo, Const<True>, Const<Bar>>;
+    using truematch  = Apply<with_if, Foo, Const<True>, Const<Bar>>;
     using BarResult  = Apply<fromMatched,   Apply<truematch,  Foo>>;
     static_assert(std::is_same_v<Bar, BarResult>);
 
-    using falsematch = Apply<with, Foo, Const<False>, Const<Bar>>;
+    using falsematch = Apply<with_if, Foo, Const<False>, Const<Bar>>;
     using NotResult  = Apply<fromUnmatched, Apply<falsematch, Foo>>;
     static_assert(std::is_same_v<Foo, NotResult>);
 
@@ -99,6 +100,17 @@ namespace Main {
     static_assert(std::is_same_v<Matched<Foo>, Apply<firstmatch, Foo>> &&
                   std::is_same_v<Matched<Foo>, Apply<againmatch, Foo>> &&
                   std::is_same_v<Matched<Foo>, Apply<finallymatch, Foo>>);
+  }
+
+  namespace WithSyntacticSugar {
+    using MatchedBool   = Match<     Pair<bool,           int>,
+                                With<Pair<FooPlaceholder, BarPlaceholder>, Apply<get, Foo>>
+                          >;
+    using MatchedInt    = Match<     Pair<bool,           int>,
+                                With<Pair<FooPlaceholder, BarPlaceholder>, Apply<get, Bar>>
+                          >;
+    static_assert(std::is_same_v<bool, MatchedBool>);
+    static_assert(std::is_same_v<int,  MatchedInt>);
   }
 };
 

@@ -42,10 +42,6 @@ using ::hdr::std::id;
 using ::hdr::std::fconst;
 using ::hdr::std::flip;
 using ::hdr::std::when_else;
-using ::hdr::maybe::Just;
-using ::hdr::maybe::Nothing;
-using ::hdr::maybe::fromJust;
-using ::hdr::maybe::maybe;
 using ::hdr::monad::MonadFromBind;
 
 /// Type definition of Unmatched
@@ -113,7 +109,13 @@ struct PlaceholderAny;
 using _ = PlaceholderAny;
 
 namespace {
-  /** We don't have set/map/list since are in core :(
+  using ::hdr::maybe::Just;
+  using ::hdr::maybe::Nothing;
+  using ::hdr::maybe::fromJust;
+  using ::hdr::maybe::maybe;
+  using maybefmap = ::hdr::maybe::fmap;
+  /** We don't want to use set/map/list since we are in core :(
+   *  This might change in the future, when I get, I might inline maybe here
    *  Anyways, this implements flat map, so don't go too wild with placeholder
    *  count and we don't check anything.
    */
@@ -188,10 +190,10 @@ namespace {
    *    Template -> (TemplateVars -> Bool) -> (TemplateVars -> B) -> A -> Maybe B
    */
   template<typename Template, typename Selector, typename Function>
-  struct With {
+  struct _with {
     using maybe_decomp = Apply<_decompose, Template>;                     // (A -> Maybe TemplateVars)
-    using boolifier    = Apply<::hdr::maybe::fmap, Selector>;            // (Maybe TemplateVars -> Maybe Bool)
-    using get_result   = Apply<::hdr::maybe::fmap, Function>;            // (Maybe TemplateVars -> Maybe B)
+    using boolifier    = Apply<maybefmap, Selector>;                      // (Maybe TemplateVars -> Maybe Bool)
+    using get_result   = Apply<maybefmap, Function>;                      // (Maybe TemplateVars -> Maybe B)
     template<typename B>
     using _selector    = Apply<when_else, B, get_result, Const<Nothing>>;
     using selector     = TemplateFunction<_selector>;                    // (Bool -> (Maybe TemplateVars -> Maybe B))
@@ -206,10 +208,15 @@ namespace {
   };
 }
 /** Constructor function for With
- *    Template -> (TemplateVars -> Bool) -> (TemplateVars -> B) -> A -> Maybe B
+ *    Template -> (TemplateVars -> Bool) -> (TemplateVars -> B) -> A -> Match B
  */
-using with      = TypeFunction<With>;
-using with_do   = Apply<flip, with, Const<True>>;
+using with_if   = TypeFunction<_with>;
+template<typename Template, typename Selector, typename Function>
+using WithIf    = Apply<with_if, Template, Selector, Function>;
+///   Template -> (TemplateVars -> B) -> A -> Match B
+using with      = Apply<flip, with_if, Const<True>>;
+template<typename Template, typename Function>
+using With      = Apply<with, Template, Function>;
 /// Template -> V -> Maybe TemplateVars
 using decompose = _decompose;
 /** Supply the name used in the placeholder then the template vars. Error when
@@ -223,10 +230,28 @@ using decompose = _decompose;
 using get       = Apply<flip, _get>;
 
 namespace {
-  template<typename V, typename ... W> struct _match;
-  template<typename V> struct sth;
+  template<typename ... W> struct _match_body;
+  template<> struct _match_body<> {
+    using combined_function = unmatched;
+  };
+  template<typename V> struct _match_body<V> {
+    using combined_function = V;
+  };
+  template<typename V, typename ... W> struct _match_body<V, W...> {
+    using recursor = typename _match_body<W...>::combined_function;
+    using combined_function = Apply<kleisli, V, recursor>;
+  };
+  template<typename ... W>
+  using _bindable_matches = typename _match_body<W...>::combined_function;
 }
 
+/** Convenience non-type version for matching, syntactic sugar for folding
+ *  multiple with statements with ::hdr::match::kleisli, then binding it to
+ *  Unmatched V and finally unpacking. Will fail if it didn't match
+ *    V -> [with-clause]* -> W
+ */
+template<typename V, typename ... W>
+using Match = Apply<fromMatched, Apply<bind, Unmatched<V>, _bindable_matches<W...>>>;
 
 }
 #endif //HEADERLIB_HDR_MATCH_HPP
