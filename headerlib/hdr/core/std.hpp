@@ -264,6 +264,7 @@ namespace hdr::std {
 		using type = Apply<F, A, B>;
 	};
 	using flip   = TypeFunction<Flip>;
+	using ignore = Apply<flip, fconst>;
 	using binary = Apply<flip, apply>;
 
 	template<bool c, typename A, typename B>

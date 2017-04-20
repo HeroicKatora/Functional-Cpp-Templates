@@ -40,6 +40,7 @@ using ::hdr::std::apply;
 using ::hdr::std::compose;
 using ::hdr::std::id;
 using ::hdr::std::fconst;
+using ::hdr::std::ignore;
 using ::hdr::std::flip;
 using ::hdr::std::when_else;
 using ::hdr::monad::MonadFromBind;
@@ -68,15 +69,13 @@ namespace {
 using matching    = TypeFunction<_matching>;
 using isUnmatched = Apply<matching, Const<True>,  Const<False>>;
 using isMatched   = Apply<matching, Const<False>, Const<True>>;
- ///  (V -> M V -> M V)
-using _unmatchedAdd = Apply<flip, fconst>;
 
 /** Left side matched will always propagate, left side unmatched dominates
  *  right side unmatched.
  *    (Matching a b) -> (Matching a b) -> (Matching a b)
  *  This is a non-abelian function, beware
  */
-using matchAdd    = Apply<matching, _unmatchedAdd, matched>;
+using matchAdd    = Apply<matching, ignore, Apply<compose, fconst, matched>>;
 
 using fromUnmatched = Apply<matching, id, Void>;
 using fromMatched   = Apply<matching, Void, id>;
