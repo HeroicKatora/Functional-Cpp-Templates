@@ -103,11 +103,10 @@ namespace hdr::std {
 
 	template<template<typename> typename F>
 	struct _TypeFunction<F> {
-		struct _final {
+		struct type {
 			template<typename Arg>
 			using expr = typename F<Arg>::type;
 		};
-		using type = _final;
 	};
 	template<template<typename, typename> typename F>
 	struct _TypeFunction <F> {
@@ -194,16 +193,25 @@ namespace hdr::std {
 	 *  It holds that Apply<Const<V>, T> === V for any (V, T)
 	 */
 	template<typename val>
-	struct Const {
-		template<typename>
-		using expr = val;
+	struct Const;
+	template<typename Val, typename FirstArg, typename... args>
+	struct _Apply<Const<Val>, FirstArg, args...> {
+		using result = typename _Apply<Val, args...>::result;
 	};
+
 	/**	Constructor of the above as well as standalone function.
 	 *  Ignores the second argument or constructs Const<a>
 	 *	(a -> b -> a)
 	 */
 	using fconst = TemplateFunction<Const>;
 
+	/** A function which will always return itself, infinitely
+	 */
+	struct VoidFunction;
+	template<typename FirstArg, typename... args>
+	struct _Apply<VoidFunction, FirstArg, args...> {
+		using result = typename _Apply<VoidFunction, args...>::result;
+	};
 
 	/**	Type Definition of true, should be used as a parameter instead of bools.
 	 */
@@ -220,9 +228,10 @@ namespace hdr::std {
 	 *	which would be neutral to the calling style but necessitate an additional
 	 *  indirection through another type.
 	 */
-	struct id {
-		template<typename F>
-		using expr = F;
+	struct id;
+	template<typename FirstArg, typename... args>
+	struct _Apply<id, FirstArg, args...> {
+		using result = typename _Apply<FirstArg, args...>::result;
 	};
 	//Function Object of Apply
 	using apply = id;
@@ -254,7 +263,8 @@ namespace hdr::std {
 	struct Flip {
 		using type = Apply<F, A, B>;
 	};
-	using flip = TypeFunction<Flip>;
+	using flip   = TypeFunction<Flip>;
+	using binary = Apply<flip, apply>;
 
 	template<bool c, typename A, typename B>
 	struct _Conditional {
