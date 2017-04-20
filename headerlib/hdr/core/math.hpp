@@ -19,6 +19,8 @@ template<typename T, T v>
 using IntegralConstant = ::std::integral_constant<T, v>;
 template<auto v>
 using Value = IntegralConstant<decltype(v), v>;
+using Zero  = Value<0>;
+using One   = Value<1>;
 
 template<typename a, typename b>
 struct Plus {
@@ -36,13 +38,13 @@ template<typename a, typename b>
 struct Minus {
 	static_assert(::hdr::std::_false<a>::value, "No specialization provided for type");
 };
-using mult = ::hdr::std::TypeFunction<Mult>;
+using minus = ::hdr::std::TypeFunction<Minus>;
 
 template<typename a, typename b>
 struct Div {
 	static_assert(::hdr::std::_false<a>::value, "No specialization provided for type");
 };
-using mult = ::hdr::std::TypeFunction<Mult>;
+using div = ::hdr::std::TypeFunction<Div>;
 
 template<template<auto> typename F>
 struct ValueTemplateFunction {
