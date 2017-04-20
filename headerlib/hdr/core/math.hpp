@@ -7,6 +7,7 @@
  *      Author: HeroicKatora
  */
 #include "hdr/core/std.hpp"
+#include "hdr/core/lambda.hpp"
 namespace hdr::math {
 
 /** Test for structural equality
@@ -38,7 +39,8 @@ template<typename a, typename b>
 struct Minus {
 	static_assert(::hdr::std::_false<a>::value, "No specialization provided for type");
 };
-using minus = ::hdr::std::TypeFunction<Minus>;
+using minus  = ::hdr::std::TypeFunction<Minus>;
+using uminus = ::hdr::lambda::Lambda<minus, ::hdr::lambda::IApply<minus, ::hdr::lambda::_0, ::hdr::lambda::_0>, ::hdr::lambda::_0>;
 
 template<typename a, typename b>
 struct Div {

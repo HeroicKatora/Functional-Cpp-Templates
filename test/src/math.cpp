@@ -22,8 +22,10 @@ namespace Test {
     using ActualPOneTTwo = Apply<POneTTwo, Input>;
     using ActualTTwoPOne = Apply<TTwoPOne, Input>;
 
-    static_assert(is_same_v<ExpectedPOneTTwo, ActualPOneTTwo>);
-    static_assert(is_same_v<ExpectedTTwoPOne, ActualTTwoPOne>);
+    static_assert(Same<ExpectedPOneTTwo, ActualPOneTTwo>::value);
+    static_assert(Same<ExpectedTTwoPOne, ActualTTwoPOne>::value);
+
+    static_assert(Same<Value<-5>, Apply<uminus, Value<5>>>::value);
   };
 
   // Example from README.md
@@ -50,7 +52,7 @@ namespace Test {
     template<typename T> struct Factorial;     // Forward declare
     using factorial = TypeFunction<Factorial>; // Se we can do this
 
-    using recfac    = Apply<compose, factorial, Apply<flip, minus, One>>;
+    using recfac    = Apply<compose, factorial, Lambda<minus, _0, One>>;
     using matchfac  = Apply<compose, recfac,    Apply<get, N>>;
 
     template<typename T> struct Factorial {
