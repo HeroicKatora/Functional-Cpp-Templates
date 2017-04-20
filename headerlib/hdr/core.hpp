@@ -3,4 +3,5 @@
 #include "hdr/core/lambda.hpp"
 #include "hdr/core/match.hpp"
 #include "hdr/core/std.hpp"
+#include "hdr/core/math.hpp"
 #endif

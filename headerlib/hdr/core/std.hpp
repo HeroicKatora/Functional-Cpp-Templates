@@ -278,13 +278,21 @@ namespace hdr::std {
 	 */
 	template<bool c, typename A, typename B>
 	using Conditional = typename _Conditional<c, A, B>::result;
+	template<bool b>
+	using FromStdBool = Conditional<b, True, False>;
+
+	/** Specialize this for a custom bool operation
+	 */
+	template<typename T>
+	struct Boolify { using type = FromStdBool<T::value>; };
+	using boolify = TypeFunction<Boolify>;
 
 	/** Functional Object of Conditional, use hdr::std::True and hdr::std::False
 	 *  here instead of a bool.
 	 */
 	struct When_Else {
 		template<typename C>
-		constexpr static const bool c = ::std::is_same_v<C, True>;
+		constexpr static const bool c = Apply<boolify, C>::value;
 		template<typename C, typename A, typename B>
 		using expr = Conditional<c<C>, A, B>;
 	};
