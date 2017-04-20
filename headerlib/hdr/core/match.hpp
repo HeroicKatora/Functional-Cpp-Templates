@@ -69,9 +69,10 @@ using matching    = TypeFunction<_matching>;
 using isUnmatched = Apply<matching, Const<True>,  Const<False>>;
 using isMatched   = Apply<matching, Const<False>, Const<True>>;
  ///  (V -> M V -> M V)
-using _unmatchedAdd = Apply<compose, Apply<flip, matching, matched>, fconst>;
+using _unmatchedAdd = Apply<flip, fconst>;
 
-/** Left side matched will always propagate
+/** Left side matched will always propagate, left side unmatched dominates
+ *  right side unmatched.
  *    (Matching a b) -> (Matching a b) -> (Matching a b)
  *  This is a non-abelian function, beware
  */
