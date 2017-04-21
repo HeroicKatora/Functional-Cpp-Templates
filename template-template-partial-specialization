@@ -1,0 +1,42 @@
+#include <utility>
+
+template<template<typename...> typename A> struct Test;
+//template<template<typename> typename P> struct Test<P> {}; // Does not work in clang, but proof in wording of standard below
+
+template<typename...> struct XPA {}; // X, invented for trying checking if P is at least as specialized as A
+template<typename> struct XAP   {}; // X, invented for trying checking if A is at least as specialized as P
+
+template<typename... PP>
+int pfunction(XPA<PP...>); // call this pfunction_A
+template<typename PP>
+bool pfunction(XPA<PP>);   // call this pfunction_P
+
+// pfunction_P is partially ordered before pfunction_A according to the partial ordering rules for function
+// templates (14.5.6.2). This infers  template template-parameter P is at least as specialized as the
+// template template-argument A, see http://open-std.org/JTC1/SC22/WG21/docs/papers/2016/n4618.pdf
+// I can't see any ambiguity here
+
+// This is not proof according to (14.5.6.2) but should still be clear
+using select_function_P = decltype(pfunction(XPA<bool>{}));
+static_assert(std::is_same<bool, select_function_P>::value);
+
+
+template<typename... PP>
+int  afunction(XAP<PP...>); // call this afunction_A
+template<typename PP>
+bool afunction_A(XAP<PP>);  // call this afunction_P
+
+
+// It's clear that the parameter pack in afunction_A orders it after pfunction_P. Exercise the proof yourself but
+// non-variadic templates are more specialized than variadic ones. Hence, A is not at least as specialized as P.
+
+// Not proof but good example
+using select_function_P = decltype(pfunction(XPA<bool>{}));
+static_assert(!std::is_same<int, select_function_P>::value);
+
+// Let X >= Y denote X is at least as specialized as Y. Then we have P >= A but A >!= P, hence P > A, P is
+// more specialized than A.
+
+// That is,
+// template<template<typename> typename P> struct Test<P> {};
+// should be considered a partial specialization of Test.
