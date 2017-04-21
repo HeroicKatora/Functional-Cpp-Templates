@@ -15,6 +15,7 @@
 #include <cstdio>
 #include <utility>
 #include <type_traits>
+#include "hdr/core/template_template_args_count.hpp"
 
 /** This namespace holds all core utilities (and a few symbols more).
  *  Don't create any partial specializations where not explicitely noted.
@@ -80,8 +81,10 @@ namespace hdr::std {
 	struct _false_integral: ::std::false_type {
 	};
 
-	template<template<typename ...> typename F>
+	template<template<typename ...> typename F, size_t ncount = helper::args_count<F>>
 	struct _TypeFunction;
+	template<template<typename ...> typename F>
+	using TypeFunction = typename _TypeFunction<F>::type;
 	/// Wraps struct types which declare a member named type to signal their result.
 	/// This is mostly for c++ standard classes but may be used to implement functions
 	/// via template specializations.
@@ -98,42 +101,46 @@ namespace hdr::std {
 	///		Apply<PF, Args...> === F<Args...>::type where F<Args...> is valid.
 	/// By specializing F, one can easily fuse normal template metaprogramming with
 	/// this library.
-	template<template<typename ...> typename F>
-	using TypeFunction = typename _TypeFunction<F>::type;
+	/// Note [21-04-2017] Since clang brought up matching of template template parameters
+	/// and I verified that the standard is indeed ambiguous at the moment, this is
+	/// a really messed up work-around I found, abusing the non-ambiguity of the
+	/// same when resolving functions where every template template parameter doesn't
+	/// match against any others while also being able to introduce the same name
+	/// and resolve against every one
 
 	template<template<typename> typename F>
-	struct _TypeFunction<F> {
+	struct _TypeFunction <F, 1> {
 		struct type {
 			template<typename Arg>
 			using expr = typename F<Arg>::type;
 		};
 	};
 	template<template<typename, typename> typename F>
-	struct _TypeFunction <F> {
+	struct _TypeFunction <F, 2> {
 		template<typename IA> struct _inner {
 			template<typename I1>	using _Inner = F<IA, I1>;
-			using type = ::hdr::std::TypeFunction<_Inner>;
+			using type = TypeFunction<_Inner>;
 		};
-		using type = ::hdr::std::TypeFunction<_inner>;
+		using type = TypeFunction<_inner>;
 	};
 	template<template<typename, typename, typename> typename F>
-	struct _TypeFunction <F> {
+	struct _TypeFunction <F, 3> {
 		template<typename IA> struct _inner {
 			template<typename I1, typename I2> using _Inner = F<IA, I1, I2>;
-			using type = ::hdr::std::TypeFunction<_Inner>;
+			using type = TypeFunction<_Inner>;
 		};
-		using type = ::hdr::std::TypeFunction<_inner>;
+		using type = TypeFunction<_inner>;
 	};
 	template<template<typename, typename, typename, typename> typename F>
-	struct _TypeFunction <F> {
+	struct _TypeFunction <F, 4> {
 		template<typename IA, typename IB> struct _inner {
 			template<typename I1, typename I2> using _Inner = F<IB, IA, I1, I2>;
-			using type = ::hdr::std::TypeFunction<_Inner>;
+			using type = TypeFunction<_Inner>;
 		};
-		using type = ::hdr::std::TypeFunction<_inner>;
+		using type = TypeFunction<_inner>;
 	};
 
-	template<template<typename...> class _>
+	template<template<typename...> class F, size_t nargs = helper::args_count<F>>
 	struct _TFunction;
 	///	Lifts a template struct to a pure function.
 	/// Having a templated type F declared as
@@ -146,25 +153,25 @@ namespace hdr::std {
 	template<template<typename...> class F>
 	using Constructor      = TemplateFunction<F>;
 	template<template<typename> typename F>
-	struct _TFunction<F> {
+	struct _TFunction<F, 1> {
 		template<typename arg> struct expr {
 			using type = F<arg>;
 		};
 	};
 	template<template<typename,typename> typename F>
-	struct _TFunction<F> {
+	struct _TFunction<F, 2> {
 		template<typename I1, typename I2> struct expr {
 			using type = F<I1, I2>;
 		};
 	};
 	template<template<typename,typename,typename> typename F>
-	struct _TFunction<F> {
+	struct _TFunction<F, 3> {
 		template<typename I1, typename I2, typename I3> struct expr {
 			using type = F<I1, I2, I3>;
 		};
 	};
 	template<template<typename,typename,typename,typename> typename F>
-	struct _TFunction<F> {
+	struct _TFunction<F, 4> {
 		template<typename I1, typename I2, typename I3, typename I4> struct expr {
 			using type = F<I1, I2, I3, I4>;
 		};
