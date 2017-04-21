@@ -100,7 +100,8 @@ namespace hdr::std {
  	/// template arguments of F, returns typename F<Args...>::type
 	///		Apply<PF, Args...> === F<Args...>::type where F<Args...> is valid.
 	/// By specializing F, one can easily fuse normal template metaprogramming with
-	/// this library.
+	/// this library, since F is completely under the users control.
+	///
 	/// Note [21-04-2017] Since clang brought up matching of template template parameters
 	/// and I verified that the standard is indeed ambiguous at the moment, this is
 	/// a messed up work-around I found.
@@ -110,6 +111,9 @@ namespace hdr::std {
 	/// We could even expand on this, and do some sfinae to match the special
 	/// template<typename...> template template parameter as well, into a constant
 	/// but that is for later, if needed.
+	///
+	/// A dense example of this in action can be found here
+	/// https://godbolt.org/g/uhQ4Cr
 	template<template<typename> typename F>
 	struct _typeFunction <F, 1> {
 		struct type {

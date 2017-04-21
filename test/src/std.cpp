@@ -2,7 +2,7 @@
 #include <type_traits>
 
 using namespace hdr::std;
-using std::is_same_v;
+
 struct Test {
   // Define some test functions, these could be done better with hdr/math but we don't include it here
   template<typename T> struct PlusOne;
@@ -23,8 +23,8 @@ struct Test {
   using ActualPOneTTwo = Apply<POneTTwo, Input>;
   using ActualTTwoPOne = Apply<TTwoPOne, Input>;
 
-  static_assert(is_same_v<ExpectedPOneTTwo, ActualPOneTTwo>);
-  static_assert(is_same_v<ExpectedTTwoPOne, ActualTTwoPOne>);
+  static_assert(std::is_same<ExpectedPOneTTwo, ActualPOneTTwo>::value);
+  static_assert(std::is_same<ExpectedTTwoPOne, ActualTTwoPOne>::value);
 };
 
 int main() {}

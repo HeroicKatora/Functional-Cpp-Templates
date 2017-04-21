@@ -16,7 +16,7 @@ using ::hdr::maybe::fmap;
 using ::hdr::maybe::join;
 using ::hdr::maybe::kleisli;
 using ::hdr::maybe::return_;
-using ::std::is_same_v;
+using ::hdr::math::Same;
 
 namespace Test {
   struct FooBar;
@@ -26,8 +26,8 @@ namespace Test {
     using Function = Const<Mapped>;
     using Result   = Apply<bind, Nothing, Function>;
     using Replaced = Apply<fromMaybe, FooBar, Result>;
-    static_assert(is_same_v<Result, Nothing>);
-    static_assert(is_same_v<FooBar, Replaced>);
+    static_assert(Same<Result, Nothing>::value);
+    static_assert(Same<FooBar, Replaced>::value);
     static_assert(!Apply<isJust, Result>::value);
   };
 
@@ -37,16 +37,16 @@ namespace Test {
     using Result     = Apply<bind, JustFooBar, Function>;
     using Unpacked   = Apply<fromJust, Result>;
     using FromMaybe  = Apply<fromMaybe, Void, Result>;
-    static_assert(is_same_v<Just<Mapped>, Result>);
-    static_assert(is_same_v<Mapped, Unpacked>);
-    static_assert(is_same_v<Mapped, FromMaybe>);
+    static_assert(Same<Just<Mapped>, Result>   ::value);
+    static_assert(Same<Mapped,       Unpacked> ::value);
+    static_assert(Same<Mapped,       FromMaybe>::value);
     static_assert(Apply<isJust, Result>::value);
   };
 
   namespace Fmap {
     using Value  = Just<FooBar>;
     using Result = Apply<fmap, Const<Mapped>, Value>;
-    static_assert(is_same_v<Just<Mapped>, Result>);
+    static_assert(Same<Just<Mapped>, Result>::value);
   };
 
   namespace Kleisli {
@@ -58,14 +58,14 @@ namespace Test {
     using resfn  = Apply<bind, Value, fn>;
     using resri  = Apply<bind, Value, right>;
     using resle  = Apply<bind, Value, left>;
-    static_assert(is_same_v<resfn, resri> &&
-                  is_same_v<resfn, resle>);
+    static_assert(Same<resfn, resri>::value &&
+                  Same<resfn, resle>::value);
   };
 
   namespace Join {
     using Value  = Just<FooBar>;
     using result = Apply<join, Apply<fmap, return_, Value>>;
-    static_assert(is_same_v<Value, result>);
+    static_assert(Same<Value, result>::value);
   };
 };
 

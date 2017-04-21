@@ -13,7 +13,7 @@ namespace hdr::math {
 /** Test for structural equality
  */
 template<typename A, typename B>
-using Same  = ::hdr::std::FromStdBool<::std::is_same_v<A, B>>;
+using Same  = ::hdr::std::FromStdBool<::std::is_same<A, B>::value>;
 using same  = ::hdr::std::TemplateFunction<Same>;
 
 template<typename T, T v>

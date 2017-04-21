@@ -8,13 +8,12 @@
 using namespace hdr::std;
 using namespace hdr::lazy;
 using namespace hdr::math;
-using std::is_same_v;
 struct Test {
   struct TestBoxing {
     using Type = Test;
     using Boxed = Apply<freturn, Type>;
     using UnBoxed = Apply<Boxed, Void>;
-    static_assert(is_same_v<UnBoxed, Type>);
+    static_assert(Same<UnBoxed, Type>::value);
   };
 
   struct TestLaziness {
@@ -31,14 +30,14 @@ struct Test {
     using LazyRecursion = Apply<lift, FunctionalRecursion>;
 
     using LazyCharArg = Lazy<CharArg>;
-    static_assert(is_same_v<CharArg, Eval<LazyCharArg>>);
+    static_assert(Same<CharArg, Eval<LazyCharArg>>::value);
     using LazyLongArg = Lazy<LongArg>;
-    static_assert(is_same_v<LongArg, Eval<LazyLongArg>>);
+    static_assert(Same<LongArg, Eval<LazyLongArg>>::value);
 
     using LazyResultChar = Apply<LazyRecursion, LazyCharArg>;
     using LazyResultLong = Apply<LazyRecursion, LazyLongArg>;
 
-    static_assert(is_same_v<OkCompile, Eval<LazyResultChar>>);
+    static_assert(Same<OkCompile, Eval<LazyResultChar>>::value);
     // static_assert(std::is_same<LongCompile, Eval<LazyResultLong>>::value); // Should not evaluate that
   };
 
@@ -48,7 +47,7 @@ struct Test {
     using LazyPlus = Apply<lift2, plus>;
     using LazyResult = Apply<LazyPlus, Lazy<NumberFour>, Lazy<NumberFour>>;
 
-    static_assert(is_same_v<NumberEight, Eval<LazyResult>>);
+    static_assert(Same<NumberEight, Eval<LazyResult>>::value);
   };
 };
 

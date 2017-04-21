@@ -4,7 +4,6 @@
 
 using namespace hdr::std;
 using namespace hdr::math;
-using std::is_same_v;
 
 namespace Test {
   // Improved version for test/src/std.cpp
@@ -30,7 +29,7 @@ namespace Test {
 
   // Example from README.md
   namespace Factorial {
-    template<signed n> struct factorial {
+    template<auto n> struct factorial {
       constexpr static const int value = n*factorial<n-1>::value;
     };
     template<> struct factorial<0> {

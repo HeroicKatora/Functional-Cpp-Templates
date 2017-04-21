@@ -32,6 +32,7 @@ namespace PreConditiona {
 
 namespace Main {
   using namespace hdr::match;
+  using ::hdr::math::Same;
   using ::hdr::maybe::isJust;
   using ::hdr::maybe::isNothing;
 
@@ -66,10 +67,10 @@ namespace Main {
     using MatchBar    = Apply<Decomposed::get, Bar>;
     using GetMatchFoo = Apply<get, Foo, Decomposed>;
     using GetMatchBar = Apply<get, Bar, Decomposed>;
-    static_assert(std::is_same_v<bool, MatchFoo>);
-    static_assert(std::is_same_v<int,  MatchBar>);
-    static_assert(std::is_same_v<bool, GetMatchFoo>);
-    static_assert(std::is_same_v<int,  GetMatchBar>);
+    static_assert(Same<bool, MatchFoo>::value);
+    static_assert(Same<int,  MatchBar>::value);
+    static_assert(Same<bool, GetMatchFoo>::value);
+    static_assert(Same<int,  GetMatchBar>::value);
   }
 
   namespace WithUsage {
@@ -86,20 +87,20 @@ namespace Main {
 
     using truematch  = Apply<with_if, Foo, Const<True>, Const<Bar>>;
     using BarResult  = Apply<fromMatched,   Apply<truematch,  Foo>>;
-    static_assert(std::is_same_v<Bar, BarResult>);
+    static_assert(Same<Bar, BarResult>::value);
 
     using falsematch = Apply<with_if, Foo, Const<False>, Const<Bar>>;
     using NotResult  = Apply<fromUnmatched, Apply<falsematch, Foo>>;
-    static_assert(std::is_same_v<Foo, NotResult>);
+    static_assert(Same<Foo, NotResult>::value);
 
     using finallymatch  = Apply<kleisli, nonematch, freematch>;
     using firstmatch    = Apply<kleisli, freematch, nonematch>;
     using againmatch    = Apply<kleisli, freematch, truematch>;
 
     // All of the above should match any type to Foo and not to None or Bar
-    static_assert(std::is_same_v<Matched<Foo>, Apply<firstmatch, Foo>> &&
-                  std::is_same_v<Matched<Foo>, Apply<againmatch, Foo>> &&
-                  std::is_same_v<Matched<Foo>, Apply<finallymatch, Foo>>);
+    static_assert(Same<Matched<Foo>, Apply<firstmatch, Foo>>::value &&
+                  Same<Matched<Foo>, Apply<againmatch, Foo>>::value &&
+                  Same<Matched<Foo>, Apply<finallymatch, Foo>>::value);
   }
 
   namespace WithSyntacticSugar {
@@ -109,8 +110,8 @@ namespace Main {
     using MatchedInt    = Match<     Pair<bool,           int>,
                                 With<Pair<FooPlaceholder, BarPlaceholder>, Apply<get, Bar>>
                           >;
-    static_assert(std::is_same_v<bool, MatchedBool>);
-    static_assert(std::is_same_v<int,  MatchedInt>);
+    static_assert(Same<bool, MatchedBool>::value);
+    static_assert(Same<int,  MatchedInt>::value);
   }
 };
 
