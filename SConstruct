@@ -2,7 +2,7 @@ EnsureSConsVersion(1,0,0)
 import os
 
 env = Environment(CPPPATH=Dir('./headerlib').abspath, ENV=os.environ)
-env.Replace(CXX='g++-7')
+env.Replace(CXX=env['ENV']['CXX'] if 'CXX' in env['ENV'] else 'clang++')
 
 envd = {'env':env}
 #env.SConscript('Permutables/SConscript', exports=envd)
