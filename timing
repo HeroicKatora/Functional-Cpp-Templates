@@ -1,3 +1,6 @@
+Old compile timings I got with building a set from type-integrals. The more than
+linear increase is bad, and a linear version (or n ln n) would be the target of
+this library.
 100 real 0m2.385s
 200 real 0m8.916s
 300 real 0m21.732s
