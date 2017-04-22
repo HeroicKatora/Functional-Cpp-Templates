@@ -220,6 +220,19 @@ namespace hdr::std {
 	 */
 	using fconst = TemplateFunction<Const>;
 
+	/** Flips the order of two arguments
+	 * 		(a -> b -> c) -> (b -> a -> c)
+	 */
+	template<typename F, typename B, typename A>
+	struct Flip {
+		using type = Apply<F, A, B>;
+	};
+	using flip   = TypeFunction<Flip>;
+
+	/** Similar to fconst, but ignores its first argument
+	 */
+	using ignore = Apply<flip, fconst>;
+
 	/** A function which will always return itself, infinitely
 	 */
 	struct VoidFunction;
@@ -230,10 +243,10 @@ namespace hdr::std {
 
 	/**	Type Definition of true, should be used as a parameter instead of bools.
 	 */
-	using True = ::std::true_type;
+	struct True : ::std::true_type , fconst {};
 	/**	Type Definition of false, should be used as a parameter instead of bools.
 	 */
-	using False = ::std::false_type;
+	struct False : ::std::false_type , ignore {};
 
 	/** Identity function for all Objects
 	 *		(a -> a)
@@ -256,6 +269,7 @@ namespace hdr::std {
 	 */
 	template<typename aarg, typename op, typename barg>
 	using Binary = Apply<op, aarg, barg>;
+	using binary = Apply<flip, apply>;
 
 	/**	Evaluates function composition, you might instead want to use
 	 *		Apply<compose, F, G>
@@ -270,17 +284,6 @@ namespace hdr::std {
 	 */
 	using compose = TypeFunction<Compose>;
 	using c = compose;
-
-	/** Flips the order of two arguments
-	 * 		(a -> b -> c) -> (b -> a -> c)
-	 */
-	template<typename F, typename B, typename A>
-	struct Flip {
-		using type = Apply<F, A, B>;
-	};
-	using flip   = TypeFunction<Flip>;
-	using ignore = Apply<flip, fconst>;
-	using binary = Apply<flip, apply>;
 
 	template<bool c, typename A, typename B>
 	struct _Conditional {
