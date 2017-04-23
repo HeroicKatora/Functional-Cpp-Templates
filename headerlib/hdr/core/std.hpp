@@ -307,16 +307,17 @@ namespace hdr::std {
 	using boolify = TypeFunction<Boolify>;
 
 	/** Functional Object of Conditional, use hdr::std::True and hdr::std::False
-	 *  here instead of a bool.
+	 *  here instead of a bool. You could also use the truth type directly as
+	 *  a function.
 	 */
-	struct When_Else {
-		template<typename C>
-		constexpr static const bool c = Apply<boolify, C>::value;
-		template<typename C, typename A, typename B>
-		using expr = Conditional<c<C>, A, B>;
-	};
-	using when_else = Function<When_Else>;
+	using when_else = id;
+	// Pretty ugly compare to when_else, just swap arguments yourself please
 	using unless    = Apply<compose, flip, when_else>;
+
+	/** This is really just apply but code might be easier to understand this way.
+	 */
+	template<typename ...Args>
+	using When = Apply<when_else, Args...>;
 
 	/** Type constexpr constructible from any arguments, could be useful.
 	 */
