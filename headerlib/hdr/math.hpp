@@ -7,10 +7,16 @@
  *  Created on: 04.04.2016
  *      Author: andreas
  */
-#include "hdr/core/math.hpp"
-#include <type_traits>
+#include "hdr/core.hpp"
 namespace hdr::math {
-
+using ::hdr::std::Apply;
+using ::hdr::std::False;
+using ::hdr::std::True;
+using ::hdr::std::flip;
+using ::hdr::lambda::_0;
+using ::hdr::lambda::_1;
+using ::hdr::lambda::Lambda;
+using ::hdr::lambda::IApply;
 /**	Utility to convert integers to types
  */
 template<unsigned u> using Unsigned = Value<u>;
@@ -40,16 +46,17 @@ template<bool a, bool b>
 struct Div<Bool<a>, Bool<b>>;
 
 /// Boolean manipulators
-using not     = Lambda<_0, False, True>;
-using and     = Lambda<_0, _1,    False>;
-using or      = Lambda<_0, True,  _1>;
-using xor     = Lambda<_0, IApply<not, _1>, _1>;
+using not_     = Lambda<_0, False, True>;
+using and_     = Lambda<_0, _1,    False>;
+using or_      = Lambda<_0, True,  _1>;
+using xor_     = Lambda<_0, IApply<not_, _1>, _1>;
 
 template<typename Smaller>
 struct TotalOrder {
 	using smaller = Smaller;
-	using unequal = Lambda<or,  IApply<compare, _0, _1>, IApply<compare, _1, _0>>;
-	using equal   = Lambda<not, IApply<unequal, _0, _1>>;
+	using greater = Apply<flip, smaller>;
+	using unequal = Lambda<or_,  IApply<compare, _0, _1>, IApply<compare, _1, _0>>;
+	using equal   = Lambda<not_, IApply<unequal, _0, _1>>;
 };
 
 } // hdrstd::math
