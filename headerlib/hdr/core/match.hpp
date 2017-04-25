@@ -228,6 +228,8 @@ using decompose = _decompose;
  *    Name -> V
  */
 using get       = Apply<flip, _get>;
+template<typename Key>
+struct Placeholder : Apply<get, Key> {};
 
 namespace {
   template<typename ... W> struct _match_body;
