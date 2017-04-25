@@ -103,7 +103,7 @@ using join         = MatchingType::join;
 
 /// A placeholder with a given type as its identifier
 template<typename Key>
-struct Placeholder { using type = Key; };
+struct Placeholder;
 /// A placeholder matching anything
 struct PlaceholderAny;
 using _ = PlaceholderAny;
@@ -252,6 +252,11 @@ namespace {
  */
 template<typename V, typename ... W>
 using Match = Apply<fromMatched, Apply<bind, Unmatched<V>, _bindable_matches<W...>>>;
+/** 'Flipped' version of Match, deferring application of the argument
+ *    [with-clause]* -> V -> W
+ */
+template<typename ... W>
+using MatchClause = Apply<compose, fromMatched, _bindable_matches<W...>>;
 
 }
 #endif //HEADERLIB_HDR_MATCH_HPP
