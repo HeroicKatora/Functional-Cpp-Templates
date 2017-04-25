@@ -39,6 +39,19 @@ struct Div<Value<a>, Value<0>>;
 template<bool a, bool b>
 struct Div<Bool<a>, Bool<b>>;
 
+/// Boolean manipulators
+using not     = Lambda<_0, False, True>;
+using and     = Lambda<_0, _1,    False>;
+using or      = Lambda<_0, True,  _1>;
+using xor     = Lambda<_0, IApply<not, _1>, _1>;
+
+template<typename Smaller>
+struct TotalOrder {
+	using smaller = Smaller;
+	using unequal = Lambda<or,  IApply<compare, _0, _1>, IApply<compare, _1, _0>>;
+	using equal   = Lambda<not, IApply<unequal, _0, _1>>;
+};
+
 } // hdrstd::math
 
 namespace hdr::std {

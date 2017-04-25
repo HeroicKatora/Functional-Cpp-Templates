@@ -48,6 +48,12 @@ struct Div {
 };
 using div = ::hdr::std::TypeFunction<Div>;
 
+template<typename a, typename b>
+struct Compare {
+	static_assert(::hdr::std::_false<a>::value, "No specialization provided for type");
+};
+using compare = ::hdr::std::TypeFunction<Compare>;
+
 template<template<auto> typename F>
 struct ValueTemplateFunction {
 	template<typename Arg>
