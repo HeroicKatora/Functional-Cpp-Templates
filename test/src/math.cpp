@@ -1,6 +1,5 @@
 #include "hdr/core.hpp"
 #include "hdr/math.hpp"
-#include <type_traits>
 
 using namespace hdr::std;
 using namespace hdr::math;
@@ -41,17 +40,23 @@ namespace Test {
   };
 
   namespace FactorialInType {
+    /** Code the factorial purely with these headers and typename arguments.
+     *  This makes use of the standard definition of integers with ::hdr::math::Value
+     *  (which is internally represented like integral_constant) but its generic
+     *  coding style would make it easy to adapt it to other integer definitions.
+     *  Should one prefer Peano construction, it's fairly easy to implements it
+     *  and also express factorial in its terms.
+     */
     using namespace ::hdr::std;
     using namespace ::hdr::math;
     using namespace ::hdr::match;
-    using namespace ::hdr::lambda;
 
     struct N; // Useful typename
 
     template<typename T> struct Factorial;     // Forward declare
     using factorial = TypeFunction<Factorial>; // Se we can do this
 
-    using recfac    = Apply<compose, factorial, Lambda<minus, _0, One>>;
+    using recfac    = Apply<compose, factorial, Apply<flip, minus, One>>;
     using matchfac  = Apply<compose, recfac,    Apply<get, N>>;
 
     template<typename T> struct Factorial {
@@ -62,6 +67,26 @@ namespace Test {
     };
     using res = Apply<factorial, Value<5>>;
     static_assert(Same<res, Value<120>>::value);
+  }
+
+  namespace FactorialTemplateMatching {
+    /** This version will only work for ::hdr::math::Value but is visually
+     *  incredibly close to the integral template parameter version one could
+     *  code naiively. This is supposed to show that adaption of these headers
+     *  is possible in reasonably nice terms.
+     */
+    using namespace ::hdr::std;
+    using namespace ::hdr::math;
+    template<typename T> struct Factorial;
+    using factorial = TypeFunction<Factorial>;
+    template<typename T> struct Factorial {
+      using type = Apply<mult, T, Apply<factorial, Apply<minus, T, One>>>;
+    };
+    template<> struct Factorial<Zero> {
+      using type = One;
+    };
+    using res = Apply<factorial, Value<5>>;
+    static_assert(Same<Value<120>, res>::value);
   }
 };
 

@@ -2,35 +2,10 @@
 #include "hdr/core/match.hpp"
 #include "hdr/math.hpp"
 
-#include "boost/type_index/ctti_type_index.hpp"
-
-struct Foo;
-struct Bar;
-
-namespace PreConditiona {
-  using namespace hdr::std;
-  using namespace hdr::math;
-  template<typename V>
-  struct TypeIndexFunction {
-    using RetType = decltype(boost::typeindex::ctti_type_index::type_id<V>());
-    constexpr static const RetType value = boost::typeindex::ctti_type_index::type_id<V>();
-  };
-  using typeindex = TemplateFunction<TypeIndexFunction>;
-
-  struct CompareTypeIndex {
-    template<typename IA, typename IB>
-    using expr = Bool<(IA::value < IB::value)>;
-  };
-  using compare = Function<CompareTypeIndex>;
-
-  using IndexFoo     = Apply<typeindex, Foo>;
-  using IndexBar     = Apply<typeindex, Bar>;
-  using IsFooSmaller = Apply<compare, IndexFoo, IndexBar>;
-  using IsBarSmaller = Apply<compare, IndexBar, IndexFoo>;
-  static_assert(IsFooSmaller::value ^ IsBarSmaller::value);
-};
 
 namespace Main {
+  struct Foo;
+  struct Bar;
   using namespace hdr::match;
   using ::hdr::math::Same;
   using ::hdr::maybe::isJust;
@@ -42,6 +17,12 @@ namespace Main {
   template<typename A, typename B> struct Diff;
 
   namespace DecomposeUsage {
+    /** Mostly for internal sanity testing during implementation.
+     *  Testing composition of types with the decompose function, breaking them
+     *  into a maybe kv-pair. This first ensure pattern matching works, then
+     *  tests the actual structure of matches and related functions.
+     */
+    // Templates match matching patterns
     using DecFir = Apply<decompose, Pair<FooPlaceholder, BarPlaceholder>, Pair<bool, int>>;
     using DecSec = Apply<decompose, Pair<bool, BarPlaceholder>,           Pair<bool, int>>;
     using DecThi = Apply<decompose, Pair<bool, int>,  Pair<bool, int>>;
@@ -51,6 +32,7 @@ namespace Main {
     static_assert(Apply<isJust, DecThi>::value);
     static_assert(Apply<isJust, DecFou>::value);
 
+    // Templates don't match non-matching patterns
     using FailFi = Apply<decompose, unsigned int,     unsigned short>;
     using FailSe = Apply<decompose, Pair<bool, int>,  Pair<int, bool>>;
     using FailTh = Apply<decompose, Pair<bool, int>,  unsigned short>;
@@ -60,20 +42,32 @@ namespace Main {
     static_assert(Apply<isNothing, FailTh>::value);
     static_assert(Apply<isNothing, FailFo>::value);
 
+    // How to use placeholders
     using MDecomposed = Apply<decompose, Pair<FooPlaceholder, BarPlaceholder>,
                                          Pair<bool,           int>>;
     using Decomposed  = Apply<hdr::maybe::fromJust, MDecomposed>;
+    // You can access the getter function of the matched pattern type
     using MatchFoo    = Apply<Decomposed::get, Foo>;
     using MatchBar    = Apply<Decomposed::get, Bar>;
+    // You can use the ::hdr::match::get function
     using GetMatchFoo = Apply<get, Foo, Decomposed>;
     using GetMatchBar = Apply<get, Bar, Decomposed>;
+    // You can use placeholders like preset get functions, this is neat
+    // since you can treat the essentially very similar to variables
+    using GetPlaceFoo = Apply<FooPlaceholder, Decomposed>;
+    using GetPlaceBar = Apply<BarPlaceholder, Decomposed>;
     static_assert(Same<bool, MatchFoo>::value);
     static_assert(Same<int,  MatchBar>::value);
     static_assert(Same<bool, GetMatchFoo>::value);
     static_assert(Same<int,  GetMatchBar>::value);
+    static_assert(Same<bool, GetPlaceFoo>::value);
+    static_assert(Same<int,  GetPlaceBar>::value);
   }
 
   namespace WithUsage {
+    /** Showcases some use cases for matching, and how to use the primitives
+     *  For specific uses of placeholders, see above in DecomposeUsage
+     */
     using namespace hdr::match;
     using namespace hdr::std;
     using freematch  = Apply<with, PlaceholderAny, Const<Foo>>;
@@ -104,14 +98,24 @@ namespace Main {
   }
 
   namespace WithSyntacticSugar {
+    /** Showcases the compressed matching statement with automatic unwrapping
+     *  This is what you would be most likely to write in your code if you
+     *  intend to have functionality similar to other functional programming
+     *  languages with matching.
+     */
     using MatchedBool   = Match<     Pair<bool,           int>,
                                 With<Pair<FooPlaceholder, BarPlaceholder>, Apply<get, Foo>>
                           >;
     using MatchedInt    = Match<     Pair<bool,           int>,
                                 With<Pair<FooPlaceholder, BarPlaceholder>, Apply<get, Bar>>
                           >;
+    using defered_match = MatchClause<
+                                With<Pair<FooPlaceholder, BarPlaceholder>, Apply<get, Bar>>
+                          >;
+    using DeferredInt   = Apply<defered_match, Pair<bool, int>>;
     static_assert(Same<bool, MatchedBool>::value);
     static_assert(Same<int,  MatchedInt>::value);
+    static_assert(Same<int,  DeferredInt>::value);
   }
 };
 
