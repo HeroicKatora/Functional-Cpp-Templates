@@ -45,6 +45,9 @@ struct Div<Value<a>, Value<0>>;
 template<bool a, bool b>
 struct Div<Bool<a>, Bool<b>>;
 
+template<typename _Tp, _Tp a, _Tp b>
+struct Compare<Value<a>, Value<b>> { using type = Value<(a < b)>; };
+
 /// Boolean manipulators
 using not_     = Lambda<_0, False, True>;
 using and_     = Lambda<_0, _1,    False>;
@@ -58,6 +61,7 @@ struct TotalOrder {
 	using unequal = Lambda<or_,  IApply<compare, _0, _1>, IApply<compare, _1, _0>>;
 	using equal   = Lambda<not_, IApply<unequal, _0, _1>>;
 };
+using natural_order = TotalOrder<compare>;
 
 } // hdrstd::math
 
