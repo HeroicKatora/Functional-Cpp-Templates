@@ -82,8 +82,8 @@ namespace hdr::std {
 	template<typename val>
 	struct Const;
 	template<typename Val, typename FirstArg>
-	struct ApplySingleStruct<Const<Val>, FirstArg> {
-		using result = Val;
+	struct _apply<Const<Val>, FirstArg> {
+		using type = Val;
 	};
 
 	/**	Constructor of the above as well as standalone function.
@@ -109,8 +109,8 @@ namespace hdr::std {
 	 */
 	struct VoidFunction;
 	template<typename FirstArg>
-	struct ApplySingleStruct<VoidFunction, FirstArg> {
-		using result = VoidFunction;
+	struct _apply<VoidFunction, FirstArg> {
+		using type = VoidFunction;
 	};
 
 	/**	Type Definition of true, should be used as a parameter instead of bools.
@@ -130,8 +130,8 @@ namespace hdr::std {
 	 */
 	struct id;
 	template<typename FirstArg>
-	struct ApplySingleStruct<id, FirstArg> {
-		using result = FirstArg;
+	struct _apply<id, FirstArg> {
+		using type = FirstArg;
 	};
 	//Function Object of Apply
 	using apply = id;

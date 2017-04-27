@@ -144,17 +144,17 @@ namespace {
     using type = typename Get<KVList<Rest...>, Name>::type;
   };
 
-  template<typename List, typename Name, typename Replace> struct Replace;
+  template<typename List, typename Name, typename Replacement> struct Replace;
   using _replace = TypeFunction<Replace>;
   template<typename n, typename rpl>
-  struct Replace<KVList<>, n, rlp> { using type = n; };
+  struct Replace<KVList<>, n, rpl> { using type = n; };
   template<typename n, typename v, typename rpl, typename ... tail>
   struct Replace<KVList<KVPair<n, v>, tail...>, n, rpl> {
     using type = v;
   };
-  template<typename n, typename f, typename ... tail>
-  struct Replace<KVList<f, tail...>, n> {
-    using type = typename Replace<KVList<tail...>, n>::type;
+  template<typename n, typename rpl, typename f, typename ... tail>
+  struct Replace<KVList<f, tail...>, n, rpl> {
+    using type = typename Replace<KVList<tail...>, n, rpl>::type;
   };
 
   template<typename ... KVs> struct KVList {
@@ -280,14 +280,14 @@ namespace {
   using ::hdr::std::Apply;
   template<typename F, typename ... T>
   struct MApplyImpl;
-  template<typename v, typename TVars> using _mreduce_impl;
+  template<typename v, typename TVars> struct _mreduce_impl;
   template<typename v, typename TVars> using _mreduce = typename _mreduce_impl<v, TVars>::type;
 
-  template<typename v, typename TVars>     using _mreduce_impl
+  template<typename v, typename TVars>     struct _mreduce_impl
     { using type = v; };
-  template<typename v, typename TVars>     using _mreduce_impl<Placeholder<v>, TVars>
-    { using type = Apply<TVars::replace, v>; };
-  template<typename ... v, typename TVars> using _mreduce_impl<MApplyImpl<v...>, TVars>
+  template<typename v, typename TVars>     struct _mreduce_impl<Placeholder<v>, TVars>
+    { using type = Apply<typename TVars::get, v>; };
+  template<typename ... v, typename TVars> struct _mreduce_impl<MApplyImpl<v...>, TVars>
     { using type = Apply<MApplyImpl<v...>, TVars>;  };
 
   template<typename F, typename ... T>

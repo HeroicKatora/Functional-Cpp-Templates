@@ -120,7 +120,7 @@ namespace Main {
     using MatchedApply  = Match<     Pair<bool,           int>,
                                 With<Pair<FooPlaceholder, BarPlaceholder>, MApply<::hdr::std::id, FooPlaceholder>>
                           >;
-    static_assert(Same<int,  MatchedApply>::value);
+    static_assert(Same<bool,  MatchedApply>::value);
   }
 };
 

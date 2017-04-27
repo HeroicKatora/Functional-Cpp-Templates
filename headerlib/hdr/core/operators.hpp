@@ -7,7 +7,7 @@ namespace hdr::operators {
  *  intended only to allow syntactic sugar and not pimarily as part of types.
  */
 template<typename Op> struct BinaryOperator;
-template<typename Op> struct BinaryOperator<Op> {
+template<typename Op> struct BinaryOperator {
   /// Fold to the right, so left associative
   template<typename Init, typename ...> struct _right;
   template<typename Init> struct _right<Init>
