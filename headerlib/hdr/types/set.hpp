@@ -47,35 +47,53 @@ namespace {
   using size = MatchClause<With<Empty,              Const<Zero>>,
                            With<Node<_,pcount,_,_>, pcount>
                           >;
-  using smart_node = Lambda<node, _0, IApply<plus, One, IApply<plus, _1, _2>>, _1, _2>;
+  using smart_node = Lambda<node, _0, IApply<plus, One, IApply<plus, IApply<size, _1>, IApply<size, _2>>>, _1, _2>;
 
-  template<typename Cmp, typename Node>
-  struct _find;
+  template<typename Cmp, typename Node> struct _find;
   // camp -> Node -> maybe result
   using find  = TypeFunction<_find>;
-
-  template<typename cmp, typename node>
-  struct _find {
+  template<typename cmp, typename node> struct _find {
     using recfind = Apply<find, cmp>;
     using type = Match<node,
-                       With<Empty,                                          Const<Nothing>>,
-                       WithIf<Node<pval,_,_,_>,      typename cmp::equal,   Apply<compose, just, pval>>,
+                       With  <Empty,                                        Const<Nothing>>,
                        WithIf<Node<pval,_,pleft,_>,  typename cmp::smaller, Apply<compose, recfind, pleft>>,
                        WithIf<Node<pval,_,_,pright>, typename cmp::greater, Apply<compose, recfind, pright>>
-                             /* This should not occur */
+                       With  <Node<pval,_,_,_>,                             Apply<compose, just, pval>>, // !smaller && !greater === equal
+                       /* This should not occur */
                       >;
   };
 
+  template<typename Node> struct _min;
+  using min = TypeFunction<_min>;
+  template<typename node> struct _min {
+    using type = Match<node,
+                       With<Node<pval,_,Empty,_>, pval>,
+                       With<Node<pval,_,pleft,_>, Apply<compose, min, pleft>>
+                      >;
+  };
+
+  template<typename a, typename x, typename rnode> struct _single_l;
+  using single_l = TypeFunction<_single_l>;
+  template<typename a, typename x, typename rnode> struct _double_l;
+  using double_l = TypeFunction<_double_l>;
+  template<typename a, typename lnode, typename x> struct _single_r;
+  using single_r = TypeFunction<_single_r>;
+  template<typename a, typename lnode, typename x> struct _double_r;
+  using double_r = TypeFunction<_double_r>;
+
+  template<typename val, typename left, typename right> struct _balance_node;
+  using balance_node = TypeFunction<_balance_node>;
+
   template<typename El, typename Set>
-  struct Insert;
+  struct _insert;
+  using insert = TypeFunction<_insert>;
 }
 
 using make_type   = TemplateFunction<SetType>;
 using number_type = Apply<make_type, ::hdr::math::compare>;
 using empty       = Empty;
 using find        = find;
-
-using insert = TypeFunction<Insert>;
+using insert      = insert;
 
 }
 
