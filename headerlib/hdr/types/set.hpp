@@ -57,8 +57,8 @@ namespace {
     using type = Match<node,
                        With  <Empty,                                        Const<Nothing>>,
                        WithIf<Node<pval,_,pleft,_>,  typename cmp::smaller, Apply<compose, recfind, pleft>>,
-                       WithIf<Node<pval,_,_,pright>, typename cmp::greater, Apply<compose, recfind, pright>>
-                       With  <Node<pval,_,_,_>,                             Apply<compose, just, pval>>, // !smaller && !greater === equal
+                       WithIf<Node<pval,_,_,pright>, typename cmp::greater, Apply<compose, recfind, pright>>,
+                       With  <Node<pval,_,_,_>,                             Apply<compose, just, pval>> // !smaller && !greater === equal
                        /* This should not occur */
                       >;
   };
