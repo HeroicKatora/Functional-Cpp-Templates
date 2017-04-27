@@ -6,13 +6,14 @@
  *  Created on: 22.02.2017
  *      Author: Andreas Molzer
  */
+#include "hdr/core/operators.hpp"
 #include "hdr/core/std.hpp"
 #include "hdr/types/maybe.hpp"
 
 /** Limited (!!!) core matching, as a monad.
  *    match var [>>= (with template selector function)]*
  *  Essentially works as a monad M with M::return == match which constructs
- *  an 'Unmatched' type. with constructs a bindable function returning this type.
+ *  an 'Unmatched' type. `with` constructs a bindable function returning this type.
  *  Binding F to a Matched T will skip the application of F while binding to
  *  an unmatched will do it. This works like Maybe but instead Nothing/Matched
  *  carries an additional result type and Maybe/Unmatched is very much the same.
@@ -24,7 +25,8 @@
  *  [WIP]
  *  Templates are declared like the type they are supposed to match but using
  *  Placholders instead of the true type parameters. Should the type definition
- *  depends on its parameters, a special form is provided (can't be constructed).
+ *  depends on its parameters, a special form should be provided
+ *  (which can't be constructed via the normal means).
  *  This feature is not currently implemented.
  */
 namespace hdr::match {
@@ -143,7 +145,7 @@ namespace {
   };
 
   template<typename List, typename Name, typename Replace> struct Replace;
-  using _repl = TypeFunction<Replace>;
+  using _replace = TypeFunction<Replace>;
   template<typename n, typename rpl>
   struct Replace<KVList<>, n, rlp> { using type = n; };
   template<typename n, typename v, typename rpl, typename ... tail>
@@ -157,7 +159,7 @@ namespace {
 
   template<typename ... KVs> struct KVList {
     using get = Apply<_get, KVList<KVs...>>;
-    using replace = Apply<_repl, KVList<KVs...>>;
+    using replace = Apply<_replace, KVList<KVs...>>;
   };
 
   template<typename... Args> struct Flatten;
@@ -270,6 +272,33 @@ using Match = Apply<fromMatched, Apply<bind, Unmatched<V>, _bindable_matches<W..
  */
 template<typename ... W>
 using MatchClause = Apply<compose, fromMatched, _bindable_matches<W...>>;
+
+/** Lambda like function creation where you can use the name template parameters
+ *  to defer the insertion of their value.
+ */
+namespace {
+  using ::hdr::std::Apply;
+  template<typename F, typename ... T>
+  struct MApplyImpl;
+  template<typename v, typename TVars> using _mreduce_impl;
+  template<typename v, typename TVars> using _mreduce = typename _mreduce_impl<v, TVars>::type;
+
+  template<typename v, typename TVars>     using _mreduce_impl
+    { using type = v; };
+  template<typename v, typename TVars>     using _mreduce_impl<Placeholder<v>, TVars>
+    { using type = Apply<TVars::replace, v>; };
+  template<typename ... v, typename TVars> using _mreduce_impl<MApplyImpl<v...>, TVars>
+    { using type = Apply<MApplyImpl<v...>, TVars>;  };
+
+  template<typename F, typename ... T>
+  struct MApplyImpl {
+    template<typename TVars>
+    using expr = Apply<_mreduce<F, TVars>, _mreduce<T, TVars>...>;
+  };
+}
+
+template<typename V, typename ... W>
+using MApply = MApplyImpl<V, W...>;
 
 }
 #endif //HEADERLIB_HDR_MATCH_HPP

@@ -116,6 +116,11 @@ namespace Main {
     static_assert(Same<bool, MatchedBool>::value);
     static_assert(Same<int,  MatchedInt>::value);
     static_assert(Same<int,  DeferredInt>::value);
+
+    using MatchedApply  = Match<     Pair<bool,           int>,
+                                With<Pair<FooPlaceholder, BarPlaceholder>, MApply<::hdr::std::id, FooPlaceholder>>
+                          >;
+    static_assert(Same<int,  MatchedApply>::value);
   }
 };
 
