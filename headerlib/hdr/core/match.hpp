@@ -130,23 +130,34 @@ namespace {
   };
 
   template<typename List, typename Name> struct Get;
-  using _get_maybe  = TypeFunction<Get>;
+  using _get  = TypeFunction<Get>;
   template<typename Name>
-  struct Get<KVList<>, Name> {
-    using type = Nothing;
-  };
+  struct Get<KVList<>, Name>; // Error
   template<typename Name, typename Value, typename ... Rest>
   struct Get<KVList<KVPair<Name, Value>, Rest...>, Name> {
-    using type = Just<Value>;
+    using type = Value;
   };
   template<typename Name, typename First, typename ... Rest>
   struct Get<KVList<First, Rest...>, Name> {
     using type = typename Get<KVList<Rest...>, Name>::type;
   };
-  using _get       = Apply<compose, Apply<compose, fromJust>, _get_maybe>;
+
+  template<typename List, typename Name, typename Replace> struct Replace;
+  using _repl = TypeFunction<Replace>;
+  template<typename n, typename rpl>
+  struct Replace<KVList<>, n, rlp> { using type = n; };
+  template<typename n, typename v, typename rpl, typename ... tail>
+  struct Replace<KVList<KVPair<n, v>, tail...>, n, rpl> {
+    using type = v;
+  };
+  template<typename n, typename f, typename ... tail>
+  struct Replace<KVList<f, tail...>, n> {
+    using type = typename Replace<KVList<tail...>, n>::type;
+  };
 
   template<typename ... KVs> struct KVList {
     using get = Apply<_get, KVList<KVs...>>;
+    using replace = Apply<_repl, KVList<KVs...>>;
   };
 
   template<typename... Args> struct Flatten;
