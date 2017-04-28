@@ -5,51 +5,88 @@
  *
  *	Created on: 12.11.2015
  *			Author: Andreas Molzer
+ *			Coathor: Martin Molzer
  */
-#pragma once
-#include <stdlib.h>
-#include <stdio.h>
-#include <typeinfo>
 #include "hdr/core/std.hpp"
 
 using namespace hdrstd;
 
-namespace hdr::list{
+namespace hdr::list {
+	/** List a = Nil | Cons a (List a)
+	*/
+	struct Nil;
 
-	struct ListSentry;
-	template<typename Head, typename Tail> struct List;
+	template<typename head, typename tail>
+	struct Cons;
 
-	template<typename> struct Head;
-	template<typename> struct Tail;
-	using head = TypeFunction<Head>;
-	using tail = TypeFunction<Tail>;
+	/** []
+	*/
+	using EmptyList = Nil;
 
-	template<typename H, typename T>
-	struct Head<List<H, T>> {
-		using type = H;
-	};
-	template<typename H, typename T>
-	struct Tail<List<H, T>> {
-		using type = T;
-	};
+	template<typename L>
+	struct Head;
+	using head = ::hdr::std::TypeFunction<Head>;
+	template<typename L>
+	struct Last;
+	template<typename L>
+	struct Tail;
+	template<typename L>
+	struct Init;
+
+	// Head []
+	template<>
+	struct Head<EmptyList>; // exception?
+	// Head (head:tail)
+	template<typename head, typename tail>
+	struct Head<Cons<head, tail>> { using type = head; };
+
+	// Last []
+	template<>
+	struct Last<EmptyList>; // exception?
+	// Last (head:[])
+	template<typename head>
+	struct Last<Cons<head, EmptyList>> { using type = head; };
+	// Last (head:tail)
+	template<typename head, typename tail>
+	struct Last<Cons<head, tail>> { using type = Last<tail>; };
+
+	// Tail []
+	template<>
+	struct Tail<EmptyList>; // exception?
+	// Tail (head:tail)
+	template<typename head, typename tail>
+	struct Tail<Cons<head, tail>> { using type = tail; };
+
+	// Init []
+	template<>
+	struct Init<EmptyList>; // exception?
+	// Init (head:[])
+	template<typename head>
+	struct Init<Cons<head, EmptyList>> { using type = EmptyList; };
+	// Last (head:tail)
+	template<typename head, typename tail>
+	struct Init<Cons<head, tail>> { using type = Cons<head, Init<tail>>; };
 
 }
 
 namespace hdrstd{
-	template<typename... ob>
-	struct Printer<_t_list<ob...>>{
+	template<typename Head, typename Tail>
+	struct Printer<hdr::list::Cons<Head, Tail>>{
 		static void print(){
-			printf("(");
-			hdrlist::list_printer<hdrlist::separator, ob...>::print();
-			printf(")");
+			Printer<Head>::print();
+			printf(", ");
+			Printer<Tail>::print();
 		}
 	};
-
-	template<size_t... num>
-	struct Printer<_c_list<num...>>{
-		using print_list = typename hdrlist::c_to_t<_c_list<num...>>::result;
+	template<typename Head>
+	struct Printer<hdr::list::Cons<Head, hdr::list::Nil>>{
 		static void print(){
-			Printer<print_list>::print();
+			Printer<Head>::print();
+		}
+	};
+	template<typename Head>
+	struct Printer<hdr::list::Nil>{
+		static void print(){
 		}
 	};
 }
