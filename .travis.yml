@@ -4,6 +4,8 @@ addons:
       llvm-toolchain-trusty-4.0
     packages:
       clang-4.0
+      lldb-4.0
+      lld-4.0
 
 language: cpp
 compiler: clang
