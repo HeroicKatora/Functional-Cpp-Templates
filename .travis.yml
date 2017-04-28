@@ -8,9 +8,9 @@ addons:
       lld-4.0
 sudo: required
 install:
-  sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 1397BC53640DB551
-  sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
-  sudo apt-get install -qq g++-6
+  - sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 1397BC53640DB551
+  - sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
+  - sudo apt-get install -qq g++-6
 dist: trusty
 language: cpp
 compiler: clang
