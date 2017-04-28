@@ -2,12 +2,15 @@ addons:
   apt:
     sources:
       llvm-toolchain-trusty-4.0
-      ubuntu-toolchain-r-test
     packages:
       clang-4.0
       lldb-4.0
       lld-4.0
-      g++-6
+sudo: required
+install:
+  sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 1397BC53640DB551
+  sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
+  sudo apt-get install -qq g++-6
 dist: trusty
 language: cpp
 compiler: clang
