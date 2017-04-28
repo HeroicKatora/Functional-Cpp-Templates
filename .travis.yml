@@ -6,6 +6,7 @@ addons:
       clang-4.0
       lldb-4.0
       lld-4.0
+      g++-6
 dist: trusty
 language: cpp
 compiler: clang
