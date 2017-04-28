@@ -6,7 +6,7 @@ addons:
       clang-4.0
       lldb-4.0
       lld-4.0
-
+dist: trusty
 language: cpp
 compiler: clang
 script: scons
