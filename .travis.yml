@@ -10,6 +10,7 @@ sudo: required
 install:
   - sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 1397BC53640DB551
   - sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
+  - sudo apt-get update
   - sudo apt-get install -qq gcc-6
 dist: trusty
 language: cpp
