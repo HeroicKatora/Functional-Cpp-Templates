@@ -2,6 +2,7 @@ addons:
   apt:
     sources:
       llvm-toolchain-trusty-4.0
+      ubuntu-toolchain-r-test
     packages:
       clang-4.0
       lldb-4.0
