@@ -37,14 +37,6 @@ struct _typeFunction;
 template<template<typename ...> typename F>
 using TypeFunction = typename _typeFunction<F>::type;
 
-#if __cplusplus > 201701L
-#  include "hdr/core/detail/type_function_n4659.hpp"
-#elif __cplusplus > 201402L
-#  include "hdr/core/detail/type_function_cpp14.hpp"
-#else
-#  error "Standards before c++14 are not supported"
-#endif
-
 ///	Lifts a template struct to a pure function.
 /// Having a templated type F declared as
 /// ``` template</*some arguments*/> struct F; ```
@@ -54,35 +46,22 @@ using TypeFunction = typename _typeFunction<F>::type;
 /// Uses the same shenanigans as TypeFunction to match different
 /// template template parameters
 template<template<typename...> class F, size_t nargs = helper::args_count<F>>
-struct _tFunction;
+struct _templateFunction;
 template<template<typename...> class F>
-using TemplateFunction = TypeFunction<_tFunction<F>::template expr>;
+using TemplateFunction = typename _templateFunction<F>::type;
 template<template<typename...> class F>
 using Constructor      = TemplateFunction<F>;
-template<template<typename> typename F>
-struct _tFunction<F, 1> {
-	template<typename arg> struct expr {
-		using type = F<arg>;
-	};
-};
-template<template<typename,typename> typename F>
-struct _tFunction<F, 2> {
-	template<typename I1, typename I2> struct expr {
-		using type = F<I1, I2>;
-	};
-};
-template<template<typename,typename,typename> typename F>
-struct _tFunction<F, 3> {
-	template<typename I1, typename I2, typename I3> struct expr {
-		using type = F<I1, I2, I3>;
-	};
-};
-template<template<typename,typename,typename,typename> typename F>
-struct _tFunction<F, 4> {
-	template<typename I1, typename I2, typename I3, typename I4> struct expr {
-		using type = F<I1, I2, I3, I4>;
-	};
-};
+
+#if __cplusplus > 201701L || defined(__clang__) && defined(__cpp_template_auto)
+#  include "hdr/core/detail/type_function_n4659.hpp"
+#  include "hdr/core/detail/template_function_n4659.hpp"
+#elif __cplusplus > 201402L
+#  include "hdr/core/detail/type_function_cpp14.hpp"
+#  include "hdr/core/detail/template_function_cpp14.hpp"
+#else
+#  error "Standards before c++14 are not supported"
+#endif
+
 
 /**	Part of a set of functions to convert a function object to a pure function
  *	This transforms a function which takes 1 argument (a type whose call member
