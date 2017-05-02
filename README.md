@@ -12,7 +12,7 @@ The only first class citizen in headerlib are structs. Without free template par
 
 Several conversion methods from conventional template meta programming approaches to the one supported here exist, for easy of use. This is by design, the user should be able to incorporate his own style and methods of MTP while being offered the full depth and power the library has to offer.
 
-```
+```c++
 // Transforming a template from std in one line
 using add_ptr = TypeFunction<::std::add_pointer>;
 ```
@@ -20,18 +20,20 @@ using add_ptr = TypeFunction<::std::add_pointer>;
 Building
 --------
 Make sure to have clang-4.0 installed on your system and at least gcc-libs version 6 (I may try to remove all std dependencies of core in future releases). Then you can simply run
-```scons
+```bash
+scons
 ```
 
 Otherwise, any compilter compatible to c++ draft n4659 should work, you can specify it as follows:
-```CXX=<compiler> scons
+```bash
+CXX=<compiler> scons
 ```
 Note that gcc-7.1 is not compatible at the moment.
 
 Advantages
 ----------
 Let's look at an example as a comparison from Boost.Hana about eval_if coding the factorial function [adapted for c++17 from here](http://www.boost.org/doc/libs/1_62_0/libs/hana/doc/html/group__group-Logical.html#gab64636f84de983575aac0208f5fa840c)
-```template <typename N>
+```c++
 template<typename N>
 constexpr auto ffactorial(const N n) {
     return hana::eval_if(hana::equal(n, hana::int_c<0>),
@@ -43,7 +45,7 @@ constexpr auto res = ffactorial(hana::int_c<5>);
 ```
 There are several negative points made in the documentation and it's just as bad when using it to dynamically determining a typename.
 But you know how to code the same function with template specialization already. That's where this library comes in.
-```
+```c++
 template<int n> struct factorial {
   constexpr static const int value = n*factorial<n-1>::value;
 };
