@@ -3,23 +3,19 @@
 
 namespace hdr::std {
 
-template<template<typename ...> typename F, size_t ncount = helper::args_count<F>>
-struct _typeFunction;
-template<template<typename ...> typename F>
-using TypeFunction = typename _typeFunction<F>::type;
 /// Wraps struct types which declare a member named type to signal their result.
 /// This is mostly for c++ standard classes but may be used to implement functions
 /// via template specializations.
-	/// Having a templated type F declared as
-	/// ```
+/// Having a templated type F declared as
+/// ```
 ///	template</*some arguments*/> struct F {
 /// 	/*implementation*/
 ///		using type = /*result*/;
 ///	};
 ///	```
-	/// invents a type PF without template parameters that fulfills the callable
-	/// syntax, i.e. applying to it Args..., where sizeof...(Args) is the number of
-	/// template arguments of F, returns typename F<Args...>::type
+/// invents a type PF without template parameters that fulfills the callable
+/// syntax, i.e. applying to it Args..., where sizeof...(Args) is the number of
+/// template arguments of F, returns typename F<Args...>::type
 ///		Apply<PF, Args...> === F<Args...>::type where F<Args...> is valid.
 /// By specializing F, one can easily fuse normal template metaprogramming with
 /// this library, since F is completely under the users control.
@@ -36,40 +32,19 @@ using TypeFunction = typename _typeFunction<F>::type;
 ///
 /// A dense example of this in action can be found here
 /// https://godbolt.org/g/uhQ4Cr
-template<template<typename> typename F>
-struct _typeFunction <F, 1> {
-	struct type {
-		template<typename Arg>
-		using expr = typename F<Arg>::type;
-	};
-};
-template<template<typename, typename> typename F>
-struct _typeFunction <F, 2> {
-	template<typename IA> struct _inner {
-		template<typename I1>	using _Inner = F<IA, I1>;
-		using type = TypeFunction<_Inner>;
-	};
-	using type = TypeFunction<_inner>;
-};
-template<template<typename, typename, typename> typename F>
-struct _typeFunction <F, 3> {
-	template<typename IA> struct _inner {
-		template<typename I1, typename I2> using _Inner = F<IA, I1, I2>;
-		using type = TypeFunction<_Inner>;
-	};
-	using type = TypeFunction<_inner>;
-};
-template<template<typename, typename, typename, typename> typename F>
-struct _typeFunction <F, 4> {
-	template<typename IA, typename IB> struct _inner {
-		template<typename I1, typename I2> using _Inner = F<IB, IA, I1, I2>;
-		using type = TypeFunction<_Inner>;
-	};
-	using type = TypeFunction<_inner>;
-};
+template<template<typename ...> typename F, size_t ncount = helper::args_count<F>>
+struct _typeFunction;
+template<template<typename ...> typename F>
+using TypeFunction = typename _typeFunction<F>::type;
 
-template<template<typename...> class F, size_t nargs = helper::args_count<F>>
-struct _tFunction;
+#if __cplusplus > 201701L
+#  include "hdr/core/detail/type_function_n4659.hpp"
+#elif __cplusplus > 201402L
+#  include "hdr/core/detail/type_function_cpp14.hpp"
+#else
+#  error "Standards before c++14 are not supported"
+#endif
+
 ///	Lifts a template struct to a pure function.
 /// Having a templated type F declared as
 /// ``` template</*some arguments*/> struct F; ```
@@ -78,6 +53,8 @@ struct _tFunction;
 /// template arguments of F, returns F<Args...>
 /// Uses the same shenanigans as TypeFunction to match different
 /// template template parameters
+template<template<typename...> class F, size_t nargs = helper::args_count<F>>
+struct _tFunction;
 template<template<typename...> class F>
 using TemplateFunction = TypeFunction<_tFunction<F>::template expr>;
 template<template<typename...> class F>
