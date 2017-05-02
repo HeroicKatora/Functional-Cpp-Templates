@@ -17,6 +17,17 @@ Several conversion methods from conventional template meta programming approache
 using add_ptr = TypeFunction<::std::add_pointer>;
 ```
 
+Building
+--------
+Make sure to have clang-4.0 installed on your system and at least gcc-libs version 6 (I may try to remove all std dependencies of core in future releases). Then you can simply run
+```scons
+```
+
+Otherwise, any compilter compatible to c++ draft n4659 should work, you can specify it as follows:
+```CXX=<compiler> scons
+```
+Note that gcc-7.1 is not compatible at the moment.
+
 Advantages
 ----------
 Let's look at an example as a comparison from Boost.Hana about eval_if coding the factorial function [adapted for c++17 from here](http://www.boost.org/doc/libs/1_62_0/libs/hana/doc/html/group__group-Logical.html#gab64636f84de983575aac0208f5fa840c)
@@ -53,7 +64,7 @@ This can theoretically be tackled with this library. Take an existing parser gen
 
 Should reflection (even as simple as [N4428][N4428]) be integrated into C++ one day, these two tools could fuse into a truly powerful machinery capable of fully replacing Qt-Moc in a way that every programmer can read and understand when he has knowledge about C++.
 
-[YACC] http://dinosaur.compilertools.net/yacc/
-[CUP] http://www2.cs.tum.edu/projects/cup/
-[PARSEC] https://hackage.haskell.org/package/parsec
-[N4428] http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4428.pdf
+[YACC]: http://dinosaur.compilertools.net/yacc/
+[CUP]: http://www2.cs.tum.edu/projects/cup/
+[PARSEC]: https://hackage.haskell.org/package/parsec
+[N4428]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4428.pdf
