@@ -1,5 +1,5 @@
-#ifndef HEADERLIB_HDR_LIST_HPP
-#define HEADERLIB_HDR_LIST_HPP
+#ifndef HEADERLIB_HDR_TYPES_LIST_HPP
+#define HEADERLIB_HDR_TYPES_LIST_HPP
 /*
  * celists.hpp
  *
@@ -72,4 +72,4 @@ struct Init<Cons<head, tail>> { using type = Cons<head, Init<tail>>; };
 
 }
 
-#endif //HEADERLIB_HDR_LIST_HPP
+#endif //HEADERLIB_HDR_TYPES_LIST_HPP
