@@ -28,10 +28,13 @@ namespace hdr::list {
 	using head = ::hdr::std::TypeFunction<Head>;
 	template<typename L>
 	struct Last;
+	using last = ::hdr::std::TypeFunction<Last>;
 	template<typename L>
 	struct Tail;
+	using tail = ::hdr::std::TypeFunction<Tail>;
 	template<typename L>
 	struct Init;
+	using init = ::hdr::std::TypeFunction<Init>;
 
 	// Head []
 	template<>
@@ -69,25 +72,4 @@ namespace hdr::list {
 
 }
 
-namespace hdrstd{
-	template<typename Head, typename Tail>
-	struct Printer<hdr::list::Cons<Head, Tail>>{
-		static void print(){
-			Printer<Head>::print();
-			printf(", ");
-			Printer<Tail>::print();
-		}
-	};
-	template<typename Head>
-	struct Printer<hdr::list::Cons<Head, hdr::list::Nil>>{
-		static void print(){
-			Printer<Head>::print();
-		}
-	};
-	template<typename Head>
-	struct Printer<hdr::list::Nil>{
-		static void print(){
-		}
-	};
-}
 #endif //HEADERLIB_HDR_LIST_HPP
