@@ -96,10 +96,8 @@ namespace hdr::std {
 	 * 		(a -> b -> c) -> (b -> a -> c)
 	 */
 	template<typename F, typename B, typename A>
-	struct Flip {
-		using type = Apply<F, A, B>;
-	};
-	using flip   = TypeFunction<Flip>;
+	using _flip = Apply<F, A, B>;
+	using flip   = TemplateFunction<_flip>;
 
 	/** Similar to fconst, but ignores its first argument
 	 */
@@ -148,13 +146,11 @@ namespace hdr::std {
 	 *	for clarity since it doesn't mix up Pures and Objects.
 	 */
 	template<typename F, typename G, typename Arg>
-	struct Compose {
-		using type = Apply<F, Apply<G, Arg>>;
-	};
+	using _compose = Apply<F, Apply<G, Arg>>;
 	/**	Binary operator for function composition
 	 *		(a -> b) -> (b -> c) -> (a -> c)
 	 */
-	using compose = TypeFunction<Compose>;
+	using compose = TemplateFunction<_compose>;
 	using c = compose;
 
 	template<bool c, typename A, typename B>
