@@ -221,29 +221,5 @@ namespace hdr::std {
 	 */
 	template<typename>
 	struct Debug;
-
-	/** This should be in its own file/namespace */
-	template<typename O>
-	struct Printer{
-		static_assert(_false<O>::value, "No printer for target class defined");
-		static void print();
-	};
-	template<>
-	struct Printer<Void>{
-		static void print(){};
-	};
-	template<>
-	struct Printer<False>{
-		static void print(){
-			printf("false");
-		}
-	};
-	template<>
-	struct Printer<True>{
-		static void print(){
-			printf("true");
-		}
-	};
-
 }
 #endif //HEADERLIB_HDR_STD_HPP

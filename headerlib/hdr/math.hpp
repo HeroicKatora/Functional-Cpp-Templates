@@ -64,22 +64,4 @@ struct TotalOrder {
 using natural_order = TotalOrder<compare>;
 
 } // hdrstd::math
-
-namespace hdr::std {
-
-template<unsigned long v>
-struct Printer<hdr::math::Value<v>>{
-	static void print(){
-		printf("%lu", v);
-	}
-};
-
-template<typename _Tp, _Tp v>
-struct Printer<hdr::math::Value<v>>{
-	static void print(){
-		printf("%i", v);
-	}
-};
-
-}
 #endif //HEADERLIB_HDR_MATH_HPP

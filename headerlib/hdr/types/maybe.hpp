@@ -70,21 +70,4 @@ using fromJust  = Apply<maybe, Void, id>;
 using fromMaybe = Apply<Apply<flip, maybe>, id>;
 
 } // namespace hdrtypes::option
-
-namespace hdr::std {
-	template<typename T>
-	struct Printer<::hdr::maybe::Just<T>>{
-		static void print(){
-			printf("%s", "Some<");
-			Printer<T>::print();
-			printf("%s", ">");
-		}
-	};
-	template<>
-	struct Printer<::hdr::maybe::Nothing>{
-		static void print(){
-			printf("%s", "None");
-		}
-	};
-}
 #endif //HEADERLIB_HDR_TYPES_MAYBE_HPP
