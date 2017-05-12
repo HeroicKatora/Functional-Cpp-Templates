@@ -24,6 +24,7 @@ namespace {
   using ::hdr::match::_;
   using ::hdr::match::Placeholder;
   using ::hdr::match::Match;
+  using ::hdr::match::MApply;
   using ::hdr::match::MatchClause;
   using ::hdr::match::With;
   using ::hdr::match::WithIf;
@@ -56,9 +57,9 @@ namespace {
     using recfind = Apply<find, cmp>;
     using type = Match<node,
                        With  <Empty,                                        Const<Nothing>>,
-                       WithIf<Node<pval,_,pleft,_>,  typename cmp::smaller, Apply<compose, recfind, pleft>>,
-                       WithIf<Node<pval,_,_,pright>, typename cmp::greater, Apply<compose, recfind, pright>>,
-                       With  <Node<pval,_,_,_>,                             Apply<compose, just, pval>> // !smaller && !greater === equal
+                       WithIf<Node<pval,_,pleft,_>,  typename cmp::smaller, MApply<recfind, pleft>>,
+                       WithIf<Node<pval,_,_,pright>, typename cmp::greater, MApply<recfind, pright>>,
+                       With  <Node<pval,_,_,_>,                             MApply<just, pval>> // !smaller && !greater === equal
                        /* This should not occur */
                       >;
   };
@@ -87,6 +88,19 @@ namespace {
   template<typename El, typename Set>
   struct _insert;
   using insert = TypeFunction<_insert>;
+
+  template<typename a, typename x, typename b, typename _, typename y, typename z>
+  struct _single_l<a, x, Node<b, _, y, z>>
+    { using type = Apply<smart_node, b, Apply<smart_node, a, x, y>, z>; };
+  template<typename a, typename x, typename b, typename _, typename y, typename z>
+  struct _single_r<b, Node<a, _, x, y>, z>
+    { using type = Apply<smart_node, a, x, Apply<smart_node, b, y, z>>; };
+  template<typename a, typename x, typename c, typename b, typename y1, typename y2, typename z, typename _, typename __>
+  struct _double_l<a, x, Node<c, _, Node<b, __, y1, y2>, z>>
+    { using type = Apply<smart_node, b, Apply<smart_node, a, x, y1>, Apply<smart_node, c, y2, z>>; };
+  template<typename a, typename x, typename c, typename b, typename y1, typename y2, typename z, typename _, typename __>
+  struct _double_r<c, Node<a, _, x, Node<b, __, y1, y2>>, z>
+    { using type = Apply<smart_node, b, Apply<smart_node, a, x, y1>, Apply<smart_node, c, y2, z>>; };
 }
 
 using make_type   = TemplateFunction<SetType>;
