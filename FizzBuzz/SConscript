@@ -1,6 +1,0 @@
-Import('env')
-
-env = env.Clone()
-env.Append(CPPFLAGS='--std=c++14')
-env.VariantDir('build', 'src', duplicate=0)
-env.Program(target='build/main.bin', source=['build/main.cpp'])
