@@ -100,4 +100,16 @@ struct Fold<Cons<head, tail>, F, I>
   { using type = ::hdr::std::Apply<fold, tail, F, ::hdr::std::Apply<F, I, head>>; };
 }
 
+namespace hdr::math {
+template<typename,typename>
+struct plus;
+
+template<typename S>
+struct plus<::hdr::list::Nil, S>
+  : ::hdr::list::Concat<::hdr::list::Nil, S> {};
+template<typename H, typename T, typename S>
+struct plus<::hdr::list::Cons<H, T>, S>
+  : ::hdr::list::Concat<::hdr::list::Cons<H, T>, S> {};
+}
+
 #endif //HEADERLIB_HDR_TYPES_LIST_HPP
