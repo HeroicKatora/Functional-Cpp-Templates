@@ -23,6 +23,13 @@ namespace Test {
     using sum = Apply<fold, plus, Zero, ElementList>;
     static_assert(Same<sum, Value<6>>::value);
   }
+
+  namespace ListMapping {
+    using ElementList = Cons<Value<1>, Cons<Value<2>, Cons<Value<3>, EmptyList>>>;
+    using AddedOne    = Apply<map, Apply<plus, One>, ElementList>;
+    using sum         = Apply<fold, plus, Zero, AddedOne>;
+    static_assert(Same<sum, Value<9>>::value);
+  }
 }
 
 int main() {}

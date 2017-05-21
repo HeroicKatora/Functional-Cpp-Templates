@@ -35,7 +35,7 @@ template<typename L, typename J> struct Concat;
 using concat = ::hdr::std::TypeFunction<Concat>;
 template<typename I, typename F, typename L> struct Fold;
 using fold   = ::hdr::std::TypeFunction<Fold>;
-template<typename L, typename J> struct Map;
+template<typename F, typename L> struct Map;
 using map    = ::hdr::std::TypeFunction<Map>;
 
 // Head []
