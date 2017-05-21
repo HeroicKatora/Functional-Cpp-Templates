@@ -35,6 +35,9 @@ template<typename L, typename J> struct Concat;
 using concat = ::hdr::std::TypeFunction<Concat>;
 template<typename L, typename F, typename I> struct Fold;
 using fold   = ::hdr::std::TypeFunction<Fold>;
+template<typename L, typename J> struct Map;
+using map    = ::hdr::std::TypeFunction<Map>;
+
 // Head []
 template<>
 struct Head<EmptyList>; // exception?
@@ -98,17 +101,26 @@ struct Fold<EmptyList, F, I>
 template<typename head, typename tail, typename F, typename I>
 struct Fold<Cons<head, tail>, F, I>
   { using type = ::hdr::std::Apply<fold, tail, F, ::hdr::std::Apply<F, I, head>>; };
+
+// Map F []
+template<typename F>
+struct Map<F, EmptyList>
+  { using type = EmptyList; };
+// Map F (head:tail)
+template<typename F, typename head, typename tail>
+struct Map<F, Cons<head, tail>>
+  { using type = Cons<::hdr::std::Apply<F, head>, ::hdr::std::Apply<map, F, tail>>; };
 }
 
 namespace hdr::math {
 template<typename,typename>
-struct plus;
+struct Plus;
 
 template<typename S>
-struct plus<::hdr::list::Nil, S>
+struct Plus<::hdr::list::Nil, S>
   : ::hdr::list::Concat<::hdr::list::Nil, S> {};
 template<typename H, typename T, typename S>
-struct plus<::hdr::list::Cons<H, T>, S>
+struct Plus<::hdr::list::Cons<H, T>, S>
   : ::hdr::list::Concat<::hdr::list::Cons<H, T>, S> {};
 }
 
