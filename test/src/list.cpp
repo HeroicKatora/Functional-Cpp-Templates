@@ -20,7 +20,7 @@ namespace Test {
 
   namespace ListFolding {
     using ElementList = Cons<Value<1>, Cons<Value<2>, Cons<Value<3>, EmptyList>>>;
-    using sum = Apply<fold, ElementList, plus, Zero>;
+    using sum = Apply<fold, plus, Zero, ElementList>;
     static_assert(Same<sum, Value<6>>::value);
   }
 }

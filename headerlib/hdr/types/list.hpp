@@ -33,7 +33,7 @@ template<typename L> struct Len;
 using len  = ::hdr::std::TypeFunction<Len>;
 template<typename L, typename J> struct Concat;
 using concat = ::hdr::std::TypeFunction<Concat>;
-template<typename L, typename F, typename I> struct Fold;
+template<typename I, typename F, typename L> struct Fold;
 using fold   = ::hdr::std::TypeFunction<Fold>;
 template<typename L, typename J> struct Map;
 using map    = ::hdr::std::TypeFunction<Map>;
@@ -95,12 +95,12 @@ struct Concat<Cons<head, tail>, L>
 
 // Fold [] L
 template<typename F, typename I>
-struct Fold<EmptyList, F, I>
+struct Fold<F, I, EmptyList>
   { using type = I; };
 // Concat (head:tail) L
-template<typename head, typename tail, typename F, typename I>
-struct Fold<Cons<head, tail>, F, I>
-  { using type = ::hdr::std::Apply<fold, tail, F, ::hdr::std::Apply<F, I, head>>; };
+template<typename F, typename I, typename head, typename tail>
+struct Fold<F, I, Cons<head, tail>>
+  { using type = ::hdr::std::Apply<fold, F, ::hdr::std::Apply<F, I, head>, tail>; };
 
 // Map F []
 template<typename F>
