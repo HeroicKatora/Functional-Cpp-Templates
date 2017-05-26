@@ -9,6 +9,7 @@
  */
 #include "hdr/core.hpp"
 #include "hdr/math.hpp"
+#include "hdr/types/monad.hpp"
 
 namespace hdr::list {
 /** List a = Nil | Cons a (List a)
@@ -35,11 +36,8 @@ template<typename L, typename J> struct Concat;
 using concat = ::hdr::std::TypeFunction<Concat>;
 template<typename I, typename F, typename L> struct Fold;
 using fold   = ::hdr::std::TypeFunction<Fold>;
-<<<<<<< HEAD
 template<typename F, typename L> struct Map;
 using map    = ::hdr::std::TypeFunction<Map>;
-=======
->>>>>>> 5b18f4b... Use Nil instead of extra typedef EmptyList
 
 // Head []
 template<>
@@ -113,6 +111,18 @@ struct Map<F, EmptyList>
 template<typename F, typename head, typename tail>
 struct Map<F, Cons<head, tail>>
   { using type = Cons<::hdr::std::Apply<F, head>, ::hdr::std::Apply<map, F, tail>>; };
+
+template<typename T> struct _list_return {
+  using type = Cons<T, Nil>;
+};
+using list_return = ::hdr::std::TypeFunction<_list_return>;
+using list_bind   = ::hdr::std::Apply<::hdr::std::compose, ::hdr::std::Apply<fold, concat, Nil>, map>;
+using ListMonadType = ::hdr::monad::MonadFromBind<list_return, list_bind>;
+using return_ = ListMonadType::return_;
+using bind    = ListMonadType::bind;
+using kleisli = ListMonadType::kleisli;
+using fmap    = ListMonadType::fmap;
+using join    = ListMonadType::join;
 }
 
 namespace hdr::math {
