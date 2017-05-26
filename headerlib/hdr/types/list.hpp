@@ -35,23 +35,26 @@ template<typename L, typename J> struct Concat;
 using concat = ::hdr::std::TypeFunction<Concat>;
 template<typename I, typename F, typename L> struct Fold;
 using fold   = ::hdr::std::TypeFunction<Fold>;
+<<<<<<< HEAD
 template<typename F, typename L> struct Map;
 using map    = ::hdr::std::TypeFunction<Map>;
+=======
+>>>>>>> 5b18f4b... Use Nil instead of extra typedef EmptyList
 
 // Head []
 template<>
-struct Head<EmptyList>; // exception?
-// Head (head:tail)
+struct Head<Nil>; // exception?
+// Tail (head:tail)
 template<typename head, typename tail>
 struct Head<Cons<head, tail>>
   { using type = head; };
 
 // Last []
 template<>
-struct Last<EmptyList>; // exception?
+struct Last<Nil>; // exception?
 // Last (head:[])
 template<typename head>
-struct Last<Cons<head, EmptyList>>
+struct Last<Cons<head, Nil>>
   { using type = head; };
 // Last (head:tail)
 template<typename head, typename tail>
@@ -60,7 +63,7 @@ struct Last<Cons<head, tail>>
 
 // Tail []
 template<>
-struct Tail<EmptyList>; // exception?
+struct Tail<Nil>; // exception?
 // Tail (head:tail)
 template<typename head, typename tail>
 struct Tail<Cons<head, tail>>
@@ -68,17 +71,17 @@ struct Tail<Cons<head, tail>>
 
 // Init []
 template<>
-struct Init<EmptyList>; // exception?
+struct Init<Nil>; // exception?
 // Init (head:[])
 template<typename head>
-struct Init<Cons<head, EmptyList>> { using type = EmptyList; };
-// Last (head:tail)
+struct Init<Cons<head, Nil>> { using type = Nil; };
+// Init (head:tail)
 template<typename head, typename tail>
 struct Init<Cons<head, tail>>
   { using type = Cons<head, ::hdr::std::Apply<init, tail>>; };
 
 template<>
-struct Len<EmptyList>
+struct Len<Nil>
   { using type = ::hdr::math::Zero; };
 template<typename head, typename tail>
 struct Len<Cons<head, tail>>
@@ -86,7 +89,7 @@ struct Len<Cons<head, tail>>
 
 // Concat [] L
 template<typename L>
-struct Concat<EmptyList, L>
+struct Concat<Nil, L>
   { using type = L; };
 // Concat (head:tail) L
 template<typename head, typename tail, typename L>
@@ -95,7 +98,7 @@ struct Concat<Cons<head, tail>, L>
 
 // Fold [] L
 template<typename F, typename I>
-struct Fold<F, I, EmptyList>
+struct Fold<F, I, Nil>
   { using type = I; };
 // Concat (head:tail) L
 template<typename F, typename I, typename head, typename tail>
