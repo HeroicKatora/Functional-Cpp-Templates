@@ -40,6 +40,15 @@ namespace Test {
 
     using bound_once = Apply<bind, simple_list, double_elements>;
     static_assert(Same<bound_once, Cons<Value<1>, Cons<Value<1>, EmptyList>>>::value);
+
+    using operator_list = Cons<double_elements, EmptyList>;
+    using two_op_list   = Apply<bind, operator_list, double_elements>;
+    using four_op_list  = Apply<bind, two_op_list,   double_elements>;
+    using eight_op_list = Apply<bind, four_op_list,  double_elements>;
+    using op_256x_elements = Apply<fold, kleisli, return_, eight_op_list>;
+
+    using extensive_list = Apply<bind, simple_list, op_256x_elements>;
+    static_assert(Same<Apply<len, extensive_list>, Value<256>>::value);
   }
 }
 
