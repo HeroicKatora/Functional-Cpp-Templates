@@ -116,7 +116,10 @@ template<typename T> struct _list_return {
   using type = Cons<T, Nil>;
 };
 using list_return = ::hdr::std::TypeFunction<_list_return>;
-using list_bind   = ::hdr::std::Apply<::hdr::std::compose, ::hdr::std::Apply<fold, concat, Nil>, map>;
+using list_join   = ::hdr::std::Apply<fold, concat, Nil>;
+using list_bind   = ::hdr::std::Apply<::hdr::std::compose,
+                                      ::hdr::std::Apply<::hdr::std::compose, list_join>,
+                                      ::hdr::std::Apply<::hdr::std::flip, map>>;
 using ListMonadType = ::hdr::monad::MonadFromBind<list_return, list_bind>;
 using return_ = ListMonadType::return_;
 using bind    = ListMonadType::bind;

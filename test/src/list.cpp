@@ -30,6 +30,17 @@ namespace Test {
     using sum         = Apply<fold, plus, Zero, AddedOne>;
     static_assert(Same<sum, Value<9>>::value);
   }
+
+  namespace ListMonad {
+    template<typename T> struct Double
+      { using type = Cons<T, Cons<T, EmptyList>>; };
+    using double_elements = TypeFunction<Double>;
+    using simple_list = Apply<return_, Value<1>>;
+    static_assert(Same<simple_list, Cons<Value<1>, EmptyList>>::value);
+
+    using bound_once = Apply<bind, simple_list, double_elements>;
+    static_assert(Same<bound_once, Cons<Value<1>, Cons<Value<1>, EmptyList>>>::value);
+  }
 }
 
 int main() {}
