@@ -26,6 +26,7 @@ namespace {
   using ::hdr::match::Match;
   using ::hdr::match::MApply;
   using ::hdr::match::MatchClause;
+  using ::hdr::match::MApply;
   using ::hdr::match::With;
   using ::hdr::match::WithIf;
   using ::hdr::match::get;

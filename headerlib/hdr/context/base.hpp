@@ -1,7 +1,5 @@
 #ifndef HEADERLIB_HDR_CONTEXT_BASE_H
 #define HEADERLIB_HDR_CONTEXT_BASE_H
-#include "hdr/core.hpp"
-#include "hdr/types/list.hpp"
 
 /** Definition for contexts, hopefully enabling many syntactic sugar expressions
  *  The idea is to provide nesting contexts which can each change every argument
@@ -41,49 +39,6 @@ struct Context {
 /** Signals the final state of a context, returning a result
  */
 template<typename result> struct Result;
-/*
-namespace {
-  using namespace ::hdr::std;
-  template<typename ContextStack> struct _context_eval;  // Data definition
-  template<typename Context, typename State> struct _stack_entry {
-    using context = Context;
-    using state   = State;
-  };
-
-  template<typename eval, typename arg>
-  struct _context_eval_apply;  // Implementation via specialization
-  using context_eval_apply = TypeFunction<_context_eval_apply>;
-  template<typename stack, typename arg>
-  struct _context_eval_apply<_context_eval<stack>, arg> {
-    template<typename arg, typename entry> using replaced_arg
-      = Apply<entry::context::handle_argument, entry::state, arg>;
-    using replacement_fold = TemplateFunction<replaced_arg>;
-    using repl_arg = Apply<::hdr::list::fold, stack, replacement_fold, arg>;
-    using top = Apply<::hdr::list::first, stack>;
-    using new_state = Apply<top::context::progress, top::state, repl_arg>;
-    using new_stack = Apply<push, Apply<pop, stack>, _stack_entry<top::context, new_state>>;
-    using type = _context_eval<new_stack>;
-  };
-  template<typename stack>
-  struct _context_eval_apply<_context_eval<stack>, End> {
-    using top = Apply<::hdr::list::first, stack>;
-    using val = Apply<top::context::close, top::state>;
-    using new_stack = Apply<::hdr::list::tail, stack>;
-    using is_last_context = Apply<::hdr::math::same, new_stack, EmptyStack>;
-    using apply_method = Apply<::hdr::std::when_else, is_last_context,
-      ::hdr::std::ignore, _context_eval_apply>;
-    using type = Apply<apply_method, _context_eval<new_stack>, val>;
-  };
-  template<typename stack, typename i, typename h, typename p, typename c>
-  struct _context_eval_apply<_context_eval<stack>, Context<i, h, p, c>> {
-    using new_stack = Apply<push, stack, _stack_entry<Context<i, h, p, c>, i>>;
-    using type = _context_eval<new_stack>;
-  };
-}
-
-using NoOpContext = Context<::hdr::std::id, ::hdr::std::ignore, ::hdr::std::apply, ::hdr::std::id>;
-using ContextEval = _context_eval<::hdr::list::Cons<NoOpContext, ::hdr::list::EmptyList>>;
-*/
 }
 
 #endif /* end of include guard: HEADERLIB_HDR_CONTEXT_BASE_H */
