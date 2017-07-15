@@ -52,7 +52,7 @@ using TemplateFunction = typename _templateFunction<F>::type;
 template<template<typename...> class F>
 using Constructor      = TemplateFunction<F>;
 
-#if __cplusplus > 201701L || defined(__clang__) && defined(__cpp_template_auto)
+#if __cplusplus > 201704L || defined(__clang__) && defined(__cpp_template_auto)
 #  include "hdr/core/detail/type_function_n4659.hpp"
 #  include "hdr/core/detail/template_function_n4659.hpp"
 #elif __cplusplus > 201402L
