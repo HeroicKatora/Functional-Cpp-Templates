@@ -31,8 +31,11 @@ namespace {
   using ::hdr::match::WithIf;
   using ::hdr::match::get;
   using ::hdr::math::plus;
+  using ::hdr::math::mult;
+  using ::hdr::math::compare;
   using ::hdr::math::Zero;
   using ::hdr::math::One;
+  using ::hdr::math::Value;
   using ::hdr::maybe::Nothing;
   using just = ::hdr::maybe::return_;
 
@@ -49,6 +52,10 @@ namespace {
   using size = MatchClause<With<Empty,              Const<Zero>>,
                            With<Node<_,pcount,_,_>, pcount>
                           >;
+  using get_entry  = MatchClause<With<Node<_val,_,_,_>, _val>>;
+  using get_size   = MatchClause<With<Node<_val,_,_,_>, _val>>;
+  using get_left   = MatchClause<With<Node<_val,_,_,_>, _val>>;
+  using get_right  = MatchClause<With<Node<_val,_,_,_>, _val>>;
   using smart_node = Lambda<node, _0, IApply<plus, One, IApply<plus, IApply<size, _1>, IApply<size, _2>>>, _1, _2>;
 
   template<typename Cmp, typename Node> struct _find;
@@ -83,8 +90,12 @@ namespace {
   template<typename a, typename lnode, typename x> struct _double_r;
   using double_r = TypeFunction<_double_r>;
 
-  template<typename val, typename left, typename right> struct _balance_node;
-  using balance_node = TypeFunction<_balance_node>;
+  template<typename v, typename l, typename r> struct _t_tick;
+  using t_tick = TypeFunction<_t_tick>;
+  using overweight_value = Value<3>;
+
+  template<typename tree, typename x> struct _add;
+  using add = TypeFunction<_add>;
 
   template<typename El, typename Set>
   struct _insert;
@@ -102,10 +113,50 @@ namespace {
   template<typename a, typename x, typename c, typename b, typename y1, typename y2, typename z, typename _, typename __>
   struct _double_r<c, Node<a, _, x, Node<b, __, y1, y2>>, z>
     { using type = Apply<smart_node, b, Apply<smart_node, a, x, y1>, Apply<smart_node, c, y2, z>>; };
+
+  template<typename v, typename l, typename r>
+  struct _t_tick {
+    using ln = Apply<size, l>;
+    using rn = Apply<size, r>;
+    using sum = Apply<plus, rn, ln>;
+    using small  = Apply<compare, sum, Value<2>>;
+    using lsmall = Apply<compare, Apply<mult, ln, overweight_value>, rn>;
+    using rsmall = Apply<compare, Apply<mult, rn, overweight_value>, ln>;
+    template<typename L, typename R>
+    struct _small {
+      using type = Apply<smart_node, v, L, R>;
+    }; using smallf = TypeFunction<_small>;
+    template<typename L, typename R>
+    struct _rtoobig {
+      using rln = Apply<size, Apply<get_left, R>>;
+      using rrn = Apply<size, Apply<get_right, R>>;
+      using type = Apply<compare, rln, rrn, single_l, double_r, v, L, R>;
+    }; using rtoobig = TypeFunction<_rtoobig>;
+    template<typename L, typename R>
+    struct _ltoobig {
+      using lln = Apply<size, Apply<get_left, L>>;
+      using lrn = Apply<size, Apply<get_right, L>>;
+      using type = Apply<compare, lrn, lln, single_r, double_l, v, L, R>;
+    }; using ltoobig = TypeFunction<_ltoobig>;
+    template<typename L, typename R>
+    struct _okay {
+      using type = Apply<smart_node, v, L, R>;
+    }; using okayf = TypeFunction<_okay>;
+    using resolver =
+      Apply<small,  smallf,  /* if small */
+      Apply<lsmall, rtoobig, /* else if lsmall */
+      Apply<rsmall, ltoobig, /* else if rsmall */
+            okayf>>>;        /* else */
+      using type = Apply<resolver, l, r>;
+  };
+
+  template<typename x>
+  struct _add<Empty, x>
+    { using type = Node<x, One, Empty, Empty>; };
 }
 
 using make_type   = TemplateFunction<SetType>;
-using number_type = Apply<make_type, ::hdr::math::compare>;
+using number_type = Apply<make_type, compare>;
 using empty       = Empty;
 using find        = find;
 using insert      = insert;
