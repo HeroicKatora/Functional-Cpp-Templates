@@ -39,7 +39,7 @@ namespace {
   using ::hdr::maybe::Nothing;
   using just = ::hdr::maybe::return_;
 
-  template<typename Compare> struct SetType;
+
   struct Empty;
   template<typename Entry, typename Count, typename Left, typename Right> struct Node;
   using node = TemplateFunction<Node>;
@@ -48,6 +48,9 @@ namespace {
   struct _count; using pcount = Placeholder<_count>;
   struct _left;  using pleft  = Placeholder<_left>;
   struct _right; using pright = Placeholder<_right>;
+
+  template<typename Compare> struct SetType : ::hdr::math::TotalOrder<Compare> {};
+  template<typename Type, typename Nodes> struct Set;
 
   using size = MatchClause<With<Empty,              Const<Zero>>,
                            With<Node<_,pcount,_,_>, pcount>
@@ -94,11 +97,10 @@ namespace {
   using t_tick = TypeFunction<_t_tick>;
   using overweight_value = Value<3>;
 
-  template<typename tree, typename x> struct _add;
+  template<typename compare, typename node, typename x> struct _add;
   using add = TypeFunction<_add>;
 
-  template<typename El, typename Set>
-  struct _insert;
+  template<typename set, typename el> struct _insert;
   using insert = TypeFunction<_insert>;
 
   template<typename a, typename x, typename b, typename _, typename y, typename z>
@@ -147,17 +149,47 @@ namespace {
       Apply<lsmall, rtoobig, /* else if lsmall */
       Apply<rsmall, ltoobig, /* else if rsmall */
             okayf>>>;        /* else */
-      using type = Apply<resolver, l, r>;
+    using type = Apply<resolver, l, r>;
   };
 
-  template<typename x>
-  struct _add<Empty, x>
+  template<typename cmp, typename x>
+  struct _add<cmp, Empty, x>
     { using type = Node<x, One, Empty, Empty>; };
+  template<typename cmp, typename v, typename _, typename l, typename r, typename x>
+  struct _add<cmp, Node<v, _, l, r>, x> {
+    template<typename X>
+    struct _left {
+      using nl = Apply<add, cmp, l, X>;
+      using type = Apply<t_tick, v, nl, r>;
+    }; using left = TypeFunction<_left>;
+    template<typename X>
+    struct _right {
+      using nr = Apply<add, cmp, r, X>;
+      using type = Apply<t_tick, v, l, nr>;
+    }; using right = TypeFunction<_right>;
+    template<typename X>
+    struct _equal {
+      using type = Apply<smart_node, X, l, r>;
+    }; using equal = TypeFunction<_equal>;
+    using smaller = Apply<cmp, x, v>;
+    using greater = Apply<cmp, v, r>;
+    using resolver =
+      Apply<smaller, left,  /* if smaller */
+      Apply<greater, right, /* if greater */
+            equal>>;
+    using type = Apply<resolver, x>;
+  };
+
+  template<typename Type, typename root, typename el>
+  struct _insert<Set<Type, root>, el>
+    { using cmp = typename Type::smaller;
+      using type = Set<Type, Apply<add, cmp, root, el>>; };
+
 }
 
 using make_type   = TemplateFunction<SetType>;
 using number_type = Apply<make_type, compare>;
-using empty       = Empty;
+using empty       = Apply<::hdr::std::flip, TemplateFunction<Set>, Empty>;
 using find        = find;
 using insert      = insert;
 
