@@ -66,9 +66,9 @@ namespace {
 
   template<typename Cmp, typename Node, typename val> struct _find;
   // cmp -> Node -> maybe result
-  using find  = TypeFunction<_find>;
+  using nfind  = TypeFunction<_find>;
   template<typename cmp, typename node, typename val> struct _find {
-    using recfind = Apply<find, cmp>;
+    using recfind = Apply<nfind, cmp>;
     using smaller = Apply<typename cmp::smaller, val>;
     using greater = Apply<typename cmp::greater, val>;
     using type = Match<node,
@@ -79,7 +79,7 @@ namespace {
                        /* This should not occur */
                       >;
   };
-  using set_find = Lambda<find, IApply<get_type, _0>, IApply<get_root, _0>>;
+  using set_find = Lambda<nfind, IApply<get_type, _0>, IApply<get_root, _0>>;
 
   template<typename Node> struct _min;
   using min = TypeFunction<_min>;
@@ -197,8 +197,9 @@ namespace {
 using make_type   = TemplateFunction<SetType>;
 using number_type = Apply<make_type, compare>;
 using empty       = Apply<::hdr::std::flip, TemplateFunction<Set>, Empty>;
-using size        = Apply<::hdr::std::compose, nsize, get_root>;
+using size        = Apply<compose, nsize, get_root>;
 using find        = Apply<::hdr::std::flip, set_find>;
+using contains    = Apply<compose, Apply<compose, ::hdr::maybe::isJust>, find>;
 using insert      = insert;
 
 }

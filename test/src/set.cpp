@@ -16,6 +16,7 @@ namespace Test {
     using InsertTwo = Apply<insert, Value<2>, InsertOne>;
     using twocount = Apply<size, InsertTwo>;
     static_assert(::hdr::math::Same<twocount, Value<2>>::value);
+
     using InsertThr = Apply<insert, Value<3>, InsertTwo>;
     using InsertFou = Apply<insert, Value<4>, InsertThr>;
     using InsertFiv = Apply<insert, Value<5>, InsertFou>;
@@ -34,6 +35,8 @@ namespace Test {
 
     static_assert(std::is_same<FindOne, ::hdr::maybe::Just<Value<1>>>::value);
     static_assert(std::is_same<FindFour, ::hdr::maybe::Nothing>::value);
+    static_assert( Apply<contains, Value<1>, Origin>::value);
+    static_assert(!Apply<contains, Value<4>, Origin>::value);
   }
 }
 
