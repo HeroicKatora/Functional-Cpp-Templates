@@ -27,10 +27,12 @@ namespace Main {
     using DecSec = Apply<decompose, Pair<bool, BarPlaceholder>,           Pair<bool, int>>;
     using DecThi = Apply<decompose, Pair<bool, int>,  Pair<bool, int>>;
     using DecFou = Apply<decompose, PlaceholderAny,   Pair<bool, int>>;
+    using DecRec = Apply<decompose, Pair<Pair<bool, int>, FooPlaceholder>, Pair<Pair<bool, int>, int>>;
     static_assert(Apply<isJust, DecFir>::value);
     static_assert(Apply<isJust, DecSec>::value);
     static_assert(Apply<isJust, DecThi>::value);
     static_assert(Apply<isJust, DecFou>::value);
+    static_assert(Apply<isJust, DecRec>::value);
 
     // Templates don't match non-matching patterns
     using FailFi = Apply<decompose, unsigned int,     unsigned short>;
@@ -121,6 +123,11 @@ namespace Main {
                                 With<Pair<FooPlaceholder, BarPlaceholder>, MApply<::hdr::std::id, FooPlaceholder>>
                           >;
     static_assert(Same<bool,  MatchedApply>::value);
+
+    using MatchedRec    = Match<     Pair<Pair<bool, bool>,          int>,
+                                With<Pair<FooPlaceholder, BarPlaceholder>, MApply<::hdr::std::id, BarPlaceholder>>
+                          >;
+    static_assert(Same<int,  MatchedRec>::value);
   }
 };
 
