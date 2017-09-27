@@ -46,7 +46,7 @@ template<bool a, bool b>
 struct Div<Bool<a>, Bool<b>>;
 
 template<typename _Tp, _Tp a, _Tp b>
-struct Compare<Value<a>, Value<b>> { using type = Value<(a < b)>; };
+struct Compare<Value<a>, Value<b>> { using type = ::hdr::std::FromStdBool<(a < b)>; };
 
 /// Boolean manipulators
 using not_     = Lambda<_0, False, True>;
