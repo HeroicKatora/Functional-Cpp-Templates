@@ -30,8 +30,10 @@ namespace Test {
     using InsertTwo = Apply<insert, InsertOne, Value<2>>;
     using Origin    = Apply<insert, InsertTwo, Value<3>>;
     using FindOne   = Apply<::hdr::set::find, Origin, Value<1>>;
+    using FindFour  = Apply<::hdr::set::find, Origin, Value<4>>;
 
     static_assert(std::is_same<FindOne, ::hdr::maybe::Just<Value<1>>>::value);
+    static_assert(std::is_same<FindFour, ::hdr::maybe::Nothing>::value);
   }
 }
 
