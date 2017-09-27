@@ -6,11 +6,25 @@ namespace Test {
   using namespace ::hdr::std;
   namespace Build {
     using EmptySet  = Apply<empty, number_type>;
-    using InsertOne = Apply<insert, EmptySet, One>;
-    using InsertTwo = Apply<insert, EmptySet, Value<2>>;
+    using InsertOne = Apply<insert, EmptySet, Value<1>>;
+    using InsertTwo = Apply<insert, InsertOne, Value<2>>;
+    using InsertThr = Apply<insert, InsertTwo, Value<3>>;
+    using InsertFou = Apply<insert, InsertThr, Value<4>>;
+    using InsertFiv = Apply<insert, InsertFou, Value<5>>;
+
+    using root = Apply<get_root, InsertFiv>;
+    using count = Apply<get_size, root>;
+    static_assert(std::is_same<EmptySet, Set<number_type, Empty>>::value);
+    static_assert(::hdr::math::Same<count, Value<5>>::value);
   }
   namespace FindElement {
+    using EmptySet  = Apply<empty, number_type>;
+    using InsertOne = Apply<insert, EmptySet, Value<1>>;
+    using InsertTwo = Apply<insert, InsertOne, Value<2>>;
+    using Origin    = Apply<insert, InsertTwo, Value<3>>;
+    using FindOne   = Apply<::hdr::set::find, Origin, Value<1>>;
 
+    static_assert(std::is_same<FindOne, ::hdr::maybe::Just<Value<1>>>::value);
   }
 }
 

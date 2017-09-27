@@ -48,31 +48,36 @@ namespace {
   struct _left;  using pleft  = Placeholder<_left>;
   struct _right; using pright = Placeholder<_right>;
 
-  template<typename Compare> struct SetType : ::hdr::math::TotalOrder<Compare> {};
-  template<typename Type, typename Nodes> struct Set;
-
   using size = MatchClause<With<Empty,              Const<Zero>>,
                            With<Node<_,pcount,_,_>, pcount>
                           >;
-  using get_entry  = MatchClause<With<Node<_val,_,_,_>, _val>>;
-  using get_size   = MatchClause<With<Node<_val,_,_,_>, _val>>;
-  using get_left   = MatchClause<With<Node<_val,_,_,_>, _val>>;
-  using get_right  = MatchClause<With<Node<_val,_,_,_>, _val>>;
+  using get_entry  = MatchClause<With<Node<pval,_,_,_>, pval>>;
+  using get_size   = MatchClause<With<Node<_,pval,_,_>, pval>>;
+  using get_left   = MatchClause<With<Node<_,_,pval,_>, pval>>;
+  using get_right  = MatchClause<With<Node<_,_,_,pval>, pval>>;
   using smart_node = Lambda<node, _0, IApply<plus, One, IApply<plus, IApply<size, _1>, IApply<size, _2>>>, _1, _2>;
 
-  template<typename Cmp, typename Node> struct _find;
-  // camp -> Node -> maybe result
+  template<typename Compare> struct SetType : ::hdr::math::TotalOrder<Compare> {};
+  template<typename Type, typename Nodes> struct Set;
+  using get_type   = MatchClause<With<Set<pval, _>, pval>>;
+  using get_root   = MatchClause<With<Set<_, pval>, pval>>;
+
+  template<typename Cmp, typename Node, typename val> struct _find;
+  // cmp -> Node -> maybe result
   using find  = TypeFunction<_find>;
-  template<typename cmp, typename node> struct _find {
+  template<typename cmp, typename node, typename val> struct _find {
     using recfind = Apply<find, cmp>;
+    using smaller = Apply<typename cmp::smaller, val>;
+    using greater = Apply<typename cmp::greater, val>;
     using type = Match<node,
-                       With  <Empty,                                        Const<Nothing>>,
-                       WithIf<Node<pval,_,pleft,_>,  typename cmp::smaller, MApply<recfind, pleft>>,
-                       WithIf<Node<pval,_,_,pright>, typename cmp::greater, MApply<recfind, pright>>,
-                       With  <Node<pval,_,_,_>,                             MApply<just, pval>> // !smaller && !greater === equal
+                       With  <Empty,                                         Const<Nothing>>,
+                       WithIf<Node<pval,_,pleft,_>,  MApply<smaller, pval>,  MApply<recfind, pleft, val>>,
+                       WithIf<Node<pval,_,_,pright>, MApply<greater, pval>,  MApply<recfind, pright, val>>,
+                       With  <Node<pval,_,_,_>,                              MApply<just, pval>> // !smaller && !greater === equal
                        /* This should not occur */
                       >;
   };
+  using set_find = Lambda<find, IApply<get_type, _0>, IApply<get_root, _0>>;
 
   template<typename Node> struct _min;
   using min = TypeFunction<_min>;
@@ -171,7 +176,8 @@ namespace {
       using type = Apply<smart_node, X, l, r>;
     }; using equal = TypeFunction<_equal>;
     using smaller = Apply<cmp, x, v>;
-    using greater = Apply<cmp, v, r>;
+    using greater = Apply<cmp, v, x>;
+    static_assert(!smaller::value || !greater::value, "Comparison function is not asymetric");
     using resolver =
       Apply<smaller, left,  /* if smaller */
       Apply<greater, right, /* if greater */
@@ -189,7 +195,7 @@ namespace {
 using make_type   = TemplateFunction<SetType>;
 using number_type = Apply<make_type, compare>;
 using empty       = Apply<::hdr::std::flip, TemplateFunction<Set>, Empty>;
-using find        = find;
+using find        = set_find;
 using insert      = insert;
 
 }
