@@ -6,14 +6,21 @@ namespace Test {
   using namespace ::hdr::std;
   namespace Build {
     using EmptySet  = Apply<empty, number_type>;
+    using emptycount = Apply<size, EmptySet>;
+    static_assert(::hdr::math::Same<emptycount, Value<0>>::value);
+
     using InsertOne = Apply<insert, EmptySet, Value<1>>;
+    using onecount = Apply<size, InsertOne>;
+    static_assert(::hdr::math::Same<onecount, Value<1>>::value);
+
     using InsertTwo = Apply<insert, InsertOne, Value<2>>;
+    using twocount = Apply<size, InsertTwo>;
+    static_assert(::hdr::math::Same<twocount, Value<2>>::value);
     using InsertThr = Apply<insert, InsertTwo, Value<3>>;
     using InsertFou = Apply<insert, InsertThr, Value<4>>;
     using InsertFiv = Apply<insert, InsertFou, Value<5>>;
 
-    using root = Apply<get_root, InsertFiv>;
-    using count = Apply<get_size, root>;
+    using count = Apply<size, InsertFiv>;
     static_assert(std::is_same<EmptySet, Set<number_type, Empty>>::value);
     static_assert(::hdr::math::Same<count, Value<5>>::value);
   }

@@ -19,8 +19,6 @@ namespace {
   using ::hdr::lambda::Lambda;
   using ::hdr::lambda::IApply;
   using ::hdr::lambda::_0;
-  using ::hdr::lambda::_1;
-  using ::hdr::lambda::_2;
   using ::hdr::match::_;
   using ::hdr::match::Placeholder;
   using ::hdr::match::Match;
@@ -48,14 +46,18 @@ namespace {
   struct _left;  using pleft  = Placeholder<_left>;
   struct _right; using pright = Placeholder<_right>;
 
-  using size = MatchClause<With<Empty,              Const<Zero>>,
-                           With<Node<_,pcount,_,_>, pcount>
-                          >;
+  using nsize = MatchClause<With<Empty,              Const<Zero>>,
+                            With<Node<_,pcount,_,_>, pcount>
+                           >;
   using get_entry  = MatchClause<With<Node<pval,_,_,_>, pval>>;
-  using get_size   = MatchClause<With<Node<_,pval,_,_>, pval>>;
   using get_left   = MatchClause<With<Node<_,_,pval,_>, pval>>;
   using get_right  = MatchClause<With<Node<_,_,_,pval>, pval>>;
-  using smart_node = Lambda<node, _0, IApply<plus, One, IApply<plus, IApply<size, _1>, IApply<size, _2>>>, _1, _2>;
+
+  template<typename v, typename L, typename R> struct _smart_node;
+  using smart_node = TypeFunction<_smart_node>;
+  template<typename v, typename L, typename R> struct _smart_node {
+    using type = Node<v, Apply<plus, One, Apply<plus, Apply<nsize, L>, Apply<nsize, R>>>, L, R>;
+  };
 
   template<typename Compare> struct SetType : ::hdr::math::TotalOrder<Compare> {};
   template<typename Type, typename Nodes> struct Set;
@@ -122,8 +124,8 @@ namespace {
 
   template<typename v, typename l, typename r>
   struct _t_tick {
-    using ln = Apply<size, l>;
-    using rn = Apply<size, r>;
+    using ln = Apply<nsize, l>;
+    using rn = Apply<nsize, r>;
     using sum = Apply<plus, rn, ln>;
     using small  = Apply<compare, sum, Value<2>>;
     using lsmall = Apply<compare, Apply<mult, ln, overweight_value>, rn>;
@@ -134,14 +136,14 @@ namespace {
     }; using smallf = TypeFunction<_small>;
     template<typename L, typename R>
     struct _rtoobig {
-      using rln = Apply<size, Apply<get_left, R>>;
-      using rrn = Apply<size, Apply<get_right, R>>;
+      using rln = Apply<nsize, Apply<get_left, R>>;
+      using rrn = Apply<nsize, Apply<get_right, R>>;
       using type = Apply<compare, rln, rrn, single_l, double_r, v, L, R>;
     }; using rtoobig = TypeFunction<_rtoobig>;
     template<typename L, typename R>
     struct _ltoobig {
-      using lln = Apply<size, Apply<get_left, L>>;
-      using lrn = Apply<size, Apply<get_right, L>>;
+      using lln = Apply<nsize, Apply<get_left, L>>;
+      using lrn = Apply<nsize, Apply<get_right, L>>;
       using type = Apply<compare, lrn, lln, single_r, double_l, v, L, R>;
     }; using ltoobig = TypeFunction<_ltoobig>;
     template<typename L, typename R>
@@ -195,6 +197,7 @@ namespace {
 using make_type   = TemplateFunction<SetType>;
 using number_type = Apply<make_type, compare>;
 using empty       = Apply<::hdr::std::flip, TemplateFunction<Set>, Empty>;
+using size        = Apply<::hdr::std::compose, nsize, get_root>;
 using find        = set_find;
 using insert      = insert;
 
