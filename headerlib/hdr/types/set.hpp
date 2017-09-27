@@ -106,7 +106,7 @@ namespace {
   template<typename compare, typename node, typename x> struct _add;
   using add = TypeFunction<_add>;
 
-  template<typename set, typename el> struct _insert;
+  template<typename el, typename set> struct _insert;
   using insert = TypeFunction<_insert>;
 
   template<typename a, typename x, typename b, typename _, typename y, typename z>
@@ -188,7 +188,7 @@ namespace {
   };
 
   template<typename Type, typename root, typename el>
-  struct _insert<Set<Type, root>, el>
+  struct _insert<el, Set<Type, root>>
     { using cmp = typename Type::smaller;
       using type = Set<Type, Apply<add, cmp, root, el>>; };
 
@@ -198,7 +198,7 @@ using make_type   = TemplateFunction<SetType>;
 using number_type = Apply<make_type, compare>;
 using empty       = Apply<::hdr::std::flip, TemplateFunction<Set>, Empty>;
 using size        = Apply<::hdr::std::compose, nsize, get_root>;
-using find        = set_find;
+using find        = Apply<::hdr::std::flip, set_find>;
 using insert      = insert;
 
 }
