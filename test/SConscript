@@ -6,6 +6,7 @@ env.VariantDir('build', 'src', duplicate=False)
 
 env.Program(target='build/std.out', source='build/std.cpp')
 env.Program(target='build/list.out', source='build/list.cpp')
+env.Program(target='build/array.out', source='build/array.cpp')
 env.Program(target='build/match.out', source='build/match.cpp')
 env.Program(target='build/lambda.out', source='build/lambda.cpp')
 

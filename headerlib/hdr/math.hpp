@@ -25,27 +25,37 @@ template<bool b> 		 using Bool 		= Value<b>;
 
 template<typename _Tp, _Tp a, _Tp b>
 struct Plus<Value<a>, Value<b>> { using type = Value<a+b>; };
+template<typename _Tp, typename _Tq, _Tp a, _Tq b>
+struct Plus<Value<a>, Value<b>> { using type = IntegralConstant<typename ::std::common_type<_Tp, _Tq>::type, a+b>; };
 template<bool a, bool b>
 struct Plus<Bool<a>, Bool<b>>   { using type = Bool<a || b>; };
 
 template<typename _Tp, _Tp a, _Tp b>
 struct Mult<Value<a>, Value<b>> { using type = Value<a*b>; };
+template<typename _Tp, typename _Tq, _Tp a, _Tq b>
+struct Mult<Value<a>, Value<b>> { using type = IntegralConstant<typename ::std::common_type<_Tp, _Tq>::type, a*b>; };
 template<bool a, bool b>
 struct Mult<Bool<a>, Bool<b>>   { using type = Bool<a && b>; };
 
 template<typename _Tp, _Tp a, _Tp b>
 struct Minus<Value<a>, Value<b>> { using type = Value<a-b>; };
+template<typename _Tp, typename _Tq, _Tp a, _Tq b>
+struct Minus<Value<a>, Value<b>> { using type = IntegralConstant<typename ::std::common_type<_Tp, _Tq>::type, a-b>; };
 template<bool a, bool b>
 struct Minus<Bool<a>, Bool<b>>;
 
 template<typename _Tp, _Tp a, _Tp b>
 struct Div<Value<a>, Value<b>> { using type = Value<a/b>; };
+template<typename _Tp, typename _Tq, _Tp a, _Tq b>
+struct Div<Value<a>, Value<b>> { using type = IntegralConstant<typename ::std::common_type<_Tp, _Tq>::type, a/b>; };
 template<typename _Tp, _Tp a>
 struct Div<Value<a>, Value<0>>;
 template<bool a, bool b>
 struct Div<Bool<a>, Bool<b>>;
 
 template<typename _Tp, _Tp a, _Tp b>
+struct Compare<Value<a>, Value<b>> { using type = ::hdr::std::FromStdBool<(a < b)>; };
+template<typename _Tp, typename _Tq, _Tp a, _Tq b>
 struct Compare<Value<a>, Value<b>> { using type = ::hdr::std::FromStdBool<(a < b)>; };
 
 /// Boolean manipulators
@@ -62,6 +72,9 @@ struct TotalOrder {
 	using equal   = Lambda<not_, IApply<unequal, _0, _1>>;
 };
 using natural_order = TotalOrder<compare>;
+
+template<typename A, typename B>
+using Equal = Apply<natural_order::equal, A, B>;
 
 } // hdrstd::math
 #endif //HEADERLIB_HDR_MATH_HPP
