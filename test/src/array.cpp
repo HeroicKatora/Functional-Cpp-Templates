@@ -31,7 +31,6 @@ namespace Test {
     static_assert(Equal<sum, Value<9>>::value);
   }
 
-
   namespace ArrayMonad {
     template<typename T> struct Double
       { using type = Array<T, T>; };
@@ -54,6 +53,7 @@ namespace Test {
     using crash_test = Apply<bind, extensive_list, op_256x_elements>;
     static_assert(Same<Apply<len, crash_test>, Value<(1 << 16)>>::value);
   }
+  
 }
 
 int main() {}

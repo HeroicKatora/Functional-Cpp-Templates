@@ -35,7 +35,7 @@ namespace Test {
       constexpr static const int value = 1;
     };
 
-    constexpr auto res = Apply<ValueTemplateFunction<factorial>, Value<5>>::value;
+    constexpr auto res = ValueOf<Apply<ValueTemplateFunction<factorial>, Value<5>>>::value;
     static_assert(res == 120);
   };
 

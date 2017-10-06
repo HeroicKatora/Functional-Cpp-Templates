@@ -17,7 +17,8 @@ using Same  = ::hdr::std::FromStdBool<::std::is_same<A, B>::value>;
 using same  = ::hdr::std::TemplateFunction<Same>;
 
 template<typename T, T v>
-using IntegralConstant = ::std::integral_constant<T, v>;
+struct IntegralConstant;
+
 template<auto v>
 using Value = IntegralConstant<decltype(v), v>;
 using Zero  = Value<0>;
@@ -54,10 +55,13 @@ struct Compare {
 };
 using compare = ::hdr::std::TypeFunction<Compare>;
 
+template<typename> struct ValueOf; // resolves to type with constexpr member
+template<typename T> constexpr static auto value_of_v = ValueOf<T>::value;
+
 template<template<auto> typename F>
 struct ValueTemplateFunction {
 	template<typename Arg>
-	using expr = Value<F<Arg::value>::value>;
+	using expr = Value<F<ValueOf<Arg>::value>::value>;
 };
 
 } // hdrstd::math

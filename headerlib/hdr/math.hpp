@@ -23,6 +23,11 @@ template<unsigned u> using Unsigned = Value<u>;
 template<signed s> 	 using Signed 	= Value<s>;
 template<bool b> 		 using Bool 		= Value<b>;
 
+template<typename T, T v>
+struct ValueOf<IntegralConstant<T, v>>
+	{ using type = ::std::integral_constant<T, v>;
+ 		constexpr static auto value = v; };
+
 template<typename _Tp, _Tp a, _Tp b>
 struct Plus<Value<a>, Value<b>> { using type = Value<a+b>; };
 template<typename _Tp, typename _Tq, _Tp a, _Tq b>
