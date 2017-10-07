@@ -1,8 +1,10 @@
 #include "hdr/core.hpp"
 #include "hdr/math.hpp"
+#include "hdr/assert.hpp"
 
 using namespace hdr::std;
 using namespace hdr::math;
+using namespace hdr::assert;
 
 namespace Test {
   // Improved version for test/src/std.cpp
@@ -20,10 +22,10 @@ namespace Test {
     using ActualPOneTTwo = Apply<POneTTwo, Input>;
     using ActualTTwoPOne = Apply<TTwoPOne, Input>;
 
-    static_assert(Same<ExpectedPOneTTwo, ActualPOneTTwo>::value);
-    static_assert(Same<ExpectedTTwoPOne, ActualTTwoPOne>::value);
+    Assert<Same<ExpectedPOneTTwo, ActualPOneTTwo>>;
+    Assert<Same<ExpectedTTwoPOne, ActualTTwoPOne>>;
 
-    static_assert(Same<Value<-5>, Apply<uminus, Value<5>>>::value);
+    Assert<Same<Value<-5>, Apply<uminus, Value<5>>>>;
   };
 
   // Example from README.md
@@ -66,7 +68,7 @@ namespace Test {
                         >;
     };
     using res = Apply<factorial, Value<5>>;
-    static_assert(Same<res, Value<120>>::value);
+    Assert<Same<res, Value<120>>>;
   }
 
   namespace FactorialTemplateMatching {
@@ -86,7 +88,7 @@ namespace Test {
       using type = One;
     };
     using res = Apply<factorial, Value<5>>;
-    static_assert(Same<Value<120>, res>::value);
+    Assert<Same<Value<120>, res>>;
   }
 };
 

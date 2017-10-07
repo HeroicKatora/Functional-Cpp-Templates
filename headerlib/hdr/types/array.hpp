@@ -30,18 +30,25 @@ template<typename head, typename ... tail>
 struct Head<Array<head, tail...>>
   { using type = head; };
 
-template<typename ... head, typename tail>
-struct Last<Array<head..., tail>>
-  { using type = tail; };
+template<typename head>
+struct Last<Array<head>>
+  { using type = head; };
+template<typename head, typename ... tail>
+struct Last<Array<head, tail...>>
+  { using type = ::hdr::std::Apply<last, Array<tail...>>; };
 
 // Tail (head:tail)
 template<typename head, typename ... tail>
 struct Tail<Array<head, tail...>>
   { using type = Array<tail...>; };
 
-template<typename ... head, typename tail>
-struct Init<Array<head..., tail>>
-  { using type = Array<head...>; };
+template<typename head>
+struct Init<Array<head>>
+  { using type = Empty; };
+template<typename head, typename ... tail>
+struct Init<Array<head, tail...>>
+  { using rec = ::hdr::std::Apply<init, Array<tail...>>;
+    using type = ::hdr::std::Apply<concat, Array<head>, rec>; };
 
 template<typename ... elements>
 struct Len<Array<elements...>>

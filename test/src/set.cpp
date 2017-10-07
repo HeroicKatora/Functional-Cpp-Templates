@@ -1,29 +1,32 @@
 #include "hdr/math.hpp"
 #include "hdr/types/set.hpp"
+#include "hdr/assert.hpp"
 
 namespace Test {
   using namespace ::hdr::set;
   using namespace ::hdr::std;
+  using namespace ::hdr::math;
+  using namespace ::hdr::assert;
   namespace Build {
     using EmptySet  = Apply<empty, number_type>;
     using emptycount = Apply<size, EmptySet>;
-    static_assert(::hdr::math::Same<emptycount, Value<0>>::value);
+    Assert<Same<emptycount, Value<0>>>;
 
     using InsertOne = Apply<insert, Value<1>, EmptySet>;
     using onecount = Apply<size, InsertOne>;
-    static_assert(::hdr::math::Same<onecount, Value<1>>::value);
+    Assert<Same<onecount, Value<1>>>;
 
     using InsertTwo = Apply<insert, Value<2>, InsertOne>;
     using twocount = Apply<size, InsertTwo>;
-    static_assert(::hdr::math::Same<twocount, Value<2>>::value);
+    Assert<Same<twocount, Value<2>>>;
 
     using InsertThr = Apply<insert, Value<3>, InsertTwo>;
     using InsertFou = Apply<insert, Value<4>, InsertThr>;
     using InsertFiv = Apply<insert, Value<5>, InsertFou>;
 
     using count = Apply<size, InsertFiv>;
-    static_assert(std::is_same<EmptySet, Set<number_type, Empty>>::value);
-    static_assert(::hdr::math::Same<count, Value<5>>::value);
+    Assert<Same<EmptySet, Set<number_type, Empty>>>;
+    Assert<::hdr::math::Same<count, Value<5>>>;
   }
   namespace FindElement {
     using EmptySet  = Apply<empty, number_type>;
@@ -33,10 +36,10 @@ namespace Test {
     using FindOne   = Apply<::hdr::set::find, Value<1>, Origin>;
     using FindFour  = Apply<::hdr::set::find, Value<4>, Origin>;
 
-    static_assert(std::is_same<FindOne, ::hdr::maybe::Just<Value<1>>>::value);
-    static_assert(std::is_same<FindFour, ::hdr::maybe::Nothing>::value);
-    static_assert( Apply<contains, Value<1>, Origin>::value);
-    static_assert(!Apply<contains, Value<4>, Origin>::value);
+    Assert<Same<FindOne, ::hdr::maybe::Just<Value<1>>>>;
+    Assert<Same<FindFour, ::hdr::maybe::Nothing>>;
+    Assert<Apply<contains, Value<1>, Origin>>;
+    AssertFalse<Apply<contains, Value<4>, Origin>>;
   }
 }
 
@@ -71,8 +74,8 @@ namespace TestTTI {
   using IsFooSmaller = Apply<cmp::smaller, IndexFoo, IndexBar>;
   using IsBarSmaller = Apply<cmp::smaller, IndexBar, IndexFoo>;
   using IsNotEqual   = Apply<cmp::unequal, IndexBar, IndexFoo>;
-  static_assert(IsFooSmaller::value ^ IsBarSmaller::value);
-  static_assert(IsNotEqual::value);
+  static_assert(::hdr::math::ValueOf<IsFooSmaller>::value ^ ::hdr::math::ValueOf<IsBarSmaller>::value);
+  static_assert(::hdr::math::ValueOf<IsNotEqual>::value);
 };
 #endif
 

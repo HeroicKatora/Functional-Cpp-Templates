@@ -1,12 +1,13 @@
 #include "hdr/core/std.hpp"
 #include "hdr/core/match.hpp"
 #include "hdr/math.hpp"
-
+#include "hdr/assert.hpp"
 
 namespace Main {
   struct Foo;
   struct Bar;
   using namespace hdr::match;
+  using namespace hdr::assert;
   using ::hdr::math::Same;
   using ::hdr::maybe::isJust;
   using ::hdr::maybe::isNothing;
@@ -28,21 +29,21 @@ namespace Main {
     using DecThi = Apply<decompose, Pair<bool, int>,  Pair<bool, int>>;
     using DecFou = Apply<decompose, PlaceholderAny,   Pair<bool, int>>;
     using DecRec = Apply<decompose, Pair<Pair<bool, int>, FooPlaceholder>, Pair<Pair<bool, int>, int>>;
-    static_assert(Apply<isJust, DecFir>::value);
-    static_assert(Apply<isJust, DecSec>::value);
-    static_assert(Apply<isJust, DecThi>::value);
-    static_assert(Apply<isJust, DecFou>::value);
-    static_assert(Apply<isJust, DecRec>::value);
+    Assert<Apply<isJust, DecFir>>;
+    Assert<Apply<isJust, DecSec>>;
+    Assert<Apply<isJust, DecThi>>;
+    Assert<Apply<isJust, DecFou>>;
+    Assert<Apply<isJust, DecRec>>;
 
     // Templates don't match non-matching patterns
     using FailFi = Apply<decompose, unsigned int,     unsigned short>;
     using FailSe = Apply<decompose, Pair<bool, int>,  Pair<int, bool>>;
     using FailTh = Apply<decompose, Pair<bool, int>,  unsigned short>;
     using FailFo = Apply<decompose, Pair<bool, int>,  Diff<bool, int>>;
-    static_assert(Apply<isNothing, FailFi>::value);
-    static_assert(Apply<isNothing, FailSe>::value);
-    static_assert(Apply<isNothing, FailTh>::value);
-    static_assert(Apply<isNothing, FailFo>::value);
+    Assert<Apply<isNothing, FailFi>>;
+    Assert<Apply<isNothing, FailSe>>;
+    Assert<Apply<isNothing, FailTh>>;
+    Assert<Apply<isNothing, FailFo>>;
 
     // How to use placeholders
     using MDecomposed = Apply<decompose, Pair<FooPlaceholder, BarPlaceholder>,
@@ -58,12 +59,12 @@ namespace Main {
     // since you can treat the essentially very similar to variables
     using GetPlaceFoo = Apply<FooPlaceholder, Decomposed>;
     using GetPlaceBar = Apply<BarPlaceholder, Decomposed>;
-    static_assert(Same<bool, MatchFoo>::value);
-    static_assert(Same<int,  MatchBar>::value);
-    static_assert(Same<bool, GetMatchFoo>::value);
-    static_assert(Same<int,  GetMatchBar>::value);
-    static_assert(Same<bool, GetPlaceFoo>::value);
-    static_assert(Same<int,  GetPlaceBar>::value);
+    Assert<Same<bool, MatchFoo>>;
+    Assert<Same<int,  MatchBar>>;
+    Assert<Same<bool, GetMatchFoo>>;
+    Assert<Same<int,  GetMatchBar>>;
+    Assert<Same<bool, GetPlaceFoo>>;
+    Assert<Same<int,  GetPlaceBar>>;
   }
 
   namespace WithUsage {
@@ -74,29 +75,29 @@ namespace Main {
     using namespace hdr::std;
     using freematch  = Apply<with, PlaceholderAny, Const<Foo>>;
     using JustResult = Apply<freematch, Foo>;
-    static_assert(Apply<isMatched, JustResult>::value);
+    Assert<Apply<isMatched, JustResult>>;
 
     struct UniqueNoMatch;
     using nonematch  = Apply<with, UniqueNoMatch,  Const<Foo>>;
     using NoResult   = Apply<nonematch, Foo>;
-    static_assert(Apply<isUnmatched, NoResult>::value);
+    Assert<Apply<isUnmatched, NoResult>>;
 
     using truematch  = Apply<with_if, Foo, Const<True>, Const<Bar>>;
     using BarResult  = Apply<fromMatched,   Apply<truematch,  Foo>>;
-    static_assert(Same<Bar, BarResult>::value);
+    Assert<Same<Bar, BarResult>>;
 
     using falsematch = Apply<with_if, Foo, Const<False>, Const<Bar>>;
     using NotResult  = Apply<fromUnmatched, Apply<falsematch, Foo>>;
-    static_assert(Same<Foo, NotResult>::value);
+    Assert<Same<Foo, NotResult>>;
 
     using finallymatch  = Apply<kleisli, nonematch, freematch>;
     using firstmatch    = Apply<kleisli, freematch, nonematch>;
     using againmatch    = Apply<kleisli, freematch, truematch>;
 
     // All of the above should match any type to Foo and not to None or Bar
-    static_assert(Same<Matched<Foo>, Apply<firstmatch, Foo>>::value &&
-                  Same<Matched<Foo>, Apply<againmatch, Foo>>::value &&
-                  Same<Matched<Foo>, Apply<finallymatch, Foo>>::value);
+    Assert<Same<Matched<Foo>, Apply<firstmatch, Foo>>>;
+    Assert<Same<Matched<Foo>, Apply<againmatch, Foo>>>;
+    Assert<Same<Matched<Foo>, Apply<finallymatch, Foo>>>;
   }
 
   namespace WithSyntacticSugar {
@@ -115,19 +116,19 @@ namespace Main {
                                 With<Pair<FooPlaceholder, BarPlaceholder>, Apply<get, Bar>>
                           >;
     using DeferredInt   = Apply<defered_match, Pair<bool, int>>;
-    static_assert(Same<bool, MatchedBool>::value);
-    static_assert(Same<int,  MatchedInt>::value);
-    static_assert(Same<int,  DeferredInt>::value);
+    Assert<Same<bool, MatchedBool>>;
+    Assert<Same<int,  MatchedInt>>;
+    Assert<Same<int,  DeferredInt>>;
 
     using MatchedApply  = Match<     Pair<bool,           int>,
                                 With<Pair<FooPlaceholder, BarPlaceholder>, MApply<::hdr::std::id, FooPlaceholder>>
                           >;
-    static_assert(Same<bool,  MatchedApply>::value);
+    Assert<Same<bool,  MatchedApply>>;
 
     using MatchedRec    = Match<     Pair<Pair<bool, bool>,          int>,
                                 With<Pair<FooPlaceholder, BarPlaceholder>, MApply<::hdr::std::id, BarPlaceholder>>
                           >;
-    static_assert(Same<int,  MatchedRec>::value);
+    Assert<Same<int,  MatchedRec>>;
   }
 };
 

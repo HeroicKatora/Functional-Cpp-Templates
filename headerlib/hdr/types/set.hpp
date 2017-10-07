@@ -179,7 +179,7 @@ namespace {
     }; using equal = TypeFunction<_equal>;
     using smaller = Apply<cmp, x, v>;
     using greater = Apply<cmp, v, x>;
-    static_assert(!smaller::value || !greater::value, "Comparison function is not asymetric");
+    // static_assert(!::hdr::math::ValueOf<smaller>::value || !greater::value, "Comparison function is not asymetric");
     using resolver =
       Apply<smaller, left,  /* if smaller */
       Apply<greater, right, /* if greater */

@@ -241,8 +241,6 @@ using decompose = _decompose;
  *    Name -> V
  */
 using get       = Apply<flip, _get>;
-template<typename Key>
-struct Placeholder : Apply<get, Key> {};
 
 namespace {
   template<typename ... W> struct _match_body;
@@ -299,6 +297,15 @@ namespace {
 
 template<typename V, typename ... W>
 using MApply = MApplyImpl<V, W...>;
+
+}
+
+namespace hdr::std {
+
+template<typename Key, typename Arg>
+struct _apply<::hdr::match::Placeholder<Key>, Arg> {
+  using type = Apply<::hdr::match::get, Key, Arg>;
+};
 
 }
 #endif //HEADERLIB_HDR_MATCH_HPP

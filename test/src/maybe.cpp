@@ -1,5 +1,6 @@
 #include "hdr/core.hpp"
 #include "hdr/types/maybe.hpp"
+#include "hdr/assert.hpp"
 #include <type_traits>
 
 using ::hdr::std::Const;
@@ -19,6 +20,7 @@ using ::hdr::maybe::return_;
 using ::hdr::math::Same;
 
 namespace Test {
+  using namespace hdr::assert;
   struct FooBar;
   struct Mapped;
 
@@ -26,9 +28,9 @@ namespace Test {
     using Function = Const<Mapped>;
     using Result   = Apply<bind, Nothing, Function>;
     using Replaced = Apply<fromMaybe, FooBar, Result>;
-    static_assert(Same<Result, Nothing>::value);
-    static_assert(Same<FooBar, Replaced>::value);
-    static_assert(!Apply<isJust, Result>::value);
+    Assert<Same<Result, Nothing>>;
+    Assert<Same<FooBar, Replaced>>;
+    AssertFalse<Apply<isJust, Result>>;
   };
 
   namespace Bind {
@@ -37,16 +39,16 @@ namespace Test {
     using Result     = Apply<bind, JustFooBar, Function>;
     using Unpacked   = Apply<fromJust, Result>;
     using FromMaybe  = Apply<fromMaybe, Void, Result>;
-    static_assert(Same<Just<Mapped>, Result>   ::value);
-    static_assert(Same<Mapped,       Unpacked> ::value);
-    static_assert(Same<Mapped,       FromMaybe>::value);
-    static_assert(Apply<isJust, Result>::value);
+    Assert<Same<Just<Mapped>, Result>   >;
+    Assert<Same<Mapped,       Unpacked> >;
+    Assert<Same<Mapped,       FromMaybe>>;
+    Assert<Apply<isJust, Result>>;
   };
 
   namespace Fmap {
     using Value  = Just<FooBar>;
     using Result = Apply<fmap, Const<Mapped>, Value>;
-    static_assert(Same<Just<Mapped>, Result>::value);
+    Assert<Same<Just<Mapped>, Result>>;
   };
 
   namespace Kleisli {
@@ -58,14 +60,14 @@ namespace Test {
     using resfn  = Apply<bind, Value, fn>;
     using resri  = Apply<bind, Value, right>;
     using resle  = Apply<bind, Value, left>;
-    static_assert(Same<resfn, resri>::value &&
-                  Same<resfn, resle>::value);
+    Assert<Same<resfn, resri>>;
+    Assert<Same<resfn, resle>>;
   };
 
   namespace Join {
     using Value  = Just<FooBar>;
     using result = Apply<join, Apply<fmap, return_, Value>>;
-    static_assert(Same<Value, result>::value);
+    Assert<Same<Value, result>>;
   };
 };
 

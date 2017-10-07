@@ -12,6 +12,7 @@ namespace hdr::math {
 using ::hdr::std::Apply;
 using ::hdr::std::False;
 using ::hdr::std::True;
+using ::hdr::std::False;
 using ::hdr::std::flip;
 using ::hdr::lambda::_0;
 using ::hdr::lambda::_1;

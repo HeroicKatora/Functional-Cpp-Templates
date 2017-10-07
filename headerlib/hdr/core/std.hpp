@@ -113,10 +113,10 @@ namespace hdr::std {
 
 	/**	Type Definition of true, should be used as a parameter instead of bools.
 	 */
-	struct True : ::std::true_type , fconst {};
+	using True = fconst;
 	/**	Type Definition of false, should be used as a parameter instead of bools.
 	 */
-	struct False : ::std::false_type , ignore {};
+	using False = ignore;
 
 	/** Identity function for all Objects
 	 *		(a -> a)

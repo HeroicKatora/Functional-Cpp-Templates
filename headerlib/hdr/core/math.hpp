@@ -58,6 +58,15 @@ using compare = ::hdr::std::TypeFunction<Compare>;
 template<typename> struct ValueOf; // resolves to type with constexpr member
 template<typename T> constexpr static auto value_of_v = ValueOf<T>::value;
 
+template<>
+struct ValueOf<::hdr::std::True>
+	{ using type = ::std::true_type;
+		constexpr static auto value = true;};
+template<>
+struct ValueOf<::hdr::std::False>
+	{ using type = ::std::false_type;
+		constexpr static auto value = false;};
+
 template<template<auto> typename F>
 struct ValueTemplateFunction {
 	template<typename Arg>
