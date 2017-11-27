@@ -6,6 +6,7 @@
  */
 #include "hdr/core.hpp"
 #include "hdr/math.hpp"
+#include "hdr/types/array.hpp"
 #include "hdr/types/map.hpp"
 
 namespace hdr::elvm {
@@ -20,6 +21,28 @@ template<
   typename SP=Unsigned<0>,
   typename BP=Unsigned<0>>
 struct Registers;
+
+namespace _memory {
+  using namespace ::hdr::array;
+  using namespace ::hdr::map;
+  using nullmem = Apply<empty, Apply<make_type, compare>>;
+  template<
+    typename Memory,
+    typename Datum>
+  using InsertData = Apply<insert,
+    Unsigned<Apply<size, Memory>::value>,
+    Datum,
+    Memory>;
+  using insert_data = TemplateFunction<InsertData>;
+
+  template<
+    typename InitData>
+  using Memory = Apply<fold,
+    insert_data,
+    nullmem,
+    InitData>;
+  using memory = TemplateFunction<Memory>;
+}
 
 struct A; struct B; struct C; struct D; struct SP; struct BP;
 
@@ -214,6 +237,34 @@ namespace _cmp {
   using ge = typename OpCmp<geF>::op;
 }
 
+// Opcode load
+namespace _load {
+  using _value::value;
+  using _save::save;
+
+  using get_memory = Apply<compose,
+    Apply<compose, Apply<::hdr::maybe::fromMaybe, Unsigned<0>>>,
+    ::hdr::map::find>;
+
+  template<
+    typename Dst,
+    typename Src,
+    typename Registers,
+    typename Memory>
+  using Load = Apply<save,
+    Apply<get_memory,
+      Apply<value,
+        Src,
+        Registers>,
+      Memory>,
+    Dst,
+    Registers>;
+  using load = TemplateFunction<Load>;
+}
+
+using ::hdr::array::Array;
+using _memory::nullmem;
+using _memory::memory;
 using _mov::mov;
 using _add::add;
 using _sub::sub;
@@ -223,6 +274,7 @@ using _cmp::lt;
 using _cmp::gt;
 using _cmp::le;
 using _cmp::ge;
+using _load::load;
 }
 
 #endif

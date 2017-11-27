@@ -19,7 +19,7 @@ using ::hdr::lambda::Lambda;
 using ::hdr::lambda::IApply;
 /**	Utility to convert integers to types
  */
-template<unsigned u> using Unsigned = Value<u>;
+template<unsigned u> using Unsigned = IntegralConstant<unsigned, u>;
 template<signed s> 	 using Signed 	= Value<s>;
 template<bool b> 		 using Bool 		= Value<b>;
 

@@ -33,6 +33,9 @@ using insert = Apply<::hdr::tuple::curry, ::hdr::set::insert>;
 struct Unvalue;
 // Key -> Map -> Bool
 using contains = Apply<compose, ::hdr::set::contains, Apply<flip, ::hdr::tuple::tup, Unvalue>>;
+using find = Apply<compose,
+  Apply<compose, Apply<::hdr::maybe::fmap, ::hdr::tuple::second>>,
+  Apply<compose, ::hdr::set::find, Apply<flip, ::hdr::tuple::tup, Unvalue>>>;
 }
 
 #endif
