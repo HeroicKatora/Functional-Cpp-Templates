@@ -15,8 +15,8 @@ namespace hdr::list {
 /** List a = Nil | Cons a (List a)
 */
 struct Nil;
-template<typename head, typename tail>
-struct Cons;
+template<typename head, typename tail> struct Cons;
+using cons = ::hdr::std::TemplateFunction<Cons>;
 
 /** []
 */

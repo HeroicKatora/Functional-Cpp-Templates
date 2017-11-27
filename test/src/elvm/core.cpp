@@ -26,6 +26,14 @@ namespace Test {
     using Stored = Apply<store, A, Unsigned<0xBEEF>, Loaded, Memory>;
     Assert<Equal<Unsigned<42>, Apply<get_memory, Unsigned<0xBEEF>, Stored>>>;
   }
+
+  namespace Output {
+    using Initial = Apply<mov, A, Unsigned<20>, Registers<>>;
+    using OBuf0 = Apply<putcop, A, Initial, Stdout>;
+    Assert<Equal<Unsigned<1>, Apply<::hdr::list::len, OBuf0>>>;
+    using OBuf1 = Apply<putcop, B, Initial, OBuf0>;
+    Assert<Equal<Unsigned<2>, Apply<::hdr::list::len, OBuf1>>>;
+  }
 }
 
 int main() {}

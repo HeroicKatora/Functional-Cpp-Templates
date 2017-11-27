@@ -7,6 +7,7 @@
 #include "hdr/core.hpp"
 #include "hdr/math.hpp"
 #include "hdr/types/array.hpp"
+#include "hdr/types/list.hpp"
 #include "hdr/types/map.hpp"
 
 namespace hdr::elvm {
@@ -280,6 +281,25 @@ namespace _store {
   using store = TemplateFunction<Store>;
 }
 
+//Opcode putc
+namespace _putc {
+  using _value::value;
+  using Stdout = ::hdr::list::EmptyList;
+
+  template<
+    typename Src,
+    typename Registers,
+    typename Buffer>
+  using Putc = Apply<::hdr::list::cons,
+    Apply<mod,
+      Apply<value,
+        Src,
+        Registers>,
+      Unsigned<256>>,
+    Buffer>;
+  using putcop = TemplateFunction<Putc>;
+}
+
 using ::hdr::array::Array;
 using _memory::nullmem;
 using _memory::memory;
@@ -294,6 +314,8 @@ using _cmp::le;
 using _cmp::ge;
 using _load::load;
 using _store::store;
+using _putc::Stdout;
+using _putc::putcop; // Avoid conflict with c function
 }
 
 #endif

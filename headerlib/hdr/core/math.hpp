@@ -50,6 +50,12 @@ struct Div {
 using div = ::hdr::std::TypeFunction<Div>;
 
 template<typename a, typename b>
+struct Mod {
+	static_assert(::hdr::std::_false<a>::value, "No specialization provided for type");
+};
+using mod = ::hdr::std::TypeFunction<Mod>;
+
+template<typename a, typename b>
 struct Compare {
 	static_assert(::hdr::std::_false<a>::value, "No specialization provided for type");
 };

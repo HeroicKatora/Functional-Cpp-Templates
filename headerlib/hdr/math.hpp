@@ -60,6 +60,13 @@ template<bool a, bool b>
 struct Div<Bool<a>, Bool<b>>;
 
 template<typename _Tp, _Tp a, _Tp b>
+struct Mod<Value<a>, Value<b>> { using type = Value<a/b>; };
+template<typename _Tp, typename _Tq, _Tp a, _Tq b>
+struct Mod<Value<a>, Value<b>> { using type = IntegralConstant<typename ::std::common_type<_Tp, _Tq>::type, a%b>; };
+template<typename _Tp, _Tp a>
+struct Mod<Value<a>, Value<0>>;
+
+template<typename _Tp, _Tp a, _Tp b>
 struct Compare<Value<a>, Value<b>> { using type = ::hdr::std::FromStdBool<(a < b)>; };
 template<typename _Tp, typename _Tq, _Tp a, _Tq b>
 struct Compare<Value<a>, Value<b>> { using type = ::hdr::std::FromStdBool<(a < b)>; };
