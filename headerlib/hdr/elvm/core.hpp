@@ -173,9 +173,56 @@ namespace _sub {
   using sub = TemplateFunction<Sub>;
 }
 
+// Opcode comparisons
+namespace _cmp {
+  using _value::value;
+  using _save::save;
+
+  template<typename A, typename B> using LT = Unsigned<A::value < B::value>;
+  using ltF = TemplateFunction<LT>;
+  template<typename A, typename B> using GT = Unsigned<(A::value > B::value)>;
+  using gtF = TemplateFunction<GT>;
+  template<typename A, typename B> using EQ = Unsigned<A::value == B::value>;
+  using eqF = TemplateFunction<EQ>;
+  template<typename A, typename B> using NE = Unsigned<A::value != B::value>;
+  using neF = TemplateFunction<NE>;
+  template<typename A, typename B> using LE = Unsigned<A::value <= B::value>;
+  using leF = TemplateFunction<LE>;
+  template<typename A, typename B> using GE = Unsigned<(A::value >= B::value)>;
+  using geF = TemplateFunction<GE>;
+
+  template<typename cmp>
+  struct OpCmp {
+    template<
+      typename Dst,
+      typename Src,
+      typename Registers>
+    using Op = Apply<save,
+      Apply<cmp,
+        Apply<value, Dst, Registers>,
+        Apply<value, Src, Registers>>,
+      Dst,
+      Registers>;
+    using op = TemplateFunction<Op>;
+  };
+
+  using lt = typename OpCmp<ltF>::op;
+  using gt = typename OpCmp<gtF>::op;
+  using eq = typename OpCmp<eqF>::op;
+  using ne = typename OpCmp<neF>::op;
+  using le = typename OpCmp<leF>::op;
+  using ge = typename OpCmp<geF>::op;
+}
+
 using _mov::mov;
 using _add::add;
 using _sub::sub;
+using _cmp::eq;
+using _cmp::ne;
+using _cmp::lt;
+using _cmp::gt;
+using _cmp::le;
+using _cmp::ge;
 }
 
 #endif
