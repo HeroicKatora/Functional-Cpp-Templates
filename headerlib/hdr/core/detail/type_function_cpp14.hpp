@@ -30,7 +30,7 @@ struct _typeFunction <F, 3> {
 template<template<typename, typename, typename, typename> typename F>
 struct _typeFunction <F, 4> {
         template<typename IA, typename IB> struct _inner {
-                template<typename I1, typename I2> using _Inner = F<IB, IA, I1, I2>;
+                template<typename I1, typename I2> using _Inner = F<IA, IB, I1, I2>;
                 using type = TypeFunction<_Inner>;
         };
         using type = TypeFunction<_inner>;
