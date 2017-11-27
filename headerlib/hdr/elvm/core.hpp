@@ -262,6 +262,24 @@ namespace _load {
   using load = TemplateFunction<Load>;
 }
 
+// Opcode store (caution, reversed dst/src)
+namespace _store {
+  using _value::value;
+
+  using set_memory = ::hdr::map::insert;
+
+  template<
+    typename Src,
+    typename Dst,
+    typename Registers,
+    typename Memory>
+  using Store = Apply<set_memory,
+    Apply<value, Dst, Registers>,
+    Apply<value, Src, Registers>,
+    Memory>;
+  using store = TemplateFunction<Store>;
+}
+
 using ::hdr::array::Array;
 using _memory::nullmem;
 using _memory::memory;
@@ -275,6 +293,7 @@ using _cmp::gt;
 using _cmp::le;
 using _cmp::ge;
 using _load::load;
+using _store::store;
 }
 
 #endif
