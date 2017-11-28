@@ -398,6 +398,12 @@ using _putc::putcop; // Avoid conflict with c function
 using _getc::Stdin;
 using _getc::peek;
 using _getc::advance;
+using _jmp::jmpeq;
+using _jmp::jmpne;
+using _jmp::jmplt;
+using _jmp::jmpgt;
+using _jmp::jmple;
+using _jmp::jmpge;
 using _exit::Exit;
 }
 
