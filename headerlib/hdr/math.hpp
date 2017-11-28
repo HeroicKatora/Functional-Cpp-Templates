@@ -81,8 +81,10 @@ template<typename Smaller>
 struct TotalOrder {
 	using smaller = Smaller;
 	using greater = Apply<flip, smaller>;
-	using unequal = Lambda<or_,  IApply<compare, _0, _1>, IApply<compare, _1, _0>>;
+	using unequal = Lambda<or_,  IApply<smaller, _0, _1>, IApply<smaller, _1, _0>>;
 	using equal   = Lambda<not_, IApply<unequal, _0, _1>>;
+	using smallerequal = Apply<::hdr::std::compose, Apply<::hdr::std::compose, not_>, greater>;
+	using greaterequal = Apply<::hdr::std::compose, Apply<::hdr::std::compose, not_>, smaller>;
 };
 using natural_order = TotalOrder<compare>;
 

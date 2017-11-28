@@ -281,7 +281,7 @@ namespace _store {
   using store = TemplateFunction<Store>;
 }
 
-//Opcode putc
+// Opcode putc
 namespace _putc {
   using _value::value;
   using Stdout = ::hdr::list::EmptyList;
@@ -300,9 +300,9 @@ namespace _putc {
   using putcop = TemplateFunction<Putc>;
 }
 
-//Opcode getc. Special in that it would modify two structures, stdin and
-//registers! The compiler will therefore encode this as two seperate opcodes,
-//peek and advance.
+// Opcode getc. Special in that it would modify two structures, stdin and
+// registers! The compiler will therefore encode this as two seperate opcodes,
+// peek and advance.
 namespace _getc {
   using _save::save;
 
@@ -343,6 +343,35 @@ namespace _getc {
     typename Stream>
   using Advance = typename Stream::template Advance<1>;
   using advance = TemplateFunction<Advance>;
+}
+
+// Opcodes for program flow
+namespace _jmp {
+  using _value::value;
+  // Trivial
+  using jmp = id;
+
+  template<typename cmp>
+  struct OpJmp {
+    template<
+      typename Jmp,
+      typename Dst,
+      typename Src,
+      typename Registers,
+      typename PC>
+    using Op = Apply<cmp,
+      Apply<value, Dst, Registers>,
+      Apply<value, Src, Registers>,
+      Jmp,
+      PC>;
+  };
+
+  using jmpeq = TemplateFunction<OpJmp<natural_order::equal>::template Op>;
+  using jmpne = TemplateFunction<OpJmp<natural_order::unequal>::template Op>;
+  using jmplt = TemplateFunction<OpJmp<natural_order::smaller>::template Op>;
+  using jmpgt = TemplateFunction<OpJmp<natural_order::greater>::template Op>;
+  using jmple = TemplateFunction<OpJmp<natural_order::smallerequal>::template Op>;
+  using jmpge = TemplateFunction<OpJmp<natural_order::greaterequal>::template Op>;
 }
 
 using ::hdr::array::Array;
