@@ -25,6 +25,20 @@ struct Test {
 
   static_assert(std::is_same<ExpectedPOneTTwo, ActualPOneTTwo>::value);
   static_assert(std::is_same<ExpectedTTwoPOne, ActualTTwoPOne>::value);
+
+  // And here are some more advanced tests, where we use functional concepts.
+  using UntilInstant = Apply<until, Const<True>, id, Input>;
+  static_assert(std::is_same<UntilInstant, Input>::value);
+
+  // We can convert the standard concept into a function yielding functional
+  // bools, which can be used like an `if`
+  using is_same_f = Apply<compose,
+    Apply<compose, boolify>,
+    TemplateFunction<std::is_same>>;
+  using Four = std::integral_constant<int, 4>;
+  using is_four = Apply<is_same_f, Four>;
+  using Incremented = Apply<until, is_four, FunctionalOne, Input>;
+  static_assert(std::is_same<Incremented, Four>::value);
 };
 
 int main() {}

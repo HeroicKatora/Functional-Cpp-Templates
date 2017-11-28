@@ -187,6 +187,20 @@ namespace hdr::std {
 	template<typename ...Args>
 	using When = Apply<when_else, Args...>;
 
+	/** Recursively calls a function until some predicate holds.
+	 *  (a -> bool) -> (a -> a) -> a -> a
+	 */
+	template<typename T, typename F>
+	struct Until {
+		struct type;
+		using recursor = Apply<compose, type, F>;
+		struct type {
+			template<typename a>
+			using expr = Apply<T, a, id, recursor, a>;
+		};
+	};
+	using until = TypeFunction<Until>;
+
 	/** Type constexpr constructible from any arguments, could be useful.
 	 */
 	struct Sink {
