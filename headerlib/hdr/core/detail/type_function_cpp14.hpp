@@ -35,4 +35,12 @@ struct _typeFunction <F, 4> {
         };
         using type = TypeFunction<_inner>;
 };
+template<template<typename, typename, typename, typename, typename> typename F>
+struct _typeFunction <F, 5> {
+        template<typename IA, typename IB, typename IC> struct _inner {
+          template<typename I1, typename I2> using _Inner = F<IA, IB, IC, I1, I2>;
+                using type = TypeFunction<_Inner>;
+        };
+        using type = TypeFunction<_inner>;
+};
 #endif /* end of include guard: HEADERLIB_HDR_CORE_DETAIL_TYPE_FUNCTION_HPP */

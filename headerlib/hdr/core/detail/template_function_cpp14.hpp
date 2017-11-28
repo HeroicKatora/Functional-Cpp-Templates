@@ -30,4 +30,10 @@ struct _tFunction<F, 4> {
 		using type = F<I1, I2, I3, I4>;
 	};
 };
+template<template<typename,typename,typename,typename,typename> typename F>
+struct _tFunction<F, 5> {
+	template<typename I1, typename I2, typename I3, typename I4, typename I5> struct expr {
+		using type = F<I1, I2, I3, I4, I5>;
+	};
+};
 #endif /* end of include guard: HEADERLIB_HDR_CORE_DETAIL_TEMPLATE_FUNCTION_HPP */
