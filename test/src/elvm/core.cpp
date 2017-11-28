@@ -34,6 +34,19 @@ namespace Test {
     using OBuf1 = Apply<putcop, B, Initial, OBuf0>;
     Assert<Equal<Unsigned<2>, Apply<::hdr::list::len, OBuf1>>>;
   }
+
+  namespace Input {
+    constexpr char buffer[] = "!";
+    using Input = Stdin<buffer>;
+    using Initial = Apply<peek, A, Registers<>, Input>;
+    Assert<Equal<Unsigned<'!'>, Apply<value, A, Initial>>>;
+    using Advanced = Apply<advance, Input>;
+    using ReadNull = Apply<peek, A, Initial, Advanced>;
+    Assert<Equal<Unsigned<0>, Apply<value, A, ReadNull>>>;
+    using AtEnd = Apply<advance, Advanced>;
+    using ReadEOF = Apply<peek, A, ReadNull, AtEnd>;
+    Assert<Equal<Unsigned<0>, Apply<value, A, ReadEOF>>>;
+  }
 }
 
 int main() {}

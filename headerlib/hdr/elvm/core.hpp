@@ -300,6 +300,51 @@ namespace _putc {
   using putcop = TemplateFunction<Putc>;
 }
 
+//Opcode getc. Special in that it would modify two structures, stdin and
+//registers! The compiler will therefore encode this as two seperate opcodes,
+//peek and advance.
+namespace _getc {
+  using _save::save;
+
+  template<unsigned N, const char (&buffer)[N], unsigned pos, bool eof=(pos >= N)>
+  struct Stream;
+  template<unsigned N, const char (&buffer)[N], unsigned pos>
+  struct Stream<N, buffer, pos, false> {
+    using Peek = Unsigned<buffer[pos]>;
+    template<unsigned Step>
+    using Advance = Stream<N, buffer, N + Step>;
+  };
+  template<unsigned N, const char (&buffer)[N], unsigned pos>
+  struct Stream<N, buffer, pos, true> {
+    using Peek = Unsigned<0>;
+    template<unsigned Step>
+    using Advance = Stream;
+  };
+
+  // This workaround exists because clang doesnt accept `const char (&buf)[N]`
+  // as a specialization of `auto& buf`.
+  template<unsigned N> auto size(const char (&buffer)[N])
+   -> ::std::integral_constant<unsigned, N> { }
+  template<auto& buf> using Stdin = Stream<
+    decltype(size(buf))::value,
+    buf, 0>;
+
+  template<
+    typename Dst,
+    typename Registers,
+    typename Stream>
+  using Peek = Apply<save,
+    typename Stream::Peek,
+    Dst,
+    Registers>;
+  using peek = TemplateFunction<Peek>;
+
+  template<
+    typename Stream>
+  using Advance = typename Stream::template Advance<1>;
+  using advance = TemplateFunction<Advance>;
+}
+
 using ::hdr::array::Array;
 using _memory::nullmem;
 using _memory::memory;
@@ -316,6 +361,9 @@ using _load::load;
 using _store::store;
 using _putc::Stdout;
 using _putc::putcop; // Avoid conflict with c function
+using _getc::Stdin;
+using _getc::peek;
+using _getc::advance;
 }
 
 #endif
