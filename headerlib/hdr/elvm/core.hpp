@@ -37,7 +37,7 @@ namespace _memory {
   using insert_data = TemplateFunction<InsertData>;
 
   template<
-    typename InitData>
+    typename InitData=Array<>>
   using Memory = Apply<fold,
     insert_data,
     nullmem,
@@ -374,6 +374,11 @@ namespace _jmp {
   using jmpge = TemplateFunction<OpJmp<natural_order::greaterequal>::template Op>;
 }
 
+namespace _exit {
+  // Marker struct, exit when PC matches this
+  struct Exit;
+}
+
 using ::hdr::array::Array;
 using _memory::nullmem;
 using _memory::memory;
@@ -393,6 +398,7 @@ using _putc::putcop; // Avoid conflict with c function
 using _getc::Stdin;
 using _getc::peek;
 using _getc::advance;
+using _exit::Exit;
 }
 
 #endif
