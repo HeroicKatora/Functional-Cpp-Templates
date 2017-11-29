@@ -263,40 +263,27 @@ namespace _store {
 // Opcode putc
 namespace _putc {
   using _value::value;
-  using Stdout = ::hdr::list::EmptyList;
+  using Stdout = ::hdr::array::Array<>;
 
   template<
     typename Src,
     typename Registers,
     typename Buffer>
-  using Putc = Apply<::hdr::list::cons,
-    Apply<mod,
+  using Putc = Apply<::hdr::array::concat,
+    Buffer,
+    ::hdr::array::Array<Apply<mod,
       Apply<value,
         Src,
         Registers>,
-      Unsigned<256>>,
-    Buffer>;
+      Unsigned<256>>>>;
   using putcop = TemplateFunction<Putc>;
-
-  template<
-    typename Array,
-    typename Element>
-  using Append = Apply<::hdr::array::concat,
-    ::hdr::array::Array<Element>,
-    Array>;
-  using append = TemplateFunction<Append>;
-
-  using _collect = Apply<::hdr::list::fold,
-    append,
-    ::hdr::array::Array<>>;
 
   template<typename A> struct Output;
   template<unsigned ... U>
   struct Output<::hdr::array::Array<Unsigned<U>...>> {
-    static_assert(sizeof...(U) > 2);
     constexpr static char buffer[] = {(char)(U)..., '\0'};
   };
-  using collect = Apply<compose, TemplateFunction<Output>, _collect>;
+  using collect = TemplateFunction<Output>;
 }
 
 // Opcode getc. Special in that it would modify two structures, stdin and
