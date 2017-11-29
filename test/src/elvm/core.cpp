@@ -13,8 +13,8 @@ namespace Test {
     Assert<Equal<Unsigned<5>, Apply<value, A, Stored>>>;
     using Added = Apply<add, A, Unsigned<5>, Stored>;
     Assert<Equal<Unsigned<10>, Apply<value, A, Added>>>;
-    using Subbed = Apply<sub, A, Unsigned<10>, Added>;
-    Assert<Equal<Unsigned<0>, Apply<value, A, Subbed>>>;
+    using Subbed = Apply<sub, A, Unsigned<7>, Added>;
+    Assert<Equal<Unsigned<3>, Apply<value, A, Subbed>>>;
   }
 
   namespace Memory {

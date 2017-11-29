@@ -47,7 +47,9 @@ namespace _memory {
 
 struct A; struct B; struct C; struct D; struct SP; struct BP;
 
-// Get the value of an immediate or from a register
+/** Get the value of an immediate or from a register
+ *    (Register/a) -> Registers a -> a
+ */
 namespace _value {
   template<
     typename Src /* register or immediate*/,
@@ -151,91 +153,68 @@ namespace _save {
   };
 }
 
-// Opcode mov
-namespace _mov {
+// Lift binary operators to the register
+namespace _lift {
   using _value::value;
   using _save::save;
-  template<
-    typename Dst,
-    typename Src,
-    typename Registers>
-  using Mov = Apply<save, Apply<value, Src, Registers>, Dst, Registers>;
-  using mov = TemplateFunction<Mov>;
-}
-
-// Opcode add
-namespace _add {
-  using _value::value;
-  using _save::save;
-  template<
-    typename Dst,
-    typename Src,
-    typename Registers>
-  using Add = Apply<save,
-    Apply<plus,
-      Apply<value, Src, Registers>,
-      Apply<value, Dst, Registers>>,
-    Dst,
-    Registers>;
-  using add = TemplateFunction<Add>;
-}
-
-// Opcude sub
-namespace _sub {
-  using _value::value;
-  using _save::save;
-  template<
-    typename Dst,
-    typename Src,
-    typename Registers>
-  using Sub = Apply<save,
-    Apply<minus,
-      Apply<value, Src, Registers>,
-      Apply<value, Dst, Registers>>,
-    Dst,
-    Registers>;
-  using sub = TemplateFunction<Sub>;
-}
-
-// Opcode comparisons
-namespace _cmp {
-  using _value::value;
-  using _save::save;
-
-  template<typename A, typename B> using LT = Unsigned<A::value < B::value>;
-  using ltF = TemplateFunction<LT>;
-  template<typename A, typename B> using GT = Unsigned<(A::value > B::value)>;
-  using gtF = TemplateFunction<GT>;
-  template<typename A, typename B> using EQ = Unsigned<A::value == B::value>;
-  using eqF = TemplateFunction<EQ>;
-  template<typename A, typename B> using NE = Unsigned<A::value != B::value>;
-  using neF = TemplateFunction<NE>;
-  template<typename A, typename B> using LE = Unsigned<A::value <= B::value>;
-  using leF = TemplateFunction<LE>;
-  template<typename A, typename B> using GE = Unsigned<(A::value >= B::value)>;
-  using geF = TemplateFunction<GE>;
-
-  template<typename cmp>
-  struct OpCmp {
+  /** Lift a binary operator over `value`.
+   *    (a -> a -> a) -> (Register/a) -> (Register/a) -> Registers a -> Registers a
+   *  This is useful for binary functions operation on register values which have
+   *  a destination and source parameter. This includes many assembler
+   *  instructions such as `ADD`, `GT`, `EQ` but also `MOV`.
+   */
+  template<typename binaryop>
+  struct Lift {
     template<
       typename Dst,
       typename Src,
       typename Registers>
     using Op = Apply<save,
-      Apply<cmp,
+      Apply<binaryop,
         Apply<value, Dst, Registers>,
         Apply<value, Src, Registers>>,
       Dst,
       Registers>;
-    using op = TemplateFunction<Op>;
+    using type = TemplateFunction<Op>;
   };
+  using lift = TypeFunction<Lift>;
+}
 
-  using lt = typename OpCmp<ltF>::op;
-  using gt = typename OpCmp<gtF>::op;
-  using eq = typename OpCmp<eqF>::op;
-  using ne = typename OpCmp<neF>::op;
-  using le = typename OpCmp<leF>::op;
-  using ge = typename OpCmp<geF>::op;
+// Opcode mov
+namespace _mov {
+  using _lift::lift;
+  using mov = Apply<lift, ignore>;
+}
+
+// Opcode add
+namespace _add {
+  using _lift::lift;
+  using add = Apply<lift, plus>;
+}
+
+// Opcude sub
+namespace _sub {
+  using _lift::lift;
+  using sub = Apply<lift, minus>;
+}
+
+// Opcode comparisons
+namespace _cmp {
+  using _lift::lift;
+
+  template<typename A, typename B> using LT = Unsigned<A::value < B::value>;
+  template<typename A, typename B> using GT = Unsigned<(A::value > B::value)>;
+  template<typename A, typename B> using EQ = Unsigned<A::value == B::value>;
+  template<typename A, typename B> using NE = Unsigned<A::value != B::value>;
+  template<typename A, typename B> using LE = Unsigned<A::value <= B::value>;
+  template<typename A, typename B> using GE = Unsigned<(A::value >= B::value)>;
+
+  using lt = Apply<lift, TemplateFunction<LT>>;
+  using gt = Apply<lift, TemplateFunction<GT>>;
+  using eq = Apply<lift, TemplateFunction<EQ>>;
+  using ne = Apply<lift, TemplateFunction<NE>>;
+  using le = Apply<lift, TemplateFunction<LE>>;
+  using ge = Apply<lift, TemplateFunction<GE>>;
 }
 
 // Opcode load
