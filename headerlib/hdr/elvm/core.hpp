@@ -348,8 +348,8 @@ namespace _getc {
 // Opcodes for program flow
 namespace _jmp {
   using _value::value;
-  // Trivial
-  using jmp = id;
+  // Pull the value from the registers
+  using jmp = value;
 
   template<typename cmp>
   struct OpJmp {
@@ -398,6 +398,7 @@ using _putc::putcop; // Avoid conflict with c function
 using _getc::Stdin;
 using _getc::peek;
 using _getc::advance;
+using _jmp::jmp;
 using _jmp::jmpeq;
 using _jmp::jmpne;
 using _jmp::jmplt;
