@@ -30,9 +30,9 @@ namespace Test {
   namespace Output {
     using Initial = Apply<mov, A, Unsigned<20>, Registers<>>;
     using OBuf0 = Apply<putcop, A, Initial, Stdout>;
-    Assert<Equal<Unsigned<20>, Apply<::hdr::list::head, OBuf0>>>;
+    Assert<Equal<Unsigned<20>, Apply<::hdr::array::last, OBuf0>>>;
     using OBuf1 = Apply<putcop, B, Initial, OBuf0>;
-    Assert<Equal<Unsigned<0>, Apply<::hdr::list::head, OBuf1>>>;
+    Assert<Equal<Unsigned<0>, Apply<::hdr::array::last, OBuf1>>>;
   }
 
   namespace Input {
