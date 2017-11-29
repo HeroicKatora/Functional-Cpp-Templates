@@ -4,7 +4,8 @@ env = env.Clone()
 env.Append(
     CPPFLAGS=[
         '-Wall', '-fmessage-length=0', '-std=c++1z', '-O3',
-        '-ftemplate-depth=100000', '-Wno-missing-declarations'])
+        '-ftemplate-depth=100000', '-Wno-missing-declarations',
+        '-fpermissive'])
 env.VariantDir('build', 'src', duplicate=False)
 
 env.SConscript(dirs=['build/elvm'], exports={'env': env})
