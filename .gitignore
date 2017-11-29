@@ -1,4 +1,5 @@
 .*
+!.gitmodules
 !.gitignore
 build
 /hdrshowcase/
