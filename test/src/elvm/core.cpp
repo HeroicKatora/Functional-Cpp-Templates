@@ -30,9 +30,9 @@ namespace Test {
   namespace Output {
     using Initial = Apply<mov, A, Unsigned<20>, Registers<>>;
     using OBuf0 = Apply<putcop, A, Initial, Stdout>;
-    Assert<Equal<Unsigned<1>, Apply<::hdr::list::len, OBuf0>>>;
+    Assert<Equal<Unsigned<20>, Apply<::hdr::list::head, OBuf0>>>;
     using OBuf1 = Apply<putcop, B, Initial, OBuf0>;
-    Assert<Equal<Unsigned<2>, Apply<::hdr::list::len, OBuf1>>>;
+    Assert<Equal<Unsigned<0>, Apply<::hdr::list::head, OBuf1>>>;
   }
 
   namespace Input {
@@ -46,6 +46,14 @@ namespace Test {
     using AtEnd = Apply<advance, Advanced>;
     using ReadEOF = Apply<peek, A, ReadNull, AtEnd>;
     Assert<Equal<Unsigned<0>, Apply<value, A, ReadEOF>>>;
+  }
+
+  namespace Jump {
+    using Register = Apply<mov, A, Unsigned<5>, Registers<>>;
+    using Target = Apply<jmpeq, Unsigned<1>, A, Unsigned<5>, Register, Unsigned<0>>;
+    Assert<Equal<Target, Unsigned<1>>>;
+    using Continue = Apply<jmpeq, Unsigned<1>, A, Unsigned<0>, Register, Unsigned<0>>;
+    Assert<Equal<Continue, Unsigned<0>>>;
   }
 }
 
