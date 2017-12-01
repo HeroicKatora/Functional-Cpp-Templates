@@ -201,13 +201,15 @@ namespace _sub {
 // Opcode comparisons
 namespace _cmp {
   using _lift::lift;
+  using ::hdr::math::natural_order;
+  using Z = Unsigned<0>; using O = Unsigned<1>;
 
-  template<typename A, typename B> using LT = Unsigned<A::value < B::value>;
-  template<typename A, typename B> using GT = Unsigned<(A::value > B::value)>;
-  template<typename A, typename B> using EQ = Unsigned<A::value == B::value>;
-  template<typename A, typename B> using NE = Unsigned<A::value != B::value>;
-  template<typename A, typename B> using LE = Unsigned<A::value <= B::value>;
-  template<typename A, typename B> using GE = Unsigned<(A::value >= B::value)>;
+  template<typename A, typename B> using LT = Apply<natural_order::smaller, A, B, O, Z>;
+  template<typename A, typename B> using GT = Apply<natural_order::greater, A, B, O, Z>;
+  template<typename A, typename B> using EQ = Apply<natural_order::equal, A, B, O, Z>;
+  template<typename A, typename B> using NE = Apply<natural_order::unequal, A, B, O, Z>;
+  template<typename A, typename B> using LE = Apply<natural_order::smallerequal, A, B, O, Z>;
+  template<typename A, typename B> using GE = Apply<natural_order::greaterequal, A, B, O, Z>;
 
   using lt = Apply<lift, TemplateFunction<LT>>;
   using gt = Apply<lift, TemplateFunction<GT>>;
