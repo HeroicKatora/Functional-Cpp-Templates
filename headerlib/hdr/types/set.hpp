@@ -138,13 +138,13 @@ namespace {
     struct _rtoobig {
       using rln = Apply<nsize, Apply<get_left, R>>;
       using rrn = Apply<nsize, Apply<get_right, R>>;
-      using type = Apply<compare, rln, rrn, single_l, double_r, v, L, R>;
+      using type = Apply<compare, rln, rrn, single_l, double_l, v, L, R>;
     }; using rtoobig = TypeFunction<_rtoobig>;
     template<typename L, typename R>
     struct _ltoobig {
       using lln = Apply<nsize, Apply<get_left, L>>;
       using lrn = Apply<nsize, Apply<get_right, L>>;
-      using type = Apply<compare, lrn, lln, single_r, double_l, v, L, R>;
+      using type = Apply<compare, lrn, lln, single_r, double_r, v, L, R>;
     }; using ltoobig = TypeFunction<_ltoobig>;
     template<typename L, typename R>
     struct _okay {
