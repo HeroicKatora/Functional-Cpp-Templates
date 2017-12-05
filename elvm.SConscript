@@ -14,5 +14,5 @@ env.Command(
 		env.Glob('build/elvm/8cc/*.c'), env.Glob('build/elvm/8cc/*.h'), 'build/elvm/8cc/Makefile',
         env.Glob('build/elvm/*.mk'),
         env.Glob('build/elvm/tools/*')],
-    action='make out/elc out/8cc',
+    action='make out/elc out/8cc out/eli',
     chdir='build/elvm')

@@ -4,7 +4,7 @@ env.Program('core.cpp')
 env.Command(
 	'fizzbuzz_mini.s',
 	'fizzbuzz_mini.c',
-	'chdir ${TARGET.dir} && $ELVM_8CC -S ${SOURCE.abspath} -I $ELVM_LIBC',
+	'$ELVM_8CC -S ${SOURCE.abspath} -I $ELVM_LIBC -o ${TARGET.abspath}',
 	ELVM_8CC=env.File('#/build/elvm/out/8cc').abspath,
 	ELVM_LIBC=env.Dir('#/elvm/libc/').abspath)
 env.Command(
@@ -17,7 +17,7 @@ env.Command(
 env.Command(
 	'swapcase.s',
 	'swapcase.c',
-	'chdir ${TARGET.dir} && $ELVM_8CC -S ${SOURCE.abspath} -I $ELVM_LIBC',
+	'$ELVM_8CC -S ${SOURCE.abspath} -I $ELVM_LIBC -o ${TARGET.abspath}',
 	ELVM_8CC=env.File('#/build/elvm/out/8cc').abspath,
 	ELVM_LIBC=env.Dir('#/elvm/libc/').abspath)
 env.Command(

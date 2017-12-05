@@ -2,9 +2,9 @@ int getchar(void);
 int putchar(int c);
 
 int main() {
-  int c;
+  int c = 0;
   do {
-    c = getchar();
-  } while(c);
+    c = 1;
+  } while(c != 1 && c != 0);
   return 0;
 }
