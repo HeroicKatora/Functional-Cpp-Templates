@@ -15,6 +15,8 @@ namespace Test {
     Assert<Equal<Unsigned<10>, Apply<value, A, Added>>>;
     using Subbed = Apply<sub, A, Unsigned<7>, Added>;
     Assert<Equal<Unsigned<3>, Apply<value, A, Subbed>>>;
+    using Overwritten = Apply<mov, A, B, Subbed>;
+    Assert<Equal<Unsigned<0>, Apply<value, A, Overwritten>>>;
   }
 
   namespace Memory {
@@ -63,6 +65,34 @@ namespace Test {
     Assert<Equal<Target, Unsigned<0xAA>>>;
     using Continue = Apply<jmpne, Unsigned<0xFF>, A, Unsigned<0>, Register, Unsigned<0xAA>>;
     Assert<Equal<Continue, Unsigned<0xFF>>>;
+  }
+
+  namespace Compare {
+    using Register = Apply<mov, A, Unsigned<0xFF>, Registers<>>;
+    using CmpEqual = Apply<eq, B, C, Register>;
+    using CmpEqualN = Apply<eq, A, C, Register>;
+    Assert<Equal<Unsigned<1>, Apply<value, B, CmpEqual>>>;
+    Assert<Equal<Unsigned<0>, Apply<value, A, CmpEqualN>>>;
+    using Unequal = Apply<ne, B, A, Register>;
+    using UnequalN = Apply<ne, B, C, Register>;
+    Assert<Equal<Unsigned<1>, Apply<value, B, Unequal>>>;
+    Assert<Equal<Unsigned<0>, Apply<value, B, UnequalN>>>;
+    using Smaller = Apply<lt, B, A, Register>;
+    using SmallerN = Apply<lt, B, C, Register>;
+    Assert<Equal<Unsigned<1>, Apply<value, B, Smaller>>>;
+    Assert<Equal<Unsigned<0>, Apply<value, B, SmallerN>>>;
+    using Greater = Apply<gt, A, B, Register>;
+    using GreaterN = Apply<gt, B, C, Register>;
+    Assert<Equal<Unsigned<1>, Apply<value, A, Greater>>>;
+    Assert<Equal<Unsigned<0>, Apply<value, B, GreaterN>>>;
+    using SmallerEqual = Apply<le, B, A, Register>;
+    using SmallerEqualN = Apply<le, A, C, Register>;
+    Assert<Equal<Unsigned<1>, Apply<value, B, SmallerEqual>>>;
+    Assert<Equal<Unsigned<0>, Apply<value, A, SmallerEqualN>>>;
+    using GreaterEqual = Apply<ge, B, C, Register>;
+    using GreaterEqualN = Apply<ge, B, A, Register>;
+    Assert<Equal<Unsigned<1>, Apply<value, B, GreaterEqual>>>;
+    Assert<Equal<Unsigned<0>, Apply<value, B, GreaterEqualN>>>;
   }
 }
 
