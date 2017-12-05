@@ -350,7 +350,7 @@ namespace _jmp {
     using Op = Apply<cmp,
       Apply<value, Dst, Registers>,
       Apply<value, Src, Registers>,
-      Jmp,
+      Apply<value, Jmp, Registers>,
       PC>;
   };
 

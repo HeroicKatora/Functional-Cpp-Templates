@@ -1,3 +1,28 @@
 Import('env')
 
 env.Program('core.cpp')
+env.Command(
+	'fizzbuzz_mini.s',
+	'fizzbuzz_mini.c',
+	'chdir ${TARGET.dir} && $ELVM_8CC -S ${SOURCE.abspath} -I $ELVM_LIBC',
+	ELVM_8CC=env.File('#/build/elvm/out/8cc').abspath,
+	ELVM_LIBC=env.Dir('#/elvm/libc/').abspath)
+env.Command(
+	'fizzbuzz_mini.cpp',
+	'fizzbuzz_mini.s',
+	'$ELVM_C -cpp_functional_template $SOURCE > $TARGET',
+	ELVM_C=env.File('#/build/elvm/out/elc'))
+# env.Program('fizzbuzz_mini.cpp')
+
+env.Command(
+	'swapcase.s',
+	'swapcase.c',
+	'chdir ${TARGET.dir} && $ELVM_8CC -S ${SOURCE.abspath} -I $ELVM_LIBC',
+	ELVM_8CC=env.File('#/build/elvm/out/8cc').abspath,
+	ELVM_LIBC=env.Dir('#/elvm/libc/').abspath)
+env.Command(
+	'swapcase.cpp',
+	'swapcase.s',
+	'$ELVM_C -cpp_functional_template $SOURCE | sed -e \'/constexpr static char/ { s/".*"/"Hi"/ }\' > $TARGET',
+	ELVM_C=env.File('#/build/elvm/out/elc'))
+env.Program('swapcase.cpp')

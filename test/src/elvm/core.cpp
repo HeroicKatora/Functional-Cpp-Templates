@@ -36,11 +36,12 @@ namespace Test {
   }
 
   namespace Input {
-    constexpr char buffer[] = "!";
+    constexpr char buffer[] = "!#";
     using Input = Stdin<buffer>;
     using Initial = Apply<peek, A, Registers<>, Input>;
     Assert<Equal<Unsigned<'!'>, Apply<value, A, Initial>>>;
-    using Advanced = Apply<advance, Input>;
+    using Step = Apply<advance, Input>;
+    using Advanced = Apply<advance, Step>;
     using ReadNull = Apply<peek, A, Initial, Advanced>;
     Assert<Equal<Unsigned<0>, Apply<value, A, ReadNull>>>;
     using AtEnd = Apply<advance, Advanced>;
@@ -48,12 +49,20 @@ namespace Test {
     Assert<Equal<Unsigned<0>, Apply<value, A, ReadEOF>>>;
   }
 
-  namespace Jump {
+  namespace JumpEq {
     using Register = Apply<mov, A, Unsigned<5>, Registers<>>;
-    using Target = Apply<jmpeq, Unsigned<1>, A, Unsigned<5>, Register, Unsigned<0>>;
-    Assert<Equal<Target, Unsigned<1>>>;
-    using Continue = Apply<jmpeq, Unsigned<1>, A, Unsigned<0>, Register, Unsigned<0>>;
-    Assert<Equal<Continue, Unsigned<0>>>;
+    using Target = Apply<jmpeq, Unsigned<0xFF>, A, Unsigned<5>, Register, Unsigned<0xAA>>;
+    Assert<Equal<Target, Unsigned<0xFF>>>;
+    using Continue = Apply<jmpeq, Unsigned<0xFF>, A, Unsigned<0>, Register, Unsigned<0xAA>>;
+    Assert<Equal<Continue, Unsigned<0xAA>>>;
+  }
+
+  namespace JumpNe {
+    using Register = Apply<mov, A, Unsigned<5>, Registers<>>;
+    using Target = Apply<jmpne, Unsigned<0xFF>, A, Unsigned<5>, Register, Unsigned<0xAA>>;
+    Assert<Equal<Target, Unsigned<0xAA>>>;
+    using Continue = Apply<jmpne, Unsigned<0xFF>, A, Unsigned<0>, Register, Unsigned<0xAA>>;
+    Assert<Equal<Continue, Unsigned<0xFF>>>;
   }
 }
 
