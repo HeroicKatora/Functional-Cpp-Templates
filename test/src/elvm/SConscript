@@ -12,7 +12,7 @@ env.Command(
     'fizzbuzz_mini.s',
     '$ELVM_C -cpp_functional_template $SOURCE > $TARGET',
     ELVM_C=env.File('#/build/elvm/out/elc'))
-# env.Program('fizzbuzz_mini.cpp')
+env.Program('fizzbuzz_mini.cpp')
 
 env.Command(
     'swapcase.s',

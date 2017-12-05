@@ -51,7 +51,7 @@ static void print_int(int _) { }
 
 int main() {
   int i;
-  for (i = 1; i <= 100; i++) {
+  for (i = 1; i <= 3; i++) {
     int done = 0;
     if (i % 3 == 0) {
       putchar('F');
