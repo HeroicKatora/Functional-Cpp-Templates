@@ -189,13 +189,27 @@ namespace _mov {
 // Opcode add
 namespace _add {
   using _lift::lift;
-  using add = Apply<lift, plus>;
+
+  template<typename A, typename B> struct Add;
+  using _add = TypeFunction<Add>;
+  template<unsigned a, unsigned b> struct Add<Unsigned<a>, Unsigned<b>> {
+    using type = Unsigned<(a + b) % (1<<24)>;
+  };
+
+  using add = Apply<lift, _add>;
 }
 
-// Opcude sub
+// Opcode sub
 namespace _sub {
   using _lift::lift;
-  using sub = Apply<lift, minus>;
+
+  template<typename A, typename B> struct Sub;
+  using _sub = TypeFunction<Sub>;
+  template<unsigned a, unsigned b> struct Sub<Unsigned<a>, Unsigned<b>> {
+    using type = Unsigned<((1<<24) + a - b) % (1<<24)>;
+  };
+
+  using sub = Apply<lift, _sub>;
 }
 
 // Opcode comparisons
