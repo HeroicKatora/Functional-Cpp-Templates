@@ -4,7 +4,7 @@ A small library of my C++ stuff built upon my header library.
 The header library is meant to work similarly to the type meta programming part of Boost.Hana while alleviating some issues I had with it.
 The approach is a functional one, relying on template programming instead of constexpr object representation. It maps untyped lambda calculus with strict evaluation to structures available in C++-1z.
 
-The code quality is not up to Boost.Hana yet but afterall I explore a completely new style of functional templating, sorry for the inconvenience. A very interesting aspect of the Boost library is the usefullness of its error messages which I can currently not even come close to. Debugging statements are rare (only tested for correctness by a couple of test cases) and "type type safety" is not enforced in any way.
+The code quality is not up to Boost.Hana yet but afterall I explore a completely new style of functional templating, sorry for the inconvenience. A very interesting aspect of the Boost library is the usefullness of its error messages which I can currently not even come close to. Debugging statements are rare (only tested for correctness by a couple of test cases) and " type safety" is not enforced in any way.
 
 Paradigm
 -------
