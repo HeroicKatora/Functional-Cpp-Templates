@@ -1,7 +1,6 @@
 #include <type_traits>
 #include "hdr/core/std.hpp"
 #include "hdr/core/lambda.hpp"
-#include "hdr/context/lambda.hpp"
 
 namespace Test {
   using namespace ::hdr::lambda;

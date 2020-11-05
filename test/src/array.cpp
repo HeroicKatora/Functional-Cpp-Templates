@@ -48,10 +48,10 @@ namespace Test {
     using op_256x_elements = Apply<fold, kleisli, return_, eight_op_list>;
 
     using extensive_list = Apply<bind, simple_list, op_256x_elements>;
-    static_assert(Same<Apply<len, extensive_list>, Value<256>>::value);
+    static_assert(Same<Apply<len, extensive_list>, Value<size_t(256)>>::value);
 
     using crash_test = Apply<bind, extensive_list, op_256x_elements>;
-    static_assert(Same<Apply<len, crash_test>, Value<(1 << 16)>>::value);
+    static_assert(Same<Apply<len, crash_test>, Value<size_t(1 << 16)>>::value);
   }
   
 }
