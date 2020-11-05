@@ -1,7 +1,7 @@
 Import('env')
 
 env = env.Clone()
-env.Append(CPPFLAGS=['-Wall', '-fmessage-length=0', '-std=c++1z', '-O3', '-ftemplate-depth=100000'])
+env.Append(CPPFLAGS=['-Wall', '-fmessage-length=0', '-std=c++17', '-O3', '-ftemplate-depth=100000'])
 env.VariantDir('build', 'src', duplicate=False)
 
 env.Program(target='build/std.out', source='build/std.cpp')
